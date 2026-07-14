@@ -30,6 +30,7 @@ export class RibbonBarSettingTab extends PluginSettingTab {
         toggle.setValue(this.plugin.settings.defaultCollapsed).onChange(async (value) => {
           this.plugin.settings.defaultCollapsed = value;
           await this.plugin.saveSettings();
+          this.plugin.setDefaultCollapsed(value);
         })
       );
   }

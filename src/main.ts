@@ -37,6 +37,10 @@ export default class RibbonBarPlugin extends Plugin implements RibbonBarPluginLi
     this.syncRibbons();
   }
 
+  setDefaultCollapsed(defaultCollapsed: boolean): void {
+    this.ribbonManager.setDefaultCollapsed(defaultCollapsed);
+  }
+
   private markdownViews(): MarkdownView[] {
     return this.app.workspace.getLeavesOfType("markdown").map((leaf) => leaf.view as MarkdownView);
   }

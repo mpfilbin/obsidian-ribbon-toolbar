@@ -23,6 +23,10 @@ export class RibbonManager {
     this.enabled = enabled;
   }
 
+  setDefaultCollapsed(defaultCollapsed: boolean): void {
+    this.defaultCollapsed = defaultCollapsed;
+  }
+
   syncAllLeaves(views: MarkdownView[]): void {
     for (const view of views) {
       if (this.enabled) this.attach(view);
