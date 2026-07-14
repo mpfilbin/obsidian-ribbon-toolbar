@@ -1,3 +1,141 @@
 .ribbon-bar-host {
   display: block;
 }
+
+.ribbon-bar {
+  border-bottom: 1px solid var(--background-modifier-border);
+  background-color: var(--background-secondary);
+  font-size: var(--font-ui-small);
+  user-select: none;
+}
+
+.ribbon-tab-strip {
+  display: flex;
+  gap: 2px;
+  padding: 2px 8px 0;
+}
+
+.ribbon-tab {
+  background: transparent;
+  border: none;
+  border-radius: 4px 4px 0 0;
+  padding: 4px 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.ribbon-tab:hover {
+  background-color: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.ribbon-tab.active {
+  background-color: var(--background-primary);
+  color: var(--text-normal);
+  font-weight: var(--font-weight-bold, 600);
+}
+
+.ribbon-panel {
+  display: flex;
+  gap: 4px;
+  padding: 6px 8px;
+  background-color: var(--background-primary);
+  overflow-x: auto;
+}
+
+.ribbon-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px;
+  border-right: 1px solid var(--background-modifier-border);
+}
+
+.ribbon-group:last-child {
+  border-right: none;
+}
+
+.ribbon-group-buttons {
+  display: flex;
+  gap: 2px;
+}
+
+.ribbon-group-label {
+  font-size: var(--font-ui-smaller);
+  color: var(--text-faint);
+}
+
+.ribbon-button,
+.ribbon-dropdown .ribbon-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 4px 6px;
+  color: var(--text-normal);
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.ribbon-button:hover:not(:disabled) {
+  background-color: var(--background-modifier-hover);
+  border-color: var(--background-modifier-border);
+}
+
+.ribbon-button:disabled {
+  color: var(--text-faint);
+  cursor: not-allowed;
+}
+
+.ribbon-button-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.ribbon-button-label {
+  font-size: var(--font-ui-smaller);
+  white-space: nowrap;
+}
+
+.ribbon-dropdown {
+  position: relative;
+}
+
+.ribbon-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: var(--layer-menu);
+  margin: 2px 0 0;
+  padding: 4px;
+  list-style: none;
+  background-color: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  box-shadow: var(--shadow-s);
+  min-width: 120px;
+}
+
+.ribbon-dropdown-menu li button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  padding: 4px 8px;
+  color: var(--text-normal);
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.ribbon-dropdown-menu li button:hover {
+  background-color: var(--background-modifier-hover);
+}
+
+.ribbon-bar.collapsed .ribbon-tab-strip {
+  padding-bottom: 2px;
+}
