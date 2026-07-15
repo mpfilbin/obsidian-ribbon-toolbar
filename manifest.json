@@ -1,9 +1,9 @@
 {
-  "id": "ribbon-bar",
-  "name": "Ribbon Bar",
-  "version": "0.1.0",
-  "minAppVersion": "1.5.0",
-  "description": "An Office-style multi-tab editing ribbon docked above your Markdown notes.",
-  "author": "Michael Filbin",
-  "isDesktopOnly": true
+	"id": "ribbon-bar",
+	"name": "Ribbon Bar",
+	"version": "0.1.1",
+	"minAppVersion": "1.5.0",
+	"description": "An Office-style multi-tab editing ribbon docked above your Markdown notes.",
+	"author": "Michael Filbin",
+	"isDesktopOnly": true
 }
