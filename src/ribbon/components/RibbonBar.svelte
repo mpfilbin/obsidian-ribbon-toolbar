@@ -1,11 +1,15 @@
 <script lang="ts">
+  import type { Writable } from "svelte/store";
   import { TABS } from "../commands/registry";
   import type { TabId } from "../commands/registry";
   import type { EditorLike } from "../commands/actions/types";
   import Tab from "./Tab.svelte";
   import RibbonPanel from "./RibbonPanel.svelte";
 
-  let { editor, defaultCollapsed }: { editor: EditorLike | null; defaultCollapsed: boolean } = $props();
+  let { editorStore, defaultCollapsed }: { editorStore: Writable<EditorLike | null>; defaultCollapsed: boolean } =
+    $props();
+
+  let editor = $derived($editorStore);
 
   let activeTab = $state<TabId>(TABS[0].id);
   let collapsed = $state(defaultCollapsed);
