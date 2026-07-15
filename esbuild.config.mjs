@@ -1,6 +1,5 @@
 import esbuild from "esbuild";
 import esbuildSvelte from "esbuild-svelte";
-import sveltePreprocess from "svelte-preprocess";
 import process from "process";
 
 const production = process.argv[2] === "production";
@@ -13,11 +12,10 @@ const context = await esbuild.context({
   target: "es2020",
   logLevel: "info",
   sourcemap: production ? false : "inline",
-  treeShaking: true,
+  treeShaking: false,
   outfile: "main.js",
   plugins: [
     esbuildSvelte({
-      preprocess: sveltePreprocess(),
       compilerOptions: { css: "injected" },
     }),
   ],
