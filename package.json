@@ -7,7 +7,9 @@
   "scripts": {
     "dev": "node esbuild.config.mjs",
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-    "test": "vitest run"
+    "test": "vitest run",
+    "typecheck": "tsc -noEmit -skipLibCheck",
+    "release": "bash scripts/release.sh"
   },
   "devDependencies": {
     "@tsconfig/svelte": "^5.0.4",
