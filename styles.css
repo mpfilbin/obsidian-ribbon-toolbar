@@ -37,8 +37,8 @@
 
 .ribbon-panel {
   display: flex;
-  gap: 4px;
-  padding: 6px 8px;
+  gap: 8px;
+  padding: 8px 12px;
   background-color: var(--background-primary);
   overflow-x: auto;
 }
@@ -47,8 +47,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 0 8px;
+  gap: 6px;
+  padding: 0 12px;
   border-right: 1px solid var(--background-modifier-border);
 }
 
@@ -58,7 +58,7 @@
 
 .ribbon-group-buttons {
   display: flex;
-  gap: 2px;
+  gap: 4px;
 }
 
 .ribbon-group-label {
@@ -71,11 +71,15 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  background: transparent;
+  justify-content: center;
+  gap: 4px;
+  height: auto;
+  width: auto;
+  box-sizing: border-box;
+  background-color: var(--interactive-normal);
   border: 1px solid transparent;
   border-radius: 4px;
-  padding: 4px 6px;
+  padding: 8px 10px;
   color: var(--text-normal);
   cursor: pointer;
   box-shadow: none;
