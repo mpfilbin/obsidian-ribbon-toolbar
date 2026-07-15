@@ -3,6 +3,7 @@
   "version": "0.1.1",
   "private": true,
   "description": "An Office-style multi-tab editing ribbon for Obsidian Markdown notes.",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "node esbuild.config.mjs",
