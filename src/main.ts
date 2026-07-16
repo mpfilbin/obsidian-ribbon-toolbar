@@ -3,6 +3,7 @@ import { DEFAULT_SETTINGS, type RibbonBarSettings } from "./settings";
 import { RibbonBarSettingTab } from "./settings-tab";
 import type { RibbonBarPluginLike } from "./plugin-contract";
 import { RibbonManager } from "./ribbon/RibbonManager";
+import type { FrontmatterPropertyConfig } from "./ribbon/commands/actions/frontmatter";
 
 export default class RibbonBarPlugin extends Plugin implements RibbonBarPluginLike {
   settings: RibbonBarSettings = DEFAULT_SETTINGS;
@@ -14,6 +15,7 @@ export default class RibbonBarPlugin extends Plugin implements RibbonBarPluginLi
     this.ribbonManager = new RibbonManager({
       enabled: this.settings.ribbonEnabled,
       defaultCollapsed: this.settings.defaultCollapsed,
+      frontmatterProperties: this.settings.frontmatterProperties,
     });
 
     this.addSettingTab(new RibbonBarSettingTab(this.app, this));
@@ -39,6 +41,10 @@ export default class RibbonBarPlugin extends Plugin implements RibbonBarPluginLi
 
   setDefaultCollapsed(defaultCollapsed: boolean): void {
     this.ribbonManager.setDefaultCollapsed(defaultCollapsed);
+  }
+
+  setFrontmatterProperties(properties: FrontmatterPropertyConfig[]): void {
+    this.ribbonManager.setFrontmatterProperties(properties);
   }
 
   private markdownViews(): MarkdownView[] {

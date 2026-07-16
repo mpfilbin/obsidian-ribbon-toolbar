@@ -3,6 +3,7 @@ import { mount, unmount } from "svelte";
 import { writable, type Writable } from "svelte/store";
 import RibbonBar from "./components/RibbonBar.svelte";
 import type { EditorLike } from "./commands/actions/types";
+import type { FrontmatterPropertyConfig } from "./commands/actions/frontmatter";
 import { findInjectionPoint } from "./injectionPoint";
 
 interface RibbonInstance {
@@ -15,10 +16,16 @@ export class RibbonManager {
   private instances = new Map<MarkdownView, RibbonInstance>();
   private enabled: boolean;
   private defaultCollapsed: boolean;
+  private propertiesStore: Writable<FrontmatterPropertyConfig[]>;
 
-  constructor(options: { enabled: boolean; defaultCollapsed: boolean }) {
+  constructor(options: {
+    enabled: boolean;
+    defaultCollapsed: boolean;
+    frontmatterProperties: FrontmatterPropertyConfig[];
+  }) {
     this.enabled = options.enabled;
     this.defaultCollapsed = options.defaultCollapsed;
+    this.propertiesStore = writable(options.frontmatterProperties);
   }
 
   setEnabled(enabled: boolean): void {
@@ -27,6 +34,10 @@ export class RibbonManager {
 
   setDefaultCollapsed(defaultCollapsed: boolean): void {
     this.defaultCollapsed = defaultCollapsed;
+  }
+
+  setFrontmatterProperties(properties: FrontmatterPropertyConfig[]): void {
+    this.propertiesStore.set(properties);
   }
 
   syncAllLeaves(views: MarkdownView[]): void {
@@ -76,6 +87,7 @@ export class RibbonManager {
       props: {
         editorStore,
         defaultCollapsed: this.defaultCollapsed,
+        propertiesStore: this.propertiesStore,
       },
     });
 
