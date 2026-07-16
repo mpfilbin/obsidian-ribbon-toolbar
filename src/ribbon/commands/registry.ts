@@ -3,6 +3,8 @@ import * as home from "./actions/home";
 import * as insertActions from "./actions/insert";
 import * as layout from "./actions/layout";
 import * as references from "./actions/references";
+import type { FrontmatterPropertyConfig } from "./actions/frontmatter";
+import { insertOrLocateProperty } from "./actions/frontmatter";
 
 export type TabId = "home" | "insert" | "layout" | "references";
 
@@ -244,4 +246,15 @@ export function groupsForTab(tab: TabId): string[] {
     if (!groups.includes(entry.group)) groups.push(entry.group);
   }
   return groups;
+}
+
+export function buildPropertyCommands(properties: FrontmatterPropertyConfig[]): CommandEntry[] {
+  return properties.map((property) => ({
+    id: `property-${property.name}`,
+    tab: "references",
+    group: "Properties",
+    icon: "list-plus",
+    label: property.name,
+    action: insertOrLocateProperty(property),
+  }));
 }

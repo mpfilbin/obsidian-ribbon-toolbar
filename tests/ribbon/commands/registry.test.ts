@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { COMMAND_REGISTRY, TABS, commandsForTab, groupsForTab } from "../../../src/ribbon/commands/registry";
+import {
+  buildPropertyCommands,
+  COMMAND_REGISTRY,
+  TABS,
+  commandsForTab,
+  groupsForTab,
+} from "../../../src/ribbon/commands/registry";
 
 describe("COMMAND_REGISTRY", () => {
   it("has a unique id for every command", () => {
@@ -28,5 +34,22 @@ describe("COMMAND_REGISTRY", () => {
 
   it("groups commands within the Home tab in first-seen order", () => {
     expect(groupsForTab("home")).toEqual(["Font", "Paragraph"]);
+  });
+});
+
+describe("buildPropertyCommands", () => {
+  it("builds one Properties-group command per configured property", () => {
+    const commands = buildPropertyCommands([
+      { name: "tags", type: "list" },
+      { name: "description", type: "text" },
+    ]);
+    expect(commands).toHaveLength(2);
+    expect(commands[0]).toMatchObject({ tab: "references", group: "Properties", label: "tags" });
+    expect(commands[1]).toMatchObject({ tab: "references", group: "Properties", label: "description" });
+    expect(typeof commands[0].action).toBe("function");
+  });
+
+  it("returns an empty array for an empty property list", () => {
+    expect(buildPropertyCommands([])).toEqual([]);
   });
 });
