@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Writable } from "svelte/store";
+  import type { App } from "obsidian";
   import { TABS } from "../commands/registry";
   import type { TabId } from "../commands/registry";
   import type { EditorLike } from "../commands/actions/types";
@@ -11,10 +12,12 @@
     editorStore,
     defaultCollapsed,
     propertiesStore,
+    app,
   }: {
     editorStore: Writable<EditorLike | null>;
     defaultCollapsed: boolean;
     propertiesStore: Writable<FrontmatterPropertyConfig[]>;
+    app: App;
   } = $props();
 
   let editor = $derived($editorStore);
@@ -43,6 +46,6 @@
     {/each}
   </div>
   {#if !collapsed}
-    <RibbonPanel tab={activeTab} {editor} {propertiesStore} />
+    <RibbonPanel tab={activeTab} {editor} {propertiesStore} {app} />
   {/if}
 </div>

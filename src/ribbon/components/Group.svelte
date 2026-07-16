@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { App } from "obsidian";
   import type { CommandEntry } from "../commands/registry";
   import type { EditorLike } from "../commands/actions/types";
   import Button from "./Button.svelte";
@@ -8,7 +9,8 @@
     label,
     commands,
     editor,
-  }: { label: string; commands: CommandEntry[]; editor: EditorLike | null } = $props();
+    app,
+  }: { label: string; commands: CommandEntry[]; editor: EditorLike | null; app: App } = $props();
 </script>
 
 <div class="ribbon-group">
@@ -17,7 +19,7 @@
       {#if command.options}
         <Dropdown {command} {editor} />
       {:else}
-        <Button {command} {editor} />
+        <Button {command} {editor} {app} />
       {/if}
     {/each}
   </div>

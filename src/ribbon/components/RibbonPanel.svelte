@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Writable } from "svelte/store";
+  import type { App } from "obsidian";
   import type { CommandEntry, TabId } from "../commands/registry";
   import type { EditorLike } from "../commands/actions/types";
   import type { FrontmatterPropertyConfig } from "../commands/actions/frontmatter";
@@ -10,10 +11,12 @@
     tab,
     editor,
     propertiesStore,
+    app,
   }: {
     tab: TabId;
     editor: EditorLike | null;
     propertiesStore: Writable<FrontmatterPropertyConfig[]>;
+    app: App;
   } = $props();
 
   let properties = $derived($propertiesStore);
@@ -26,6 +29,6 @@
 
 <div class="ribbon-panel">
   {#each groups as group (group)}
-    <Group label={group} commands={commands.filter((c: CommandEntry) => c.group === group)} {editor} />
+    <Group label={group} commands={commands.filter((c: CommandEntry) => c.group === group)} {editor} {app} />
   {/each}
 </div>

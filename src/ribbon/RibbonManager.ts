@@ -1,4 +1,4 @@
-import type { MarkdownView } from "obsidian";
+import type { App, MarkdownView } from "obsidian";
 import { mount, unmount } from "svelte";
 import { writable, type Writable } from "svelte/store";
 import RibbonBar from "./components/RibbonBar.svelte";
@@ -17,12 +17,15 @@ export class RibbonManager {
   private enabled: boolean;
   private defaultCollapsed: boolean;
   private propertiesStore: Writable<FrontmatterPropertyConfig[]>;
+  private app: App;
 
   constructor(options: {
+    app: App;
     enabled: boolean;
     defaultCollapsed: boolean;
     frontmatterProperties: FrontmatterPropertyConfig[];
   }) {
+    this.app = options.app;
     this.enabled = options.enabled;
     this.defaultCollapsed = options.defaultCollapsed;
     this.propertiesStore = writable(options.frontmatterProperties);
@@ -92,6 +95,7 @@ export class RibbonManager {
         editorStore,
         defaultCollapsed: this.defaultCollapsed,
         propertiesStore: this.propertiesStore,
+        app: this.app,
       },
     });
 

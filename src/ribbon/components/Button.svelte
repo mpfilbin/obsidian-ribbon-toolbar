@@ -12,13 +12,19 @@
 </script>
 
 <script lang="ts">
+  import type { App } from "obsidian";
   import type { CommandEntry } from "../commands/registry";
   import type { EditorLike } from "../commands/actions/types";
 
-  let { command, editor }: { command: CommandEntry; editor: EditorLike | null } = $props();
+  let { command, editor, app }: { command: CommandEntry; editor: EditorLike | null; app: App } = $props();
 
   function handleClick() {
-    if (!editor || !command.action) return;
+    if (!editor) return;
+    if (command.modal) {
+      command.modal(editor, app);
+      return;
+    }
+    if (!command.action) return;
     command.action(editor);
     editor.focus();
   }

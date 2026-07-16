@@ -13,6 +13,7 @@ export default class RibbonBarPlugin extends Plugin implements RibbonBarPluginLi
     await this.loadSettings();
 
     this.ribbonManager = new RibbonManager({
+      app: this.app,
       enabled: this.settings.ribbonEnabled,
       defaultCollapsed: this.settings.defaultCollapsed,
       frontmatterProperties: this.settings.frontmatterProperties,
