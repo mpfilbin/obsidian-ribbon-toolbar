@@ -34,7 +34,9 @@ export const TABS: { id: TabId; label: string }[] = [
 ];
 
 function openCallout(editor: EditorLike, app: App): void {
-  void import("./actions/calloutModal").then((module) => module.openCalloutModal(editor, app));
+  void import("./actions/calloutModal")
+    .then((module) => module.openCalloutModal(editor, app))
+    .catch((error) => console.error("Ribbon Bar: failed to open callout modal", error));
 }
 
 export const COMMAND_REGISTRY: CommandEntry[] = [
