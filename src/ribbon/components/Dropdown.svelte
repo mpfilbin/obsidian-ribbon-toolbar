@@ -33,7 +33,10 @@
   }
 
   function choose(action: (editor: EditorLike) => void) {
-    if (editor) action(editor);
+    if (editor) {
+      action(editor);
+      editor.focus();
+    }
     open = false;
   }
 

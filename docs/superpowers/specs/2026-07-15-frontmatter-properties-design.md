@@ -22,8 +22,13 @@ according to its type.
     that property.
   - If frontmatter exists and the property isn't present, inserts it as a
     new line inside the existing block.
-  - If frontmatter exists and the property is already present, moves the
-    cursor to the end of that existing line (no duplicate key).
+  - If frontmatter exists and the property is already present, does nothing
+    (no duplicate key). Originally specced to move the cursor to the
+    existing line instead, but real Obsidian didn't visibly respond to any
+    cursor-only move we tried (`setSelection`, `setCursor`, with/without an
+    explicit `editor.focus()`) with no error and no repro path found within
+    reasonable effort — dropped in favor of a safe no-op rather than keep
+    chasing it.
 - Editing the property list in settings updates **every currently open
   pane's** ribbon immediately (not just newly opened panes) — the property
   list is a single shared, live value, unlike the per-pane `defaultCollapsed`
@@ -36,8 +41,8 @@ according to its type.
 - No validation that a typed value (e.g. a Number property's default) is
   actually well-formed — the user is trusted to enter sensible values, same
   spirit as the rest of v1's stateless buttons.
-- No editing of an existing property's *value* beyond placing the cursor on
-  its line — the user types the edit themselves.
+- No editing of an existing property's *value* — clicking an already-present
+  property's button is a no-op; the user edits the value themselves.
 - No reordering of the configured property list in settings; add/remove only.
 
 ## Data model
@@ -97,8 +102,9 @@ immediately.
     matching, since property names are free-form user text).
   - `formatValueLines(config)` — pure formatter implementing the table
     above.
-  - `insertOrLocateProperty(config: FrontmatterPropertyConfig): (editor: EditorLike) => void`
-    — the exported action factory, composing the above.
+  - `insertProperty(config: FrontmatterPropertyConfig): (editor: EditorLike) => void`
+    — the exported action factory, composing the above. No-ops if the
+    property already exists in the note's frontmatter.
 
 - **`src/ribbon/commands/registry.ts`** gains
   `buildPropertyCommands(properties: FrontmatterPropertyConfig[]): CommandEntry[]`,

@@ -4,7 +4,7 @@ import * as insertActions from "./actions/insert";
 import * as layout from "./actions/layout";
 import * as references from "./actions/references";
 import type { FrontmatterPropertyConfig } from "./actions/frontmatter";
-import { insertOrLocateProperty } from "./actions/frontmatter";
+import { insertProperty } from "./actions/frontmatter";
 
 export type TabId = "home" | "insert" | "layout" | "references";
 
@@ -255,6 +255,6 @@ export function buildPropertyCommands(properties: FrontmatterPropertyConfig[]): 
     group: "Properties",
     icon: "list-plus",
     label: property.name,
-    action: insertOrLocateProperty(property),
+    action: insertProperty(property),
   }));
 }

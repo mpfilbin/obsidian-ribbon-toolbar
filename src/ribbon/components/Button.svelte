@@ -20,6 +20,7 @@
   function handleClick() {
     if (!editor || !command.action) return;
     command.action(editor);
+    editor.focus();
   }
 </script>
 

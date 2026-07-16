@@ -13,11 +13,9 @@ export function insertFootnote(editor: EditorLike): void {
   const nextIndex = maxIndex + 1;
 
   const cursor = editor.getCursor();
-  editor.setSelection(cursor, cursor);
-  editor.replaceSelection(`[^${nextIndex}]`);
+  editor.replaceRange(`[^${nextIndex}]`, cursor);
 
   const endLine = editor.lastLine();
   const endCh = editor.getLine(endLine).length;
-  editor.setSelection({ line: endLine, ch: endCh }, { line: endLine, ch: endCh });
-  editor.replaceSelection(`\n\n[^${nextIndex}]: `);
+  editor.replaceRange(`\n\n[^${nextIndex}]: `, { line: endLine, ch: endCh });
 }

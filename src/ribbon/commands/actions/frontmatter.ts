@@ -74,32 +74,29 @@ function formatValueLines(config: FrontmatterPropertyConfig): string[] {
 function placeCursorAtEndOf(editor: EditorLike, lineIndex: number): void {
   const text = editor.getLine(lineIndex);
   const pos: EditorPosition = { line: lineIndex, ch: text.length };
-  editor.setSelection(pos, pos);
+  editor.setCursor(pos);
 }
 
-export function insertOrLocateProperty(config: FrontmatterPropertyConfig): (editor: EditorLike) => void {
+/**
+ * Inserts a property into the note's frontmatter (creating the frontmatter
+ * block first if needed). No-ops if the property already exists, so
+ * clicking the same property's button twice never creates a duplicate key.
+ */
+export function insertProperty(config: FrontmatterPropertyConfig): (editor: EditorLike) => void {
   return (editor: EditorLike): void => {
     const range = findFrontmatterRange(editor);
 
     if (!range) {
       const lines = formatValueLines(config);
-      const start: EditorPosition = { line: 0, ch: 0 };
-      editor.setSelection(start, start);
-      editor.replaceSelection(`${DELIMITER}\n${lines.join("\n")}\n${DELIMITER}\n`);
+      editor.replaceRange(`${DELIMITER}\n${lines.join("\n")}\n${DELIMITER}\n`, { line: 0, ch: 0 });
       placeCursorAtEndOf(editor, lines.length);
       return;
     }
 
-    const existingLine = findPropertyLine(editor, range, config.name);
-    if (existingLine !== null) {
-      placeCursorAtEndOf(editor, existingLine);
-      return;
-    }
+    if (findPropertyLine(editor, range, config.name) !== null) return;
 
     const lines = formatValueLines(config);
-    const insertAt: EditorPosition = { line: range.endLine, ch: 0 };
-    editor.setSelection(insertAt, insertAt);
-    editor.replaceSelection(`${lines.join("\n")}\n`);
+    editor.replaceRange(`${lines.join("\n")}\n`, { line: range.endLine, ch: 0 });
     placeCursorAtEndOf(editor, range.endLine + lines.length - 1);
   };
 }

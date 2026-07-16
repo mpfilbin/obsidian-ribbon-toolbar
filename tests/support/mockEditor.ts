@@ -29,12 +29,15 @@ export function createMockEditor(
       return full.slice(posToOffset(selectionFrom), posToOffset(selectionTo));
     },
     replaceSelection(replacement: string) {
+      this.replaceRange(replacement, selectionFrom, selectionTo);
+    },
+    replaceRange(replacement: string, from: EditorPosition, to: EditorPosition = from) {
       const full = lines.join("\n");
-      const from = posToOffset(selectionFrom);
-      const to = posToOffset(selectionTo);
-      const newText = full.slice(0, from) + replacement + full.slice(to);
+      const fromOffset = posToOffset(from);
+      const toOffset = posToOffset(to);
+      const newText = full.slice(0, fromOffset) + replacement + full.slice(toOffset);
       lines = newText.split("\n");
-      const newPos = offsetToPos(from + replacement.length);
+      const newPos = offsetToPos(fromOffset + replacement.length);
       selectionFrom = newPos;
       selectionTo = newPos;
     },
@@ -64,5 +67,6 @@ export function createMockEditor(
     getValue() {
       return lines.join("\n");
     },
+    focus() {},
   };
 }
