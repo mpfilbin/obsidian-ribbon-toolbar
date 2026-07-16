@@ -37,7 +37,11 @@ export class RibbonManager {
   }
 
   setFrontmatterProperties(properties: FrontmatterPropertyConfig[]): void {
-    this.propertiesStore.set(properties);
+    // Svelte's writable store skips notifying subscribers when the new value
+    // is reference-equal to the old one - callers (e.g. settings-tab.ts) may
+    // mutate their array in place before calling this, so always publish a
+    // fresh array reference to guarantee subscribers are notified.
+    this.propertiesStore.set([...properties]);
   }
 
   syncAllLeaves(views: MarkdownView[]): void {
