@@ -19,17 +19,28 @@ describe("COMMAND_REGISTRY", () => {
     }
   });
 
-  it("every command is either a direct action or a non-empty set of options", () => {
+  it("every command is either a direct action, a modal, or a non-empty set of options", () => {
     for (const entry of COMMAND_REGISTRY) {
       if (entry.options) {
         expect(entry.options.length).toBeGreaterThan(0);
         for (const option of entry.options) {
           expect(typeof option.action).toBe("function");
         }
+      } else if (entry.modal) {
+        expect(typeof entry.modal).toBe("function");
       } else {
         expect(typeof entry.action).toBe("function");
       }
     }
+  });
+
+  it("callout commands open the callout type modal instead of a direct action", () => {
+    const callout = COMMAND_REGISTRY.find((entry) => entry.id === "callout");
+    const refCallout = COMMAND_REGISTRY.find((entry) => entry.id === "ref-callout");
+    expect(callout?.modal).toBeTypeOf("function");
+    expect(callout?.action).toBeUndefined();
+    expect(refCallout?.modal).toBeTypeOf("function");
+    expect(refCallout?.action).toBeUndefined();
   });
 
   it("groups commands within the Home tab in first-seen order", () => {

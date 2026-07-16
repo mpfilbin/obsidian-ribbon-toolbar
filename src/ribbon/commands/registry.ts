@@ -1,3 +1,4 @@
+import type { App } from "obsidian";
 import type { EditorLike } from "./actions/types";
 import * as home from "./actions/home";
 import * as insertActions from "./actions/insert";
@@ -22,6 +23,7 @@ export interface CommandEntry {
   label: string;
   action?: (editor: EditorLike) => void;
   options?: CommandOption[];
+  modal?: (editor: EditorLike, app: App) => void;
 }
 
 export const TABS: { id: TabId; label: string }[] = [
@@ -30,6 +32,10 @@ export const TABS: { id: TabId; label: string }[] = [
   { id: "layout", label: "Layout" },
   { id: "references", label: "References" },
 ];
+
+function openCallout(editor: EditorLike, app: App): void {
+  void import("./actions/calloutModal").then((module) => module.openCalloutModal(editor, app));
+}
 
 export const COMMAND_REGISTRY: CommandEntry[] = [
   // Home
@@ -140,7 +146,7 @@ export const COMMAND_REGISTRY: CommandEntry[] = [
     group: "Illustrations",
     icon: "message-square",
     label: "Callout",
-    action: insertActions.insertCallout,
+    modal: openCallout,
   },
 
   // Layout
@@ -232,7 +238,7 @@ export const COMMAND_REGISTRY: CommandEntry[] = [
     group: "Callouts",
     icon: "message-square",
     label: "Callout",
-    action: insertActions.insertCallout,
+    modal: openCallout,
   },
 ];
 

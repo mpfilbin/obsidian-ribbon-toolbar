@@ -27,8 +27,4 @@ export function insertCodeBlock(editor: EditorLike): void {
   editor.setSelection({ line: cursor.line + 1, ch: 0 }, { line: cursor.line + 1, ch: 4 });
 }
 
-export function insertCallout(editor: EditorLike): void {
-  insertAtCursor(editor, "> [!note] Title\n> ");
-}
-
 export const insertTag = (editor: EditorLike): void => wrapSelection(editor, "#", "", "tag");

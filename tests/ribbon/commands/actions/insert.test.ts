@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createMockEditor } from "../../../support/mockEditor";
 import {
-  insertCallout,
   insertCodeBlock,
   insertHorizontalRule,
   insertImage,
@@ -63,12 +62,6 @@ describe("Insert tab actions", () => {
     insertCodeBlock(editor);
     expect(editor.getValue()).toBe("```\ncode\n```");
     expect(editor.getSelection()).toBe("code");
-  });
-
-  it("insertCallout inserts a callout template", () => {
-    const editor = createMockEditor("");
-    insertCallout(editor);
-    expect(editor.getValue()).toBe("> [!note] Title\n> ");
   });
 
   it("insertTag inserts a placeholder tag and selects it", () => {
