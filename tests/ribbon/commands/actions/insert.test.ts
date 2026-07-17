@@ -4,7 +4,6 @@ import {
   insertCodeBlock,
   insertHorizontalRule,
   insertImage,
-  insertInternalLink,
   insertLink,
   insertTable,
   insertTag,
@@ -23,13 +22,6 @@ describe("Insert tab actions", () => {
     insertLink(editor);
     expect(editor.getValue()).toBe("[link text](url)");
     expect(editor.getSelection()).toBe("link text");
-  });
-
-  it("insertInternalLink wraps a selection in double brackets", () => {
-    const editor = createMockEditor("My Note");
-    editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: 7 });
-    insertInternalLink(editor);
-    expect(editor.getValue()).toBe("[[My Note]]");
   });
 
   it("insertImage inserts an image template at the cursor", () => {

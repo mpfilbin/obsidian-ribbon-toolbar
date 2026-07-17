@@ -2,7 +2,6 @@ import type { EditorLike } from "./types";
 import { insertAtCursor, wrapSelection } from "./helpers";
 
 export const insertLink = (editor: EditorLike): void => wrapSelection(editor, "[", "](url)", "link text");
-export const insertInternalLink = (editor: EditorLike): void => wrapSelection(editor, "[[", "]]", "note name");
 
 export function insertImage(editor: EditorLike): void {
   insertAtCursor(editor, "![alt text](url)");
