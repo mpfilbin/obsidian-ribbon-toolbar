@@ -39,6 +39,12 @@ function openCallout(editor: EditorLike, app: App): void {
     .catch((error) => console.error("Ribbon Bar: failed to open callout modal", error));
 }
 
+function openInternalLink(editor: EditorLike, app: App): void {
+  void import("./actions/linkModal")
+    .then((module) => module.openLinkModal(editor, app))
+    .catch((error) => console.error("Ribbon Bar: failed to open internal link modal", error));
+}
+
 export const COMMAND_REGISTRY: CommandEntry[] = [
   // Home
   { id: "bold", tab: "home", group: "Font", icon: "bold", label: "Bold", action: home.toggleBold },
@@ -121,7 +127,7 @@ export const COMMAND_REGISTRY: CommandEntry[] = [
     group: "Links",
     icon: "file-symlink",
     label: "Internal Link",
-    action: insertActions.insertInternalLink,
+    modal: openInternalLink,
   },
   { id: "tag", tab: "insert", group: "Links", icon: "tag", label: "Tag", action: insertActions.insertTag },
   { id: "image", tab: "insert", group: "Media", icon: "image", label: "Image", action: insertActions.insertImage },
@@ -224,7 +230,7 @@ export const COMMAND_REGISTRY: CommandEntry[] = [
     group: "Links",
     icon: "file-symlink",
     label: "Internal Link",
-    action: insertActions.insertInternalLink,
+    modal: openInternalLink,
   },
   {
     id: "ref-tag",
