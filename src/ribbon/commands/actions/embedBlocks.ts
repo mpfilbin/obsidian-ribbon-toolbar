@@ -15,5 +15,16 @@ export function collectBlockCandidates(cache: CachedMetadata): BlockCandidate[] 
     .filter((item): item is typeof item & { id: string } => item.id !== undefined)
     .map((item) => ({ id: item.id, line: item.position.start.line }));
 
-  return [...blockEntries, ...listItemEntries];
+  const sectionEntries = (cache.sections ?? [])
+    .filter((section): section is typeof section & { id: string } => section.id !== undefined)
+    .map((section) => ({ id: section.id, line: section.position.start.line }));
+
+  const seenIds = new Set<string>();
+  const candidates: BlockCandidate[] = [];
+  for (const entry of [...blockEntries, ...listItemEntries, ...sectionEntries]) {
+    if (seenIds.has(entry.id)) continue;
+    seenIds.add(entry.id);
+    candidates.push(entry);
+  }
+  return candidates;
 }

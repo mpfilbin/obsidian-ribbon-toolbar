@@ -57,4 +57,42 @@ describe("collectBlockCandidates", () => {
     };
     expect(collectBlockCandidates(cache)).toEqual([]);
   });
+
+  it("includes a whole-list block ID recorded on the list's section entry", () => {
+    const cache = {
+      listItems: [
+        { position: { start: { line: 0, col: 0, offset: 0 }, end: { line: 0, col: 5, offset: 5 } } },
+        { position: { start: { line: 1, col: 0, offset: 0 }, end: { line: 1, col: 5, offset: 5 } } },
+      ],
+      sections: [
+        {
+          type: "list",
+          id: "list",
+          position: { start: { line: 0, col: 0, offset: 0 }, end: { line: 2, col: 5, offset: 20 } },
+        },
+      ],
+    };
+    expect(collectBlockCandidates(cache)).toEqual([{ id: "list", line: 0 }]);
+  });
+
+  it("excludes sections with no block ID", () => {
+    const cache = {
+      sections: [
+        { type: "paragraph", position: { start: { line: 0, col: 0, offset: 0 }, end: { line: 0, col: 5, offset: 5 } } },
+      ],
+    };
+    expect(collectBlockCandidates(cache)).toEqual([]);
+  });
+
+  it("does not duplicate an ID that appears in more than one cache source", () => {
+    const cache = {
+      blocks: {
+        list: { id: "list", position: { start: { line: 2, col: 0, offset: 0 }, end: { line: 2, col: 5, offset: 5 } } },
+      },
+      sections: [
+        { type: "list", id: "list", position: { start: { line: 0, col: 0, offset: 0 }, end: { line: 2, col: 5, offset: 20 } } },
+      ],
+    };
+    expect(collectBlockCandidates(cache)).toEqual([{ id: "list", line: 2 }]);
+  });
 });
