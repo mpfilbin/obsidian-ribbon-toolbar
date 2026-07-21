@@ -2,6 +2,7 @@ import { App, SuggestModal, TFile, prepareFuzzySearch } from "obsidian";
 import type { CachedMetadata } from "obsidian";
 import type { EditorLike } from "./types";
 import { buildEmbedText } from "./embedText";
+import { collectBlockCandidates } from "./embedBlocks";
 
 type EmbedSuggestion =
   | { type: "file"; file: TFile }
@@ -108,9 +109,8 @@ class EmbedSuggestModal extends SuggestModal<EmbedSuggestion> {
     cache: CachedMetadata,
     blockQuery: string
   ): Promise<EmbedSuggestion[]> {
-    const blocks = cache.blocks ?? {};
-    const ids = Object.keys(blocks);
-    if (ids.length === 0) {
+    const entries = collectBlockCandidates(cache);
+    if (entries.length === 0) {
       return [];
     }
 
@@ -120,9 +120,9 @@ class EmbedSuggestModal extends SuggestModal<EmbedSuggestion> {
     }
     const lines = this.blockContentCache.lines;
 
-    const candidates = ids.map((id) => ({
-      id,
-      preview: lines[blocks[id].position.start.line]?.trim() ?? "",
+    const candidates = entries.map((entry) => ({
+      id: entry.id,
+      preview: lines[entry.line]?.trim() ?? "",
     }));
 
     const trimmed = blockQuery.trim();
