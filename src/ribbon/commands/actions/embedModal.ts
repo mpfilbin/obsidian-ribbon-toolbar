@@ -8,7 +8,8 @@ type EmbedSuggestion =
   | { type: "file"; file: TFile }
   | { type: "heading"; file: TFile; heading: string }
   | { type: "block"; file: TFile; blockId: string; preview: string }
-  | { type: "create"; name: string };
+  | { type: "create"; name: string }
+  | { type: "raw"; target: string };
 
 const RESULT_LIMIT = 20;
 
@@ -24,14 +25,18 @@ class EmbedSuggestModal extends SuggestModal<EmbedSuggestion> {
     this.setPlaceholder("Find a file, or type Note# for headings, Note#^ for blocks...");
   }
 
-  getSuggestions(query: string): EmbedSuggestion[] | Promise<EmbedSuggestion[]> {
+  async getSuggestions(query: string): Promise<EmbedSuggestion[]> {
     const hashIndex = query.indexOf("#");
-    if (hashIndex === -1) {
-      return this.getFileSuggestions(query);
+    const results =
+      hashIndex === -1
+        ? this.getFileSuggestions(query)
+        : await this.getFragmentSuggestions(query.slice(0, hashIndex).trim(), query.slice(hashIndex + 1));
+
+    const trimmed = query.trim();
+    if (results.length === 0 && trimmed) {
+      return [{ type: "raw", target: trimmed }];
     }
-    const filePart = query.slice(0, hashIndex).trim();
-    const fragmentPart = query.slice(hashIndex + 1);
-    return this.getFragmentSuggestions(filePart, fragmentPart);
+    return results;
   }
 
   private getFileSuggestions(query: string): EmbedSuggestion[] {
@@ -146,6 +151,11 @@ class EmbedSuggestModal extends SuggestModal<EmbedSuggestion> {
   }
 
   renderSuggestion(item: EmbedSuggestion, el: HTMLElement): void {
+    if (item.type === "raw") {
+      el.createEl("div", { text: `Embed "${item.target}"` });
+      el.createEl("small", { text: "No match found — inserted as typed", cls: "ribbon-bar-link-modal-path" });
+      return;
+    }
     if (item.type === "create") {
       el.createEl("div", { text: `Create new note: "${item.name}"` });
       return;
@@ -182,6 +192,9 @@ class EmbedSuggestModal extends SuggestModal<EmbedSuggestion> {
         break;
       case "create":
         target = item.name;
+        break;
+      case "raw":
+        target = item.target;
         break;
     }
     this.editor.replaceSelection(buildEmbedText(target, this.alias));
