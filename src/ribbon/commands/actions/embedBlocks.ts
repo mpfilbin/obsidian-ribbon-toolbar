@@ -5,6 +5,10 @@ export interface BlockCandidate {
   line: number;
 }
 
+// Merges cache.blocks with ListItemCache.id/SectionCache.id as defensive breadth: Obsidian
+// normally mirrors list-item and section block IDs into cache.blocks too, so those two passes
+// are usually redundant with the first. Kept for cache states where they aren't (not a confirmed
+// fix for any specific reported bug), deduped by ID so no source contributes a duplicate.
 export function collectBlockCandidates(cache: CachedMetadata): BlockCandidate[] {
   const blockEntries = Object.entries(cache.blocks ?? {}).map(([id, block]) => ({
     id,

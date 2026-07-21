@@ -33,7 +33,8 @@ class EmbedSuggestModal extends SuggestModal<EmbedSuggestion> {
         : await this.getFragmentSuggestions(query.slice(0, hashIndex).trim(), query.slice(hashIndex + 1));
 
     const trimmed = query.trim();
-    if (results.length === 0 && trimmed) {
+    const isBareFragmentDelimiter = trimmed.endsWith("#") || trimmed.endsWith("#^");
+    if (results.length === 0 && trimmed && !isBareFragmentDelimiter) {
       return [{ type: "raw", target: trimmed }];
     }
     return results;
