@@ -28,6 +28,11 @@ export const CALLOUT_TYPES: readonly string[] = [
   "cite",
 ];
 
-export function calloutInsertText(type: string): string {
-  return `> [!${type}] Title\n> `;
+export function calloutInsertText(type: string, title = "", content = ""): string {
+  const resolvedType = type.trim() || "note";
+  const trimmedTitle = title.trim();
+  const header = trimmedTitle ? `> [!${resolvedType}] ${trimmedTitle}` : `> [!${resolvedType}]`;
+  const lines = content.length > 0 ? content.split("\n") : [""];
+  const body = lines.map((line) => `> ${line}`).join("\n");
+  return `${header}\n${body}`;
 }
