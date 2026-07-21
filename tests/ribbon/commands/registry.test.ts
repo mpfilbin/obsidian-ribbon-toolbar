@@ -43,6 +43,12 @@ describe("COMMAND_REGISTRY", () => {
     expect(refCallout?.action).toBeUndefined();
   });
 
+  it("embed command opens the embed modal instead of a direct action", () => {
+    const embed = COMMAND_REGISTRY.find((entry) => entry.id === "embed");
+    expect(embed?.modal).toBeTypeOf("function");
+    expect(embed?.action).toBeUndefined();
+  });
+
   it("groups commands within the Home tab in first-seen order", () => {
     expect(groupsForTab("home")).toEqual(["Font", "Paragraph"]);
   });

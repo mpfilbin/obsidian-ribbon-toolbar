@@ -45,6 +45,12 @@ function openInternalLink(editor: EditorLike, app: App): void {
     .catch((error) => console.error("Ribbon Bar: failed to open internal link modal", error));
 }
 
+function openEmbed(editor: EditorLike, app: App): void {
+  void import("./actions/embedModal")
+    .then((module) => module.openEmbedModal(editor, app))
+    .catch((error) => console.error("Ribbon Bar: failed to open embed modal", error));
+}
+
 export const COMMAND_REGISTRY: CommandEntry[] = [
   // Home
   { id: "bold", tab: "home", group: "Font", icon: "bold", label: "Bold", action: home.toggleBold },
@@ -131,6 +137,14 @@ export const COMMAND_REGISTRY: CommandEntry[] = [
   },
   { id: "tag", tab: "insert", group: "Links", icon: "tag", label: "Tag", action: insertActions.insertTag },
   { id: "image", tab: "insert", group: "Media", icon: "image", label: "Image", action: insertActions.insertImage },
+  {
+    id: "embed",
+    tab: "insert",
+    group: "Media",
+    icon: "layout-template",
+    label: "Embed",
+    modal: openEmbed,
+  },
   { id: "table", tab: "insert", group: "Tables", icon: "table", label: "Table", action: insertActions.insertTable },
   {
     id: "code-block",
