@@ -23,5 +23,8 @@
     "tslib": "^2.6.3",
     "typescript": "^5.5.2",
     "vitest": "^2.0.0"
+  },
+  "dependencies": {
+    "markdown-table": "^3.0.4"
   }
 }

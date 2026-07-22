@@ -3,6 +3,7 @@ import {
   stripHeadingTrailingHashes,
   normalizeBulletMarkers,
   trimTrailingWhitespace,
+  alignTables,
 } from "../../../../src/ribbon/commands/actions/formatMarkdown";
 
 describe("stripHeadingTrailingHashes", () => {
@@ -48,5 +49,31 @@ describe("trimTrailingWhitespace", () => {
 
   it("trims a trailing tab", () => {
     expect(trimTrailingWhitespace("Line\t")).toBe("Line");
+  });
+});
+
+describe("alignTables", () => {
+  it("pads cells and rebuilds the separator row with alignment markers", () => {
+    expect(alignTables("| Name | Age |\n|:-|--:|\n| Bob | 30 |")).toBe(
+      "| Name | Age |\n| :--- | --: |\n| Bob  |  30 |"
+    );
+  });
+
+  it("pads cells with a plain separator row (no alignment colons)", () => {
+    expect(alignTables("| Name | Age |\n| --- | --- |\n| Bob | 30 |")).toBe(
+      "| Name | Age |\n| ---- | --- |\n| Bob  | 30  |"
+    );
+  });
+
+  it("handles multiple independent tables in one document", () => {
+    expect(
+      alignTables("| A | B |\n| - | - |\n| 1 | 22 |\nSome text.\n| X | Y |\n| - | - |\n| longvalue | z |")
+    ).toBe(
+      "| A | B  |\n| - | -- |\n| 1 | 22 |\nSome text.\n| X         | Y |\n| --------- | - |\n| longvalue | z |"
+    );
+  });
+
+  it("leaves non-table text untouched", () => {
+    expect(alignTables("Just a paragraph.\nAnother line.")).toBe("Just a paragraph.\nAnother line.");
   });
 });
