@@ -57,6 +57,13 @@ describe("COMMAND_REGISTRY", () => {
     expect(table?.action).toBeUndefined();
   });
 
+  it("format-document command is a direct action on the Layout tab in a Formatting group", () => {
+    const formatDocument = COMMAND_REGISTRY.find((entry) => entry.id === "format-document");
+    expect(formatDocument?.tab).toBe("layout");
+    expect(formatDocument?.group).toBe("Formatting");
+    expect(typeof formatDocument?.action).toBe("function");
+  });
+
   it("groups commands within the Home tab in first-seen order", () => {
     expect(groupsForTab("home")).toEqual(["Font", "Paragraph"]);
   });

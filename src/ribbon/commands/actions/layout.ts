@@ -1,4 +1,5 @@
 import type { EditorLike } from "./types";
+import { formatMarkdown } from "./formatMarkdown";
 
 const HEADING_PATTERN = /^(#{1,6}) /;
 
@@ -79,4 +80,23 @@ export function insertTableOfContents(editor: EditorLike): void {
   }
   const toc = entries.length > 0 ? entries.join("\n") : "- (no headings found)";
   editor.replaceSelection(`${toc}\n`);
+}
+
+export function formatDocument(editor: EditorLike): void {
+  const lines: string[] = [];
+  for (let line = 0; line <= editor.lastLine(); line++) {
+    lines.push(editor.getLine(line));
+  }
+  const original = lines.join("\n");
+  const formatted = formatMarkdown(original);
+  if (formatted === original) return;
+
+  const cursor = editor.getCursor();
+  const lastLine = editor.lastLine();
+  editor.replaceRange(formatted, { line: 0, ch: 0 }, { line: lastLine, ch: editor.getLine(lastLine).length });
+
+  const newLines = formatted.split("\n");
+  const clampedLine = Math.min(cursor.line, newLines.length - 1);
+  const clampedCh = Math.min(cursor.ch, newLines[clampedLine].length);
+  editor.setCursor({ line: clampedLine, ch: clampedCh });
 }

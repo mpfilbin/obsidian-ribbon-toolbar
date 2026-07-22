@@ -229,6 +229,14 @@ export const COMMAND_REGISTRY: CommandEntry[] = [
     label: "Table of Contents",
     action: layout.insertTableOfContents,
   },
+  {
+    id: "format-document",
+    tab: "layout",
+    group: "Formatting",
+    icon: "sparkles",
+    label: "Format Document",
+    action: layout.formatDocument,
+  },
 
   // References
   {

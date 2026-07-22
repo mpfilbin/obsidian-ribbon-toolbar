@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createMockEditor } from "../../../support/mockEditor";
 import {
   demoteHeading,
+  formatDocument,
   indentList,
   insertTableOfContents,
   moveLineDown,
@@ -99,5 +100,32 @@ describe("Layout tab actions", () => {
     editor.setCursor({ line: 0, ch: 16 });
     insertTableOfContents(editor);
     expect(editor.getValue()).toBe("no headings here- (no headings found)\n");
+  });
+
+  it("formatDocument reformats the whole document", () => {
+    const editor = createMockEditor("## Title ##\n* item");
+    formatDocument(editor);
+    expect(editor.getValue()).toBe("## Title\n\n- item\n");
+  });
+
+  it("formatDocument does nothing when the document is already formatted", () => {
+    const editor = createMockEditor("# Title\n\nSome content.\n");
+    const before = editor.getValue();
+    formatDocument(editor);
+    expect(editor.getValue()).toBe(before);
+  });
+
+  it("formatDocument clamps the cursor to the reformatted document's bounds", () => {
+    const editor = createMockEditor("Para one.\n\n\n\nPara two.", { line: 4, ch: 3 });
+    formatDocument(editor);
+    expect(editor.getValue()).toBe("Para one.\n\nPara two.\n");
+    expect(editor.getCursor()).toEqual({ line: 3, ch: 0 });
+  });
+
+  it("formatDocument preserves the cursor position on a line that survives formatting", () => {
+    const editor = createMockEditor("Line one   \nLine two", { line: 1, ch: 5 });
+    formatDocument(editor);
+    expect(editor.getValue()).toBe("Line one\nLine two\n");
+    expect(editor.getCursor()).toEqual({ line: 1, ch: 5 });
   });
 });
