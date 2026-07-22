@@ -1,3 +1,11 @@
+import type { EditorLike } from "./types";
+
+export interface TableBlock {
+  start: number;
+  end: number;
+  align: string[];
+}
+
 export function isSeparatorRow(line: string): boolean {
   const trimmed = line.trim();
   if (!trimmed.includes("-")) return false;
@@ -28,4 +36,19 @@ export function parseAlignment(separatorLine: string): string[] {
     if (left) return "l";
     return "";
   });
+}
+
+export function findEnclosingTable(editor: EditorLike, line: number): TableBlock | null {
+  const lines: string[] = [];
+  for (let i = 0; i <= editor.lastLine(); i++) lines.push(editor.getLine(i));
+
+  for (let start = 0; start <= line; start++) {
+    if (!lines[start].includes("|")) continue;
+    if (start + 1 >= lines.length || !isSeparatorRow(lines[start + 1])) continue;
+    const end = findTableBlockEnd(lines, start);
+    if (line >= start && line < end) {
+      return { start, end, align: parseAlignment(lines[start + 1]) };
+    }
+  }
+  return null;
 }
