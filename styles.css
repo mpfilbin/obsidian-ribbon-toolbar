@@ -143,3 +143,24 @@
 .ribbon-bar.collapsed .ribbon-tab-strip {
   padding-bottom: 2px;
 }
+
+.ribbon-bar-callout-modal .setting-item {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  column-gap: 12px;
+  align-items: start;
+}
+
+.ribbon-bar-callout-modal .setting-item-info {
+  text-align: right;
+}
+
+.ribbon-bar-callout-modal .setting-item-control input[type="text"],
+.ribbon-bar-callout-modal .setting-item-control textarea {
+  width: 100%;
+}
+
+.ribbon-bar-callout-content {
+  min-height: 8em;
+  resize: vertical;
+}

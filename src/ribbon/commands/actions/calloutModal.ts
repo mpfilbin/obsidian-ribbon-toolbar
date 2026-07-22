@@ -19,6 +19,7 @@ class CalloutFormModal extends Modal {
 
   onOpen(): void {
     const { contentEl } = this;
+    contentEl.addClass("ribbon-bar-callout-modal");
 
     const datalist = contentEl.createEl("datalist", { attr: { id: TYPE_DATALIST_ID } });
     for (const type of CALLOUT_TYPES) {
@@ -41,6 +42,8 @@ class CalloutFormModal extends Modal {
     new Setting(contentEl).setName("Content").addTextArea((textArea) => {
       this.contentInput = textArea.inputEl;
       textArea.setValue(initialContent);
+      textArea.inputEl.rows = 8;
+      textArea.inputEl.addClass("ribbon-bar-callout-content");
       textArea.inputEl.addEventListener("keydown", (event) => this.handleFieldKeydown(event));
     });
 
