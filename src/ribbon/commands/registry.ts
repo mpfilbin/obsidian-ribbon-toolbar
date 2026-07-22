@@ -3,6 +3,7 @@ import type { EditorLike } from "./actions/types";
 import * as home from "./actions/home";
 import * as insertActions from "./actions/insert";
 import * as layout from "./actions/layout";
+import * as tableEdit from "./actions/tableEdit";
 import * as references from "./actions/references";
 import type { FrontmatterPropertyConfig } from "./actions/frontmatter";
 import { insertProperty } from "./actions/frontmatter";
@@ -147,6 +148,54 @@ export const COMMAND_REGISTRY: CommandEntry[] = [
     modal: openEmbed,
   },
   { id: "table", tab: "insert", group: "Tables", icon: "table", label: "Table", grid: insertActions.insertTableGrid },
+  {
+    id: "table-insert-row-above",
+    tab: "insert",
+    group: "Tables",
+    icon: "arrow-up-to-line",
+    label: "Insert Row Above",
+    action: tableEdit.insertRowAbove,
+  },
+  {
+    id: "table-insert-row-below",
+    tab: "insert",
+    group: "Tables",
+    icon: "arrow-down-to-line",
+    label: "Insert Row Below",
+    action: tableEdit.insertRowBelow,
+  },
+  {
+    id: "table-insert-column-left",
+    tab: "insert",
+    group: "Tables",
+    icon: "arrow-left-to-line",
+    label: "Insert Column Left",
+    action: tableEdit.insertColumnLeft,
+  },
+  {
+    id: "table-insert-column-right",
+    tab: "insert",
+    group: "Tables",
+    icon: "arrow-right-to-line",
+    label: "Insert Column Right",
+    action: tableEdit.insertColumnRight,
+  },
+  {
+    id: "table-delete-row",
+    tab: "insert",
+    group: "Tables",
+    icon: "rows-3",
+    label: "Delete Row",
+    action: tableEdit.deleteRow,
+  },
+  {
+    id: "table-delete-column",
+    tab: "insert",
+    group: "Tables",
+    icon: "columns-3",
+    label: "Delete Column",
+    action: tableEdit.deleteColumn,
+  },
   {
     id: "code-block",
     tab: "insert",

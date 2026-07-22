@@ -67,6 +67,23 @@ describe("COMMAND_REGISTRY", () => {
   it("groups commands within the Home tab in first-seen order", () => {
     expect(groupsForTab("home")).toEqual(["Font", "Paragraph"]);
   });
+
+  it("table row/column editing commands are direct actions in the Insert tab's Tables group", () => {
+    const ids = [
+      "table-insert-row-above",
+      "table-insert-row-below",
+      "table-insert-column-left",
+      "table-insert-column-right",
+      "table-delete-row",
+      "table-delete-column",
+    ];
+    for (const id of ids) {
+      const entry = COMMAND_REGISTRY.find((e) => e.id === id);
+      expect(entry?.tab).toBe("insert");
+      expect(entry?.group).toBe("Tables");
+      expect(typeof entry?.action).toBe("function");
+    }
+  });
 });
 
 describe("buildPropertyCommands", () => {
