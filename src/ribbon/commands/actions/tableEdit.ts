@@ -61,3 +61,51 @@ export function insertRowBelow(editor: EditorLike): void {
   replaceBlock(editor, start, end, lines, rows, align);
   editor.setCursor({ line: start + insertAt + 1, ch: 2 });
 }
+
+function columnAt(line: string, ch: number, columns: number): number {
+  let pipesBeforeCh = 0;
+  for (let i = 0; i < ch && i < line.length; i++) {
+    if (line[i] === "|") pipesBeforeCh++;
+  }
+  const column = line.startsWith("|") ? pipesBeforeCh - 1 : pipesBeforeCh;
+  return Math.min(Math.max(column, 0), columns - 1);
+}
+
+function cellStartCh(line: string, column: number): number {
+  let pipesSeen = 0;
+  for (let i = 0; i < line.length; i++) {
+    if (line[i] === "|") {
+      pipesSeen++;
+      if (pipesSeen === column + 1) return i + 1;
+    }
+  }
+  return line.length;
+}
+
+function insertColumn(editor: EditorLike, offset: 0 | 1): void {
+  const cursor = editor.getCursor();
+  const block = findEnclosingTable(editor, cursor.line);
+  if (!block) return;
+  const { start, end, align } = block;
+
+  const lines = readLines(editor);
+  const rows = rowsFromBlock(lines, start, end);
+  const columns = rows[0].length;
+  const col = columnAt(lines[cursor.line], cursor.ch, columns) + offset;
+
+  for (const row of rows) row.splice(col, 0, "");
+  const newAlign = [...align];
+  newAlign.splice(col, 0, "");
+
+  const rendered = replaceBlock(editor, start, end, lines, rows, newAlign);
+  const rowOffset = cursor.line - start;
+  editor.setCursor({ line: cursor.line, ch: cellStartCh(rendered[rowOffset], col) });
+}
+
+export function insertColumnLeft(editor: EditorLike): void {
+  insertColumn(editor, 0);
+}
+
+export function insertColumnRight(editor: EditorLike): void {
+  insertColumn(editor, 1);
+}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createMockEditor } from "../../../support/mockEditor";
-import { insertRowAbove, insertRowBelow } from "../../../../src/ribbon/commands/actions/tableEdit";
+import { insertColumnLeft, insertColumnRight, insertRowAbove, insertRowBelow } from "../../../../src/ribbon/commands/actions/tableEdit";
 
 const BASE_TABLE = "| Name | Age |\n| --- | --- |\n| Alice | 30 |\n| Bob | 25 |";
 
@@ -62,6 +62,49 @@ describe("insertRowBelow", () => {
   it("does nothing when the cursor is not inside a table", () => {
     const editor = createMockEditor("just a paragraph", { line: 0, ch: 0 });
     insertRowBelow(editor);
+    expect(editor.getValue()).toBe("just a paragraph");
+  });
+});
+
+describe("insertColumnLeft", () => {
+  it("inserts an empty column to the left of the column the cursor is on", () => {
+    const editor = createMockEditor(BASE_TABLE, { line: 2, ch: 4 });
+    insertColumnLeft(editor);
+    expect(editor.getValue()).toBe(
+      "|   | Name  | Age |\n| - | ----- | --- |\n|   | Alice | 30  |\n|   | Bob   | 25  |"
+    );
+    expect(editor.getCursor()).toEqual({ line: 2, ch: 1 });
+  });
+
+  it("works when the cursor is on the header row", () => {
+    const editor = createMockEditor(BASE_TABLE, { line: 0, ch: 3 });
+    insertColumnLeft(editor);
+    expect(editor.getValue()).toBe(
+      "|   | Name  | Age |\n| - | ----- | --- |\n|   | Alice | 30  |\n|   | Bob   | 25  |"
+    );
+    expect(editor.getCursor()).toEqual({ line: 0, ch: 1 });
+  });
+
+  it("does nothing when the cursor is not inside a table", () => {
+    const editor = createMockEditor("just a paragraph", { line: 0, ch: 0 });
+    insertColumnLeft(editor);
+    expect(editor.getValue()).toBe("just a paragraph");
+  });
+});
+
+describe("insertColumnRight", () => {
+  it("inserts an empty column to the right of the column the cursor is on", () => {
+    const editor = createMockEditor(BASE_TABLE, { line: 2, ch: 4 });
+    insertColumnRight(editor);
+    expect(editor.getValue()).toBe(
+      "| Name  |   | Age |\n| ----- | - | --- |\n| Alice |   | 30  |\n| Bob   |   | 25  |"
+    );
+    expect(editor.getCursor()).toEqual({ line: 2, ch: 9 });
+  });
+
+  it("does nothing when the cursor is not inside a table", () => {
+    const editor = createMockEditor("just a paragraph", { line: 0, ch: 0 });
+    insertColumnRight(editor);
     expect(editor.getValue()).toBe("just a paragraph");
   });
 });
