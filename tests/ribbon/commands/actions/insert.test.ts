@@ -5,7 +5,7 @@ import {
   insertHorizontalRule,
   insertImage,
   insertLink,
-  insertTable,
+  insertTableGrid,
   insertTag,
 } from "../../../../src/ribbon/commands/actions/insert";
 
@@ -30,10 +30,16 @@ describe("Insert tab actions", () => {
     expect(editor.getValue()).toBe("![alt text](url)");
   });
 
-  it("insertTable inserts a 2-column markdown table", () => {
+  it("insertTableGrid inserts a table of the given shape at the cursor", () => {
     const editor = createMockEditor("");
-    insertTable(editor);
-    expect(editor.getValue()).toBe("| Column 1 | Column 2 |\n| --- | --- |\n| Cell | Cell |\n");
+    insertTableGrid(editor, 3, 4);
+    expect(editor.getValue()).toBe("| | | |\n| --- | --- | --- |\n| | | |\n| | | |\n| | | |\n");
+  });
+
+  it("insertTableGrid selects the placeholder space in the first header cell", () => {
+    const editor = createMockEditor("");
+    insertTableGrid(editor, 2, 2);
+    expect(editor.getSelection()).toBe(" ");
   });
 
   it("insertHorizontalRule inserts a rule", () => {

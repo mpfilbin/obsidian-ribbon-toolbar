@@ -1,5 +1,6 @@
 import type { EditorLike } from "./types";
 import { insertAtCursor, wrapSelection } from "./helpers";
+import { buildTableText } from "./tableText";
 
 export const insertLink = (editor: EditorLike): void => wrapSelection(editor, "[", "](url)", "link text");
 
@@ -7,8 +8,10 @@ export function insertImage(editor: EditorLike): void {
   insertAtCursor(editor, "![alt text](url)");
 }
 
-export function insertTable(editor: EditorLike): void {
-  insertAtCursor(editor, "| Column 1 | Column 2 |\n| --- | --- |\n| Cell | Cell |\n");
+export function insertTableGrid(editor: EditorLike, columns: number, rows: number): void {
+  const cursor = editor.getCursor();
+  editor.replaceSelection(buildTableText(columns, rows));
+  editor.setSelection({ line: cursor.line, ch: cursor.ch + 1 }, { line: cursor.line, ch: cursor.ch + 2 });
 }
 
 export function insertHorizontalRule(editor: EditorLike): void {
