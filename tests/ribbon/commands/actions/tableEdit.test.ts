@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createMockEditor } from "../../../support/mockEditor";
-import { insertColumnLeft, insertColumnRight, insertRowAbove, insertRowBelow } from "../../../../src/ribbon/commands/actions/tableEdit";
+import { deleteRow, insertColumnLeft, insertColumnRight, insertRowAbove, insertRowBelow } from "../../../../src/ribbon/commands/actions/tableEdit";
 
 const BASE_TABLE = "| Name | Age |\n| --- | --- |\n| Alice | 30 |\n| Bob | 25 |";
 
@@ -105,6 +105,55 @@ describe("insertColumnRight", () => {
   it("does nothing when the cursor is not inside a table", () => {
     const editor = createMockEditor("just a paragraph", { line: 0, ch: 0 });
     insertColumnRight(editor);
+    expect(editor.getValue()).toBe("just a paragraph");
+  });
+});
+
+describe("deleteRow", () => {
+  it("deletes the data row the cursor is on, landing on the row that shifted into its place", () => {
+    const editor = createMockEditor(BASE_TABLE, { line: 2, ch: 0 });
+    deleteRow(editor);
+    expect(editor.getValue()).toBe("| Name | Age |\n| ---- | --- |\n| Bob  | 25  |");
+    expect(editor.getCursor()).toEqual({ line: 2, ch: 0 });
+  });
+
+  it("deletes the last data row, landing on the previous row", () => {
+    const editor = createMockEditor(BASE_TABLE, { line: 3, ch: 0 });
+    deleteRow(editor);
+    expect(editor.getValue()).toBe("| Name  | Age |\n| ----- | --- |\n| Alice | 30  |");
+    expect(editor.getCursor()).toEqual({ line: 2, ch: 0 });
+  });
+
+  it("deletes the header row, promoting the next data row to header", () => {
+    const editor = createMockEditor(BASE_TABLE, { line: 0, ch: 0 });
+    deleteRow(editor);
+    expect(editor.getValue()).toBe("| Alice | 30 |\n| ----- | -- |\n| Bob   | 25 |");
+    expect(editor.getCursor()).toEqual({ line: 0, ch: 0 });
+  });
+
+  it("does nothing on the separator row", () => {
+    const editor = createMockEditor(BASE_TABLE, { line: 1, ch: 0 });
+    deleteRow(editor);
+    expect(editor.getValue()).toBe(BASE_TABLE);
+  });
+
+  it("does nothing when it would leave zero data rows (deleting the only data row)", () => {
+    const oneRow = "| Name | Age |\n| --- | --- |\n| Alice | 30 |";
+    const editor = createMockEditor(oneRow, { line: 2, ch: 0 });
+    deleteRow(editor);
+    expect(editor.getValue()).toBe(oneRow);
+  });
+
+  it("does nothing when it would leave zero data rows (deleting the header with only one data row left)", () => {
+    const oneRow = "| Name | Age |\n| --- | --- |\n| Alice | 30 |";
+    const editor = createMockEditor(oneRow, { line: 0, ch: 0 });
+    deleteRow(editor);
+    expect(editor.getValue()).toBe(oneRow);
+  });
+
+  it("does nothing when the cursor is not inside a table", () => {
+    const editor = createMockEditor("just a paragraph", { line: 0, ch: 0 });
+    deleteRow(editor);
     expect(editor.getValue()).toBe("just a paragraph");
   });
 });

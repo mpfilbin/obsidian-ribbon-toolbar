@@ -109,3 +109,31 @@ export function insertColumnLeft(editor: EditorLike): void {
 export function insertColumnRight(editor: EditorLike): void {
   insertColumn(editor, 1);
 }
+
+export function deleteRow(editor: EditorLike): void {
+  const cursor = editor.getCursor();
+  const block = findEnclosingTable(editor, cursor.line);
+  if (!block) return;
+  const { start, end, align } = block;
+  if (cursor.line === start + 1) return;
+
+  const lines = readLines(editor);
+  const rows = rowsFromBlock(lines, start, end);
+  const dataRowCount = rows.length - 1;
+  if (dataRowCount < 2) return;
+
+  if (cursor.line === start) {
+    rows.shift();
+    replaceBlock(editor, start, end, lines, rows, align);
+    editor.setCursor({ line: start, ch: 0 });
+    return;
+  }
+
+  const dataIndex = cursor.line - (start + 2);
+  rows.splice(dataIndex + 1, 1);
+  replaceBlock(editor, start, end, lines, rows, align);
+
+  const newDataRowCount = rows.length - 1;
+  const targetDataIndex = Math.min(dataIndex, newDataRowCount - 1);
+  editor.setCursor({ line: start + 2 + targetDataIndex, ch: 0 });
+}
