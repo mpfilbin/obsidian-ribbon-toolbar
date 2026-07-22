@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createMockEditor } from "../../../support/mockEditor";
-import { deleteRow, insertColumnLeft, insertColumnRight, insertRowAbove, insertRowBelow } from "../../../../src/ribbon/commands/actions/tableEdit";
+import { deleteColumn, deleteRow, insertColumnLeft, insertColumnRight, insertRowAbove, insertRowBelow } from "../../../../src/ribbon/commands/actions/tableEdit";
 
 const BASE_TABLE = "| Name | Age |\n| --- | --- |\n| Alice | 30 |\n| Bob | 25 |";
 
@@ -154,6 +154,36 @@ describe("deleteRow", () => {
   it("does nothing when the cursor is not inside a table", () => {
     const editor = createMockEditor("just a paragraph", { line: 0, ch: 0 });
     deleteRow(editor);
+    expect(editor.getValue()).toBe("just a paragraph");
+  });
+});
+
+describe("deleteColumn", () => {
+  it("deletes the column the cursor is on, landing on the column that shifted into its place", () => {
+    const editor = createMockEditor(BASE_TABLE, { line: 2, ch: 10 });
+    deleteColumn(editor);
+    expect(editor.getValue()).toBe("| Name  |\n| ----- |\n| Alice |\n| Bob   |");
+    expect(editor.getCursor()).toEqual({ line: 2, ch: 1 });
+  });
+
+  it("deletes the last column, landing on the previous column", () => {
+    const threeCol = "| A | B | C |\n| - | - | - |\n| 1 | 2 | 3 |";
+    const editor = createMockEditor(threeCol, { line: 2, ch: 10 });
+    deleteColumn(editor);
+    expect(editor.getValue()).toBe("| A | B |\n| - | - |\n| 1 | 2 |");
+    expect(editor.getCursor()).toEqual({ line: 2, ch: 5 });
+  });
+
+  it("does nothing when only one column remains", () => {
+    const oneCol = "| Name |\n| --- |\n| Alice |";
+    const editor = createMockEditor(oneCol, { line: 2, ch: 3 });
+    deleteColumn(editor);
+    expect(editor.getValue()).toBe(oneCol);
+  });
+
+  it("does nothing when the cursor is not inside a table", () => {
+    const editor = createMockEditor("just a paragraph", { line: 0, ch: 0 });
+    deleteColumn(editor);
     expect(editor.getValue()).toBe("just a paragraph");
   });
 });

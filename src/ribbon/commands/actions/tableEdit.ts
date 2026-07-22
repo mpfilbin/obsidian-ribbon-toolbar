@@ -137,3 +137,26 @@ export function deleteRow(editor: EditorLike): void {
   const targetDataIndex = Math.min(dataIndex, newDataRowCount - 1);
   editor.setCursor({ line: start + 2 + targetDataIndex, ch: 0 });
 }
+
+export function deleteColumn(editor: EditorLike): void {
+  const cursor = editor.getCursor();
+  const block = findEnclosingTable(editor, cursor.line);
+  if (!block) return;
+  const { start, end, align } = block;
+
+  const lines = readLines(editor);
+  const rows = rowsFromBlock(lines, start, end);
+  const columns = rows[0].length;
+  if (columns <= 1) return;
+
+  const col = columnAt(lines[cursor.line], cursor.ch, columns);
+  for (const row of rows) row.splice(col, 1);
+  const newAlign = [...align];
+  newAlign.splice(col, 1);
+
+  const rendered = replaceBlock(editor, start, end, lines, rows, newAlign);
+  const newColumns = columns - 1;
+  const target = Math.min(col, newColumns - 1);
+  const rowOffset = cursor.line - start;
+  editor.setCursor({ line: cursor.line, ch: cellStartCh(rendered[rowOffset], target) });
+}
