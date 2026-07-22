@@ -198,3 +198,27 @@ export function normalizeBlankLines(text: string): string {
 
   return outLines.join("\n");
 }
+
+function splitFrontmatter(text: string): { frontmatter: string; body: string } {
+  const lines = text.split("\n");
+  if ((lines[0] ?? "").trim() !== "---") return { frontmatter: "", body: text };
+  for (let i = 1; i < lines.length; i++) {
+    if (lines[i].trim() === "---") {
+      const frontmatter = lines.slice(0, i + 1).join("\n") + "\n";
+      const body = lines.slice(i + 1).join("\n");
+      return { frontmatter, body };
+    }
+  }
+  return { frontmatter: "", body: text };
+}
+
+export function formatMarkdown(text: string): string {
+  const { frontmatter, body } = splitFrontmatter(text);
+  let formatted = stripHeadingTrailingHashes(body);
+  formatted = normalizeBulletMarkers(formatted);
+  formatted = trimTrailingWhitespace(formatted);
+  formatted = alignTables(formatted);
+  formatted = normalizeBlankLines(formatted);
+  const finalBody = formatted.length > 0 ? `${formatted}\n` : "";
+  return frontmatter + finalBody;
+}

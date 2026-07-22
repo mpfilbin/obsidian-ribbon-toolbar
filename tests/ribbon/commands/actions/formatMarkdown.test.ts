@@ -5,6 +5,7 @@ import {
   trimTrailingWhitespace,
   alignTables,
   normalizeBlankLines,
+  formatMarkdown,
 } from "../../../../src/ribbon/commands/actions/formatMarkdown";
 
 describe("stripHeadingTrailingHashes", () => {
@@ -112,5 +113,35 @@ describe("normalizeBlankLines", () => {
     expect(normalizeBlankLines("Text\n| A | B |\n| - | - |\n| 1 | 2 |\nMore")).toBe(
       "Text\n\n| A | B |\n| - | - |\n| 1 | 2 |\n\nMore"
     );
+  });
+});
+
+describe("formatMarkdown", () => {
+  it("applies all rules together in the correct order", () => {
+    expect(
+      formatMarkdown(
+        "# Title ##\nSome text.\n* item one\n+ item two\n\n\n\n| Name | Age |\n|:-|--:|\n| Bob | 30 |\nAfter table."
+      )
+    ).toBe(
+      "# Title\n\nSome text.\n- item one\n- item two\n\n| Name | Age |\n| :--- | --: |\n| Bob  |  30 |\n\nAfter table.\n"
+    );
+  });
+
+  it("leaves a leading YAML frontmatter block untouched and only formats the body", () => {
+    expect(formatMarkdown("---\ntitle: x\ntags: [a,  b]\n---\n# Heading\ncontent   \n")).toBe(
+      "---\ntitle: x\ntags: [a,  b]\n---\n# Heading\n\ncontent\n"
+    );
+  });
+
+  it("returns an empty string for an empty document", () => {
+    expect(formatMarkdown("")).toBe("");
+  });
+
+  it("leaves a frontmatter-only document unchanged with no artificial body content", () => {
+    expect(formatMarkdown("---\ntitle: x\n---\n")).toBe("---\ntitle: x\n---\n");
+  });
+
+  it("is a no-op on an already-formatted document", () => {
+    expect(formatMarkdown("# Title\n\nSome content.\n")).toBe("# Title\n\nSome content.\n");
   });
 });
