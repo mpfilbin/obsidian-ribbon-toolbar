@@ -37,4 +37,11 @@ describe("findEnclosingTable", () => {
     const editor = createMockEditor(aligned, { line: 0, ch: 0 });
     expect(findEnclosingTable(editor, 0)).toEqual({ start: 0, end: 3, align: ["l", "r"] });
   });
+
+  it("returns null when the cursor line is beyond the document bounds", () => {
+    const doc = "| A | B |\n| - | - |\n| 1 | 2 |";
+    const editor = createMockEditor(doc, { line: 0, ch: 0 });
+    expect(findEnclosingTable(editor, 5)).toBeNull();
+    expect(findEnclosingTable(editor, 100)).toBeNull();
+  });
 });

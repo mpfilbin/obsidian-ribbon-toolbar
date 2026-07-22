@@ -42,6 +42,8 @@ export function findEnclosingTable(editor: EditorLike, line: number): TableBlock
   const lines: string[] = [];
   for (let i = 0; i <= editor.lastLine(); i++) lines.push(editor.getLine(i));
 
+  if (line < 0 || line >= lines.length) return null;
+
   for (let start = 0; start <= line; start++) {
     if (!lines[start].includes("|")) continue;
     if (start + 1 >= lines.length || !isSeparatorRow(lines[start + 1])) continue;
