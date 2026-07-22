@@ -24,6 +24,7 @@ export interface CommandEntry {
   action?: (editor: EditorLike) => void;
   options?: CommandOption[];
   modal?: (editor: EditorLike, app: App) => void;
+  grid?: (editor: EditorLike, columns: number, rows: number) => void;
 }
 
 export const TABS: { id: TabId; label: string }[] = [
@@ -145,7 +146,7 @@ export const COMMAND_REGISTRY: CommandEntry[] = [
     label: "Embed",
     modal: openEmbed,
   },
-  { id: "table", tab: "insert", group: "Tables", icon: "table", label: "Table", action: insertActions.insertTable },
+  { id: "table", tab: "insert", group: "Tables", icon: "table", label: "Table", grid: insertActions.insertTableGrid },
   {
     id: "code-block",
     tab: "insert",

@@ -19,7 +19,7 @@ describe("COMMAND_REGISTRY", () => {
     }
   });
 
-  it("every command is either a direct action, a modal, or a non-empty set of options", () => {
+  it("every command is either a direct action, a modal, a grid picker, or a non-empty set of options", () => {
     for (const entry of COMMAND_REGISTRY) {
       if (entry.options) {
         expect(entry.options.length).toBeGreaterThan(0);
@@ -28,6 +28,8 @@ describe("COMMAND_REGISTRY", () => {
         }
       } else if (entry.modal) {
         expect(typeof entry.modal).toBe("function");
+      } else if (entry.grid) {
+        expect(typeof entry.grid).toBe("function");
       } else {
         expect(typeof entry.action).toBe("function");
       }
@@ -47,6 +49,12 @@ describe("COMMAND_REGISTRY", () => {
     const embed = COMMAND_REGISTRY.find((entry) => entry.id === "embed");
     expect(embed?.modal).toBeTypeOf("function");
     expect(embed?.action).toBeUndefined();
+  });
+
+  it("table command opens the grid picker instead of a direct action", () => {
+    const table = COMMAND_REGISTRY.find((entry) => entry.id === "table");
+    expect(table?.grid).toBeTypeOf("function");
+    expect(table?.action).toBeUndefined();
   });
 
   it("groups commands within the Home tab in first-seen order", () => {
