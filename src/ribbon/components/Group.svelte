@@ -4,6 +4,7 @@
   import type { EditorLike } from "../commands/actions/types";
   import Button from "./Button.svelte";
   import Dropdown from "./Dropdown.svelte";
+  import TablePicker from "./TablePicker.svelte";
 
   let {
     label,
@@ -16,7 +17,9 @@
 <div class="ribbon-group">
   <div class="ribbon-group-buttons">
     {#each commands as command (command.id)}
-      {#if command.options}
+      {#if command.grid}
+        <TablePicker {command} {editor} />
+      {:else if command.options}
         <Dropdown {command} {editor} />
       {:else}
         <Button {command} {editor} {app} />
