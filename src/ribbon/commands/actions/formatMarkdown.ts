@@ -1,4 +1,5 @@
 import { markdownTable } from "markdown-table";
+import { isSeparatorRow, findTableBlockEnd, splitTableRow, parseAlignment } from "./tableParsing";
 
 export function stripHeadingTrailingHashes(text: string): string {
   return text
@@ -30,38 +31,6 @@ export function trimTrailingWhitespace(text: string): string {
       return line.slice(0, line.length - trailing.length);
     })
     .join("\n");
-}
-
-function isSeparatorRow(line: string): boolean {
-  const trimmed = line.trim();
-  if (!trimmed.includes("-")) return false;
-  return /^\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?$/.test(trimmed);
-}
-
-function findTableBlockEnd(lines: string[], start: number): number {
-  let end = start + 2;
-  while (end < lines.length && lines[end].trim() !== "" && lines[end].includes("|")) {
-    end++;
-  }
-  return end;
-}
-
-function splitTableRow(line: string): string[] {
-  let trimmed = line.trim();
-  if (trimmed.startsWith("|")) trimmed = trimmed.slice(1);
-  if (trimmed.endsWith("|")) trimmed = trimmed.slice(0, -1);
-  return trimmed.split("|").map((cell) => cell.trim());
-}
-
-function parseAlignment(separatorLine: string): string[] {
-  return splitTableRow(separatorLine).map((cell) => {
-    const left = cell.startsWith(":");
-    const right = cell.endsWith(":");
-    if (left && right) return "c";
-    if (right) return "r";
-    if (left) return "l";
-    return "";
-  });
 }
 
 export function alignTables(text: string): string {
