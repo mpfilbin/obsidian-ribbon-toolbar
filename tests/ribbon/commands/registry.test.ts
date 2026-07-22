@@ -6,6 +6,14 @@ import {
   commandsForTab,
   groupsForTab,
 } from "../../../src/ribbon/commands/registry";
+import {
+  insertRowAbove,
+  insertRowBelow,
+  insertColumnLeft,
+  insertColumnRight,
+  deleteRow,
+  deleteColumn,
+} from "../../../src/ribbon/commands/actions/tableEdit";
 
 describe("COMMAND_REGISTRY", () => {
   it("has a unique id for every command", () => {
@@ -69,19 +77,19 @@ describe("COMMAND_REGISTRY", () => {
   });
 
   it("table row/column editing commands are direct actions in the Insert tab's Tables group", () => {
-    const ids = [
-      "table-insert-row-above",
-      "table-insert-row-below",
-      "table-insert-column-left",
-      "table-insert-column-right",
-      "table-delete-row",
-      "table-delete-column",
+    const tableEditingCommands = [
+      { id: "table-insert-row-above", expectedAction: insertRowAbove },
+      { id: "table-insert-row-below", expectedAction: insertRowBelow },
+      { id: "table-insert-column-left", expectedAction: insertColumnLeft },
+      { id: "table-insert-column-right", expectedAction: insertColumnRight },
+      { id: "table-delete-row", expectedAction: deleteRow },
+      { id: "table-delete-column", expectedAction: deleteColumn },
     ];
-    for (const id of ids) {
+    for (const { id, expectedAction } of tableEditingCommands) {
       const entry = COMMAND_REGISTRY.find((e) => e.id === id);
       expect(entry?.tab).toBe("insert");
       expect(entry?.group).toBe("Tables");
-      expect(typeof entry?.action).toBe("function");
+      expect(entry?.action).toBe(expectedAction);
     }
   });
 });
