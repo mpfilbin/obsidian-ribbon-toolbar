@@ -9,7 +9,7 @@ export function insertImage(editor: EditorLike): void {
 }
 
 export function insertTableGrid(editor: EditorLike, columns: number, rows: number): void {
-  const cursor = editor.getCursor();
+  const cursor = editor.getCursor("from");
   editor.replaceSelection(buildTableText(columns, rows));
   editor.setSelection({ line: cursor.line, ch: cursor.ch + 1 }, { line: cursor.line, ch: cursor.ch + 2 });
 }

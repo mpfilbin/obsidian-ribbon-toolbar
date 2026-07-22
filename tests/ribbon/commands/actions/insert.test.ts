@@ -42,6 +42,14 @@ describe("Insert tab actions", () => {
     expect(editor.getSelection()).toBe(" ");
   });
 
+  it("insertTableGrid replaces selected text and selects the placeholder space in the first header cell", () => {
+    const editor = createMockEditor("some text here");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: 9 });
+    insertTableGrid(editor, 2, 2);
+    expect(editor.getValue()).toBe("| | |\n| --- | --- |\n| | |\n here");
+    expect(editor.getSelection()).toBe(" ");
+  });
+
   it("insertHorizontalRule inserts a rule", () => {
     const editor = createMockEditor("");
     insertHorizontalRule(editor);
