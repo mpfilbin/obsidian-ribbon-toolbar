@@ -90,7 +90,25 @@ describe("COMMAND_REGISTRY", () => {
       expect(entry?.tab).toBe("insert");
       expect(entry?.group).toBe("Tables");
       expect(entry?.action).toBe(expectedAction);
+      expect(entry?.compact).toBe(true);
     }
+  });
+
+  it("table row/column editing commands appear in the registry in 3x2 grid reading order", () => {
+    const compactIds = COMMAND_REGISTRY.filter((entry) => entry.compact).map((entry) => entry.id);
+    expect(compactIds).toEqual([
+      "table-insert-row-above",
+      "table-insert-column-left",
+      "table-delete-row",
+      "table-insert-row-below",
+      "table-insert-column-right",
+      "table-delete-column",
+    ]);
+  });
+
+  it("the Table insert grid-picker command is not compact", () => {
+    const table = COMMAND_REGISTRY.find((entry) => entry.id === "table");
+    expect(table?.compact).toBeFalsy();
   });
 });
 

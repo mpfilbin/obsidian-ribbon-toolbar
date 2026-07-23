@@ -26,6 +26,7 @@ export interface CommandEntry {
   options?: CommandOption[];
   modal?: (editor: EditorLike, app: App) => void;
   grid?: (editor: EditorLike, columns: number, rows: number) => void;
+  compact?: boolean;
 }
 
 export const TABS: { id: TabId; label: string }[] = [
@@ -155,14 +156,7 @@ export const COMMAND_REGISTRY: CommandEntry[] = [
     icon: "arrow-up-to-line",
     label: "Insert Row Above",
     action: tableEdit.insertRowAbove,
-  },
-  {
-    id: "table-insert-row-below",
-    tab: "insert",
-    group: "Tables",
-    icon: "arrow-down-to-line",
-    label: "Insert Row Below",
-    action: tableEdit.insertRowBelow,
+    compact: true,
   },
   {
     id: "table-insert-column-left",
@@ -171,14 +165,7 @@ export const COMMAND_REGISTRY: CommandEntry[] = [
     icon: "arrow-left-to-line",
     label: "Insert Column Left",
     action: tableEdit.insertColumnLeft,
-  },
-  {
-    id: "table-insert-column-right",
-    tab: "insert",
-    group: "Tables",
-    icon: "arrow-right-to-line",
-    label: "Insert Column Right",
-    action: tableEdit.insertColumnRight,
+    compact: true,
   },
   {
     id: "table-delete-row",
@@ -187,6 +174,25 @@ export const COMMAND_REGISTRY: CommandEntry[] = [
     icon: "rows-3",
     label: "Delete Row",
     action: tableEdit.deleteRow,
+    compact: true,
+  },
+  {
+    id: "table-insert-row-below",
+    tab: "insert",
+    group: "Tables",
+    icon: "arrow-down-to-line",
+    label: "Insert Row Below",
+    action: tableEdit.insertRowBelow,
+    compact: true,
+  },
+  {
+    id: "table-insert-column-right",
+    tab: "insert",
+    group: "Tables",
+    icon: "arrow-right-to-line",
+    label: "Insert Column Right",
+    action: tableEdit.insertColumnRight,
+    compact: true,
   },
   {
     id: "table-delete-column",
@@ -195,6 +201,7 @@ export const COMMAND_REGISTRY: CommandEntry[] = [
     icon: "columns-3",
     label: "Delete Column",
     action: tableEdit.deleteColumn,
+    compact: true,
   },
   {
     id: "code-block",
