@@ -16,7 +16,12 @@
   import type { CommandEntry } from "../commands/registry";
   import type { EditorLike } from "../commands/actions/types";
 
-  let { command, editor, app }: { command: CommandEntry; editor: EditorLike | null; app: App } = $props();
+  let {
+    command,
+    editor,
+    app,
+    compact = false,
+  }: { command: CommandEntry; editor: EditorLike | null; app: App; compact?: boolean } = $props();
 
   function handleClick() {
     if (!editor) return;
@@ -32,6 +37,7 @@
 
 <button
   class="ribbon-button"
+  class:ribbon-button-compact={compact}
   type="button"
   title={command.label}
   aria-label={command.label}
@@ -39,5 +45,7 @@
   onclick={handleClick}
 >
   <span class="ribbon-button-icon" use:icon={command.icon}></span>
-  <span class="ribbon-button-label">{command.label}</span>
+  {#if !compact}
+    <span class="ribbon-button-label">{command.label}</span>
+  {/if}
 </button>
