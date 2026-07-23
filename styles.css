@@ -105,6 +105,21 @@
   white-space: nowrap;
 }
 
+.ribbon-compact-grid {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  gap: 4px;
+}
+
+.ribbon-button-compact {
+  padding: 6px;
+}
+
+.ribbon-button-compact .ribbon-button-icon {
+  width: 14px;
+  height: 14px;
+}
+
 .ribbon-dropdown {
   position: relative;
 }
