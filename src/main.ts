@@ -1,12 +1,12 @@
 import { MarkdownView, Plugin } from "obsidian";
-import { DEFAULT_SETTINGS, type RibbonBarSettings } from "./settings";
+import { mergeSettings, type RibbonBarSettings } from "./settings";
 import { RibbonBarSettingTab } from "./settings-tab";
 import type { RibbonBarPluginLike } from "./plugin-contract";
 import { RibbonManager } from "./ribbon/RibbonManager";
 import type { FrontmatterPropertyConfig } from "./ribbon/commands/actions/frontmatter";
 
 export default class RibbonBarPlugin extends Plugin implements RibbonBarPluginLike {
-  settings: RibbonBarSettings = DEFAULT_SETTINGS;
+  settings: RibbonBarSettings = mergeSettings(null);
   ribbonManager!: RibbonManager;
 
   async onload(): Promise<void> {
@@ -53,7 +53,7 @@ export default class RibbonBarPlugin extends Plugin implements RibbonBarPluginLi
   }
 
   async loadSettings(): Promise<void> {
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+    this.settings = mergeSettings(await this.loadData());
   }
 
   async saveSettings(): Promise<void> {
