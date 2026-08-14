@@ -60,6 +60,25 @@ describe("Layout tab actions", () => {
     expect(editor.getValue()).toBe("- item");
   });
 
+  it("outdentList removes two leading spaces when the line uses a 2-space indent", () => {
+    const editor = createMockEditor("  - item");
+    outdentList(editor);
+    expect(editor.getValue()).toBe("- item");
+  });
+
+  it("indentList matches an existing 2-space indent instead of mixing in a tab", () => {
+    const editor = createMockEditor("  - item");
+    indentList(editor);
+    expect(editor.getValue()).toBe("    - item");
+  });
+
+  it("indentList matches an existing 4-space indent instead of mixing in a tab", () => {
+    const editor = createMockEditor("    - item");
+    indentList(editor);
+    expect(editor.getValue()).toBe("        - item");
+  });
+
+
   it("moveLineUp swaps the current line with the one above", () => {
     const editor = createMockEditor("first\nsecond");
     editor.setCursor({ line: 1, ch: 0 });
