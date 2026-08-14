@@ -80,6 +80,36 @@ describe("Home tab actions", () => {
     expect(editor.getValue()).toBe("> item");
   });
 
+  it("toggleChecklist converts an existing bullet line instead of stacking markers", () => {
+    const editor = createMockEditor("- item");
+    toggleChecklist(editor);
+    expect(editor.getValue()).toBe("- [ ] item");
+  });
+
+  it("toggleBulletList converts an existing checklist line instead of stacking markers", () => {
+    const editor = createMockEditor("- [ ] item");
+    toggleBulletList(editor);
+    expect(editor.getValue()).toBe("- item");
+  });
+
+  it("toggleNumberedList converts an existing bullet line", () => {
+    const editor = createMockEditor("- item");
+    toggleNumberedList(editor);
+    expect(editor.getValue()).toBe("1. item");
+  });
+
+  it("toggleBulletList converts an existing numbered line regardless of its digits", () => {
+    const editor = createMockEditor("5. item");
+    toggleBulletList(editor);
+    expect(editor.getValue()).toBe("- item");
+  });
+
+  it("toggleChecklist toggles off when the line is already a checklist item", () => {
+    const editor = createMockEditor("- [ ] item");
+    toggleChecklist(editor);
+    expect(editor.getValue()).toBe("item");
+  });
+
   it("clearFormatting strips bold/italic/strike/highlight/code markers from the selection", () => {
     const editor = createMockEditor("**bold** and *italic* and ~~gone~~ and ==hi== and `code`");
     editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: editor.getValue().length });
