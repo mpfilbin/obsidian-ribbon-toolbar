@@ -1,36 +1,48 @@
 import { markdownTable } from "markdown-table";
 import { isSeparatorRow, findTableBlockEnd, splitTableRow, parseAlignment } from "./tableParsing";
 
-export function stripHeadingTrailingHashes(text: string): string {
+const FENCE_PATTERN = /^\s*(```|~~~)/;
+
+/**
+ * Applies a per-line transform everywhere except inside fenced code blocks
+ * (including the fence delimiter lines themselves), so formatting passes
+ * never rewrite code content.
+ */
+function mapLinesOutsideFences(text: string, transform: (line: string) => string): string {
+  let inFence = false;
   return text
     .split("\n")
     .map((line) => {
-      const match = line.match(/^(#{1,6})(\s+)(.*)$/);
-      if (!match) return line;
-      const [, hashes, sp, rest] = match;
-      const stripped = rest.replace(/\s+#+\s*$/, "");
-      return `${hashes}${sp}${stripped}`;
+      if (FENCE_PATTERN.test(line)) {
+        inFence = !inFence;
+        return line;
+      }
+      return inFence ? line : transform(line);
     })
     .join("\n");
+}
+
+export function stripHeadingTrailingHashes(text: string): string {
+  return mapLinesOutsideFences(text, (line) => {
+    const match = line.match(/^(#{1,6})(\s+)(.*)$/);
+    if (!match) return line;
+    const [, hashes, sp, rest] = match;
+    const stripped = rest.replace(/\s+#+\s*$/, "");
+    return `${hashes}${sp}${stripped}`;
+  });
 }
 
 export function normalizeBulletMarkers(text: string): string {
-  return text
-    .split("\n")
-    .map((line) => line.replace(/^(\s*)[*+](\s+)/, "$1-$2"))
-    .join("\n");
+  return mapLinesOutsideFences(text, (line) => line.replace(/^(\s*)[*+](\s+)/, "$1-$2"));
 }
 
 export function trimTrailingWhitespace(text: string): string {
-  return text
-    .split("\n")
-    .map((line) => {
-      const match = line.match(/[ \t]*$/);
-      const trailing = match ? match[0] : "";
-      if (trailing === "  ") return line;
-      return line.slice(0, line.length - trailing.length);
-    })
-    .join("\n");
+  return mapLinesOutsideFences(text, (line) => {
+    const match = line.match(/[ \t]*$/);
+    const trailing = match ? match[0] : "";
+    if (trailing === "  ") return line;
+    return line.slice(0, line.length - trailing.length);
+  });
 }
 
 export function alignTables(text: string): string {

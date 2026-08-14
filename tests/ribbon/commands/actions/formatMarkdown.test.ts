@@ -20,6 +20,11 @@ describe("stripHeadingTrailingHashes", () => {
   it("leaves a non-heading line untouched, even if it ends in #", () => {
     expect(stripHeadingTrailingHashes("Not a heading #")).toBe("Not a heading #");
   });
+
+  it("does not touch a heading-shaped comment line inside a fenced code block", () => {
+    const text = "```python\n# comment #\n```";
+    expect(stripHeadingTrailingHashes(text)).toBe(text);
+  });
 });
 
 describe("normalizeBulletMarkers", () => {
@@ -40,6 +45,11 @@ describe("normalizeBulletMarkers", () => {
   it("does not touch ordered list markers", () => {
     expect(normalizeBulletMarkers("1. First\n2. Second")).toBe("1. First\n2. Second");
   });
+
+  it("does not touch a JSDoc-style * line inside a fenced code block", () => {
+    const text = "```js\n/**\n * some comment\n */\n```";
+    expect(normalizeBulletMarkers(text)).toBe(text);
+  });
 });
 
 describe("trimTrailingWhitespace", () => {
@@ -51,6 +61,11 @@ describe("trimTrailingWhitespace", () => {
 
   it("trims a trailing tab", () => {
     expect(trimTrailingWhitespace("Line\t")).toBe("Line");
+  });
+
+  it("does not touch trailing whitespace inside a fenced code block", () => {
+    const text = "```\ncode with trailing space \n```";
+    expect(trimTrailingWhitespace(text)).toBe(text);
   });
 });
 
@@ -143,5 +158,11 @@ describe("formatMarkdown", () => {
 
   it("is a no-op on an already-formatted document", () => {
     expect(formatMarkdown("# Title\n\nSome content.\n")).toBe("# Title\n\nSome content.\n");
+  });
+
+  it("leaves the contents of a fenced code block untouched end to end", () => {
+    expect(formatMarkdown("# Title\n```python\n# comment #\n*not a bullet*   \n```\n")).toBe(
+      "# Title\n\n```python\n# comment #\n*not a bullet*   \n```\n"
+    );
   });
 });
