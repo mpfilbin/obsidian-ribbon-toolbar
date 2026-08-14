@@ -69,7 +69,8 @@ export function toggleListPrefix(editor: EditorLike, kind: ListMarkerKind, prefi
   const rest = existing ? line.slice(existing.length) : line;
   editor.setLine(cursor.line, `${prefix}${rest}`);
   const removedLength = existing ? existing.length : 0;
-  editor.setCursor({ line: cursor.line, ch: Math.max(0, cursor.ch - removedLength + prefix.length) });
+  const contentOffset = Math.max(0, cursor.ch - removedLength);
+  editor.setCursor({ line: cursor.line, ch: prefix.length + contentOffset });
 }
 
 export function insertAtCursor(editor: EditorLike, text: string): void {

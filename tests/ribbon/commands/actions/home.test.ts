@@ -110,6 +110,20 @@ describe("Home tab actions", () => {
     expect(editor.getValue()).toBe("item");
   });
 
+  it("lands the cursor after the new marker, not inside it, when the old cursor was within the replaced marker", () => {
+    const editor = createMockEditor("- item", { line: 0, ch: 0 });
+    toggleChecklist(editor);
+    expect(editor.getValue()).toBe("- [ ] item");
+    expect(editor.getCursor().ch).toBe(6);
+  });
+
+  it("preserves the cursor's offset into the line content when converting marker kinds", () => {
+    const editor = createMockEditor("- item", { line: 0, ch: 4 });
+    toggleChecklist(editor);
+    expect(editor.getValue()).toBe("- [ ] item");
+    expect(editor.getCursor().ch).toBe(8);
+  });
+
   it("clearFormatting strips bold/italic/strike/highlight/code markers from the selection", () => {
     const editor = createMockEditor("**bold** and *italic* and ~~gone~~ and ==hi== and `code`");
     editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: editor.getValue().length });
