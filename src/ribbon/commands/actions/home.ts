@@ -1,5 +1,5 @@
 import type { EditorLike } from "./types";
-import { togglePrefix, wrapSelection } from "./helpers";
+import { toggleListPrefix, togglePrefix, wrapSelection } from "./helpers";
 
 export const toggleBold = (editor: EditorLike): void => wrapSelection(editor, "**", "**", "bold text");
 export const toggleItalic = (editor: EditorLike): void => wrapSelection(editor, "*", "*", "italic text");
@@ -18,9 +18,9 @@ export function setHeading(level: 1 | 2 | 3): (editor: EditorLike) => void {
   };
 }
 
-export const toggleBulletList = (editor: EditorLike): void => togglePrefix(editor, "- ");
-export const toggleNumberedList = (editor: EditorLike): void => togglePrefix(editor, "1. ");
-export const toggleChecklist = (editor: EditorLike): void => togglePrefix(editor, "- [ ] ");
+export const toggleBulletList = (editor: EditorLike): void => toggleListPrefix(editor, "bullet", "- ");
+export const toggleNumberedList = (editor: EditorLike): void => toggleListPrefix(editor, "numbered", "1. ");
+export const toggleChecklist = (editor: EditorLike): void => toggleListPrefix(editor, "checklist", "- [ ] ");
 export const toggleBlockquote = (editor: EditorLike): void => togglePrefix(editor, "> ");
 
 const FORMATTING_MARKERS = [/\*\*(.*?)\*\*/g, /\*(.*?)\*/g, /~~(.*?)~~/g, /==(.*?)==/g, /`(.*?)`/g];
