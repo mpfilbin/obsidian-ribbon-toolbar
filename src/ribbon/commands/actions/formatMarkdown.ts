@@ -1,7 +1,42 @@
 import { markdownTable } from "markdown-table";
 import { isSeparatorRow, findTableBlockEnd, splitTableRow, parseAlignment } from "./tableParsing";
 
-const FENCE_PATTERN = /^\s*(```|~~~)/;
+const FENCE_MARKER_PATTERN = /^\s*(`{3,}|~{3,})/;
+
+type FenceLineKind = "fence" | "fence-content" | null;
+
+/**
+ * Classifies each line as a fence delimiter, fence content, or neither.
+ * Per CommonMark, a fence only closes on a line using the same character
+ * (backtick vs tilde) and at least as many of them as the opening fence, so
+ * a shorter or differently-charactered marker nested inside (e.g. a ``` or
+ * ~~~ block shown as an example inside a ```` fence) doesn't end it early.
+ */
+function computeFenceLineKinds(lines: string[]): FenceLineKind[] {
+  const kinds: FenceLineKind[] = new Array(lines.length).fill(null);
+  let openFence: { char: string; length: number } | null = null;
+
+  for (let i = 0; i < lines.length; i++) {
+    const marker = lines[i].match(FENCE_MARKER_PATTERN)?.[1];
+
+    if (!openFence) {
+      if (marker) {
+        openFence = { char: marker[0], length: marker.length };
+        kinds[i] = "fence";
+      }
+      continue;
+    }
+
+    if (marker && marker[0] === openFence.char && marker.length >= openFence.length) {
+      openFence = null;
+      kinds[i] = "fence";
+    } else {
+      kinds[i] = "fence-content";
+    }
+  }
+
+  return kinds;
+}
 
 /**
  * Applies a per-line transform everywhere except inside fenced code blocks
@@ -9,17 +44,9 @@ const FENCE_PATTERN = /^\s*(```|~~~)/;
  * never rewrite code content.
  */
 function mapLinesOutsideFences(text: string, transform: (line: string) => string): string {
-  let inFence = false;
-  return text
-    .split("\n")
-    .map((line) => {
-      if (FENCE_PATTERN.test(line)) {
-        inFence = !inFence;
-        return line;
-      }
-      return inFence ? line : transform(line);
-    })
-    .join("\n");
+  const lines = text.split("\n");
+  const fenceKinds = computeFenceLineKinds(lines);
+  return lines.map((line, i) => (fenceKinds[i] ? line : transform(line))).join("\n");
 }
 
 export function stripHeadingTrailingHashes(text: string): string {
@@ -47,10 +74,16 @@ export function trimTrailingWhitespace(text: string): string {
 
 export function alignTables(text: string): string {
   const lines = text.split("\n");
+  const fenceKinds = computeFenceLineKinds(lines);
   const result: string[] = [];
   let i = 0;
   while (i < lines.length) {
     const line = lines[i];
+    if (fenceKinds[i]) {
+      result.push(line);
+      i++;
+      continue;
+    }
     if (line.includes("|") && i + 1 < lines.length && isSeparatorRow(lines[i + 1])) {
       const end = findTableBlockEnd(lines, i);
       const align = parseAlignment(lines[i + 1]);
@@ -71,7 +104,7 @@ type LineKind = "blank" | "fence" | "fence-content" | "heading" | "table" | "oth
 
 function classifyLines(lines: string[]): LineKind[] {
   const kinds: LineKind[] = new Array(lines.length).fill("other");
-  let inFence = false;
+  const fenceKinds = computeFenceLineKinds(lines);
   let i = 0;
   while (i < lines.length) {
     const line = lines[i];
@@ -80,14 +113,9 @@ function classifyLines(lines: string[]): LineKind[] {
       i++;
       continue;
     }
-    if (/^\s*(```|~~~)/.test(line)) {
-      kinds[i] = "fence";
-      inFence = !inFence;
-      i++;
-      continue;
-    }
-    if (inFence) {
-      kinds[i] = "fence-content";
+    const fenceKind = fenceKinds[i];
+    if (fenceKind) {
+      kinds[i] = fenceKind;
       i++;
       continue;
     }

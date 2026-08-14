@@ -50,6 +50,11 @@ describe("normalizeBulletMarkers", () => {
     const text = "```js\n/**\n * some comment\n */\n```";
     expect(normalizeBulletMarkers(text)).toBe(text);
   });
+
+  it("does not treat a shorter nested fence marker as closing a longer outer fence", () => {
+    const text = "````\nexample:\n```\n* fake bullet inside nested example\n```\n````";
+    expect(normalizeBulletMarkers(text)).toBe(text);
+  });
 });
 
 describe("trimTrailingWhitespace", () => {
@@ -65,6 +70,11 @@ describe("trimTrailingWhitespace", () => {
 
   it("does not touch trailing whitespace inside a fenced code block", () => {
     const text = "```\ncode with trailing space \n```";
+    expect(trimTrailingWhitespace(text)).toBe(text);
+  });
+
+  it("does not treat a mismatched fence character as closing the open fence", () => {
+    const text = "```markdown\n~~~\ncode sample using tilde fence   \n~~~\n```";
     expect(trimTrailingWhitespace(text)).toBe(text);
   });
 });
@@ -92,6 +102,11 @@ describe("alignTables", () => {
 
   it("leaves non-table text untouched", () => {
     expect(alignTables("Just a paragraph.\nAnother line.")).toBe("Just a paragraph.\nAnother line.");
+  });
+
+  it("does not touch a table-shaped example inside a fenced code block", () => {
+    const text = "```markdown\n| Name | Age |\n|:-|--:|\n| Bob | 30 |\n```";
+    expect(alignTables(text)).toBe(text);
   });
 });
 
