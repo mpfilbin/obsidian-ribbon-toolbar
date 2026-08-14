@@ -1,44 +1,89 @@
 import { markdownTable } from "markdown-table";
 import { isSeparatorRow, findTableBlockEnd, splitTableRow, parseAlignment } from "./tableParsing";
 
+const FENCE_MARKER_PATTERN = /^\s*(`{3,}|~{3,})/;
+
+type FenceLineKind = "fence" | "fence-content" | null;
+
+/**
+ * Classifies each line as a fence delimiter, fence content, or neither.
+ * Per CommonMark, a fence only closes on a line using the same character
+ * (backtick vs tilde) and at least as many of them as the opening fence, so
+ * a shorter or differently-charactered marker nested inside (e.g. a ``` or
+ * ~~~ block shown as an example inside a ```` fence) doesn't end it early.
+ */
+function computeFenceLineKinds(lines: string[]): FenceLineKind[] {
+  const kinds: FenceLineKind[] = new Array(lines.length).fill(null);
+  let openFence: { char: string; length: number } | null = null;
+
+  for (let i = 0; i < lines.length; i++) {
+    const marker = lines[i].match(FENCE_MARKER_PATTERN)?.[1];
+
+    if (!openFence) {
+      if (marker) {
+        openFence = { char: marker[0], length: marker.length };
+        kinds[i] = "fence";
+      }
+      continue;
+    }
+
+    if (marker && marker[0] === openFence.char && marker.length >= openFence.length) {
+      openFence = null;
+      kinds[i] = "fence";
+    } else {
+      kinds[i] = "fence-content";
+    }
+  }
+
+  return kinds;
+}
+
+/**
+ * Applies a per-line transform everywhere except inside fenced code blocks
+ * (including the fence delimiter lines themselves), so formatting passes
+ * never rewrite code content.
+ */
+function mapLinesOutsideFences(text: string, transform: (line: string) => string): string {
+  const lines = text.split("\n");
+  const fenceKinds = computeFenceLineKinds(lines);
+  return lines.map((line, i) => (fenceKinds[i] ? line : transform(line))).join("\n");
+}
+
 export function stripHeadingTrailingHashes(text: string): string {
-  return text
-    .split("\n")
-    .map((line) => {
-      const match = line.match(/^(#{1,6})(\s+)(.*)$/);
-      if (!match) return line;
-      const [, hashes, sp, rest] = match;
-      const stripped = rest.replace(/\s+#+\s*$/, "");
-      return `${hashes}${sp}${stripped}`;
-    })
-    .join("\n");
+  return mapLinesOutsideFences(text, (line) => {
+    const match = line.match(/^(#{1,6})(\s+)(.*)$/);
+    if (!match) return line;
+    const [, hashes, sp, rest] = match;
+    const stripped = rest.replace(/\s+#+\s*$/, "");
+    return `${hashes}${sp}${stripped}`;
+  });
 }
 
 export function normalizeBulletMarkers(text: string): string {
-  return text
-    .split("\n")
-    .map((line) => line.replace(/^(\s*)[*+](\s+)/, "$1-$2"))
-    .join("\n");
+  return mapLinesOutsideFences(text, (line) => line.replace(/^(\s*)[*+](\s+)/, "$1-$2"));
 }
 
 export function trimTrailingWhitespace(text: string): string {
-  return text
-    .split("\n")
-    .map((line) => {
-      const match = line.match(/[ \t]*$/);
-      const trailing = match ? match[0] : "";
-      if (trailing === "  ") return line;
-      return line.slice(0, line.length - trailing.length);
-    })
-    .join("\n");
+  return mapLinesOutsideFences(text, (line) => {
+    const match = line.match(/[ \t]*$/);
+    const trailing = match ? match[0] : "";
+    if (trailing === "  ") return line;
+    return line.slice(0, line.length - trailing.length);
+  });
 }
 
 export function alignTables(text: string): string {
   const lines = text.split("\n");
+  const fenceKinds = computeFenceLineKinds(lines);
   const result: string[] = [];
   let i = 0;
   while (i < lines.length) {
     const line = lines[i];
+    if (fenceKinds[i]) {
+      result.push(line);
+      i++;
+      continue;
+    }
     if (line.includes("|") && i + 1 < lines.length && isSeparatorRow(lines[i + 1])) {
       const end = findTableBlockEnd(lines, i);
       const align = parseAlignment(lines[i + 1]);
@@ -59,7 +104,7 @@ type LineKind = "blank" | "fence" | "fence-content" | "heading" | "table" | "oth
 
 function classifyLines(lines: string[]): LineKind[] {
   const kinds: LineKind[] = new Array(lines.length).fill("other");
-  let inFence = false;
+  const fenceKinds = computeFenceLineKinds(lines);
   let i = 0;
   while (i < lines.length) {
     const line = lines[i];
@@ -68,14 +113,9 @@ function classifyLines(lines: string[]): LineKind[] {
       i++;
       continue;
     }
-    if (/^\s*(```|~~~)/.test(line)) {
-      kinds[i] = "fence";
-      inFence = !inFence;
-      i++;
-      continue;
-    }
-    if (inFence) {
-      kinds[i] = "fence-content";
+    const fenceKind = fenceKinds[i];
+    if (fenceKind) {
+      kinds[i] = fenceKind;
       i++;
       continue;
     }
