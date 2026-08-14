@@ -23,10 +23,32 @@ export function demoteHeading(editor: EditorLike): void {
   editor.setLine(cursor.line, line.replace(HEADING_PATTERN, `${"#".repeat(level + 1)} `));
 }
 
+// Widths checked largest-first: a line already indented 4 spaces is treated
+// as one 4-space level rather than two 2-space levels, matching Obsidian's
+// historical default tab size. Ambiguous without knowing the vault's actual
+// tab settings (not exposed by Obsidian's public API), but this keeps
+// indent/outdent as inverses of each other for both common conventions.
+const SPACE_INDENT_WIDTHS = [4, 2];
+
+/**
+ * The indent unit to use for this line: a tab if the line already starts
+ * with one, the matching space-run if it starts with a recognized
+ * space-indent width, or a tab as the default for an unindented line.
+ */
+function detectIndentUnit(line: string): string {
+  if (line.startsWith("\t")) return "\t";
+  for (const width of SPACE_INDENT_WIDTHS) {
+    if (line.startsWith(" ".repeat(width))) return " ".repeat(width);
+  }
+  return "\t";
+}
+
 export function indentList(editor: EditorLike): void {
   const cursor = editor.getCursor();
-  editor.setLine(cursor.line, `\t${editor.getLine(cursor.line)}`);
-  editor.setCursor({ line: cursor.line, ch: cursor.ch + 1 });
+  const line = editor.getLine(cursor.line);
+  const unit = detectIndentUnit(line);
+  editor.setLine(cursor.line, `${unit}${line}`);
+  editor.setCursor({ line: cursor.line, ch: cursor.ch + unit.length });
 }
 
 export function outdentList(editor: EditorLike): void {
@@ -35,9 +57,14 @@ export function outdentList(editor: EditorLike): void {
   if (line.startsWith("\t")) {
     editor.setLine(cursor.line, line.slice(1));
     editor.setCursor({ line: cursor.line, ch: Math.max(0, cursor.ch - 1) });
-  } else if (line.startsWith("    ")) {
-    editor.setLine(cursor.line, line.slice(4));
-    editor.setCursor({ line: cursor.line, ch: Math.max(0, cursor.ch - 4) });
+    return;
+  }
+  for (const width of SPACE_INDENT_WIDTHS) {
+    if (line.startsWith(" ".repeat(width))) {
+      editor.setLine(cursor.line, line.slice(width));
+      editor.setCursor({ line: cursor.line, ch: Math.max(0, cursor.ch - width) });
+      return;
+    }
   }
 }
 
