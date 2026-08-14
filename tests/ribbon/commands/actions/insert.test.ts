@@ -4,26 +4,11 @@ import {
   insertCodeBlock,
   insertHorizontalRule,
   insertImage,
-  insertLink,
   insertTableGrid,
   insertTag,
 } from "../../../../src/ribbon/commands/actions/insert";
 
 describe("Insert tab actions", () => {
-  it("insertLink wraps a selection as a markdown link", () => {
-    const editor = createMockEditor("site");
-    editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: 4 });
-    insertLink(editor);
-    expect(editor.getValue()).toBe("[site](url)");
-  });
-
-  it("insertLink inserts a placeholder link when nothing is selected", () => {
-    const editor = createMockEditor("");
-    insertLink(editor);
-    expect(editor.getValue()).toBe("[link text](url)");
-    expect(editor.getSelection()).toBe("link text");
-  });
-
   it("insertImage inserts an image template at the cursor", () => {
     const editor = createMockEditor("");
     insertImage(editor);

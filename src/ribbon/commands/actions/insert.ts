@@ -2,8 +2,6 @@ import type { EditorLike } from "./types";
 import { insertAtCursor, wrapSelection } from "./helpers";
 import { buildTableText } from "./tableText";
 
-export const insertLink = (editor: EditorLike): void => wrapSelection(editor, "[", "](url)", "link text");
-
 export function insertImage(editor: EditorLike): void {
   insertAtCursor(editor, "![alt text](url)");
 }
