@@ -2,14 +2,15 @@
   import type { CommandEntry } from "../commands/registry";
   import type { EditorLike } from "../commands/actions/types";
   import { icon } from "./Button.svelte";
+  import { isOutsideClick } from "./clickOutside";
 
   let { command, editor }: { command: CommandEntry; editor: EditorLike | null } = $props();
 
   let open = $state(false);
   let menuStyle = $state("");
+  let rootEl: HTMLDivElement | undefined = $state();
   let toggleEl: HTMLButtonElement | undefined = $state();
   let menuEl: HTMLUListElement | undefined = $state();
-  const rootId = `ribbon-dropdown-${command.id}`;
 
   // The ribbon panel scrolls horizontally, which (per CSS overflow rules) also
   // clips vertical overflow of descendants — so the menu is moved to <body> and
@@ -42,16 +43,13 @@
 
   function handleWindowClick(event: MouseEvent) {
     if (!(event.target instanceof Node)) return;
-    const root = document.getElementById(rootId);
-    const clickedRoot = root?.contains(event.target) ?? false;
-    const clickedMenu = menuEl?.contains(event.target) ?? false;
-    if (!clickedRoot && !clickedMenu) open = false;
+    if (isOutsideClick(event.target, rootEl, menuEl)) open = false;
   }
 </script>
 
 <svelte:window onclick={handleWindowClick} />
 
-<div class="ribbon-dropdown" id={rootId}>
+<div class="ribbon-dropdown" bind:this={rootEl}>
   <button
     class="ribbon-button"
     type="button"
