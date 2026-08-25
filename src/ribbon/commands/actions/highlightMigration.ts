@@ -13,6 +13,13 @@ const HIGHLIGHT_PATTERN = /==([^=\s](?:.*?[^=\s])?)==/g;
 // of pure "=" content.
 const SETEXT_UNDERLINE_PATTERN = /^=+\s*$/;
 
+// The Extended Markdown Syntax community plugin extends ==...== with an
+// optional color tag right after the opening delimiter, e.g. =={cyan}text==.
+// Migrated highlights use the migration's configured color instead (Obsidian's
+// native <mark> has no equivalent color-name syntax to preserve), so this tag
+// is stripped from the content rather than left as literal visible text.
+const COLOR_TAG_PATTERN = /^\{[^{}]+\}/;
+
 const INLINE_CODE_PATTERN = /`[^`\n]*`/g;
 
 // A null-byte-delimited index is used as the inline-code placeholder. The null
@@ -62,10 +69,10 @@ export function migrateHighlightsInText(text: string, color: string): string {
       if (fenceKinds[i]) return line;
       if (SETEXT_UNDERLINE_PATTERN.test(line)) return line;
       const { masked, spans } = maskInlineCode(line);
-      const replaced = masked.replace(
-        HIGHLIGHT_PATTERN,
-        (_match, content: string) => `<mark style="background-color: ${color};">${content}</mark>`
-      );
+      const replaced = masked.replace(HIGHLIGHT_PATTERN, (_match, content: string) => {
+        const stripped = content.replace(COLOR_TAG_PATTERN, "");
+        return `<mark style="background-color: ${color};">${stripped}</mark>`;
+      });
       return unmaskInlineCode(replaced, spans);
     })
     .join("\n");

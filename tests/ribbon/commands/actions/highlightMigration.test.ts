@@ -94,4 +94,16 @@ describe("migrateHighlightsInText", () => {
       '<mark style="background-color: #ffd700;">highlight this</mark> and `a == b` code'
     );
   });
+
+  it("strips an Extended Markdown Syntax color tag and uses the migration color instead", () => {
+    expect(migrateHighlightsInText("=={cyan}Highlighted Text==", "#ffd700")).toBe(
+      '<mark style="background-color: #ffd700;">Highlighted Text</mark>'
+    );
+  });
+
+  it("strips a color tag alongside a normal highlight on the same line", () => {
+    expect(migrateHighlightsInText("=={red}urgent== and ==normal==", "#ffd700")).toBe(
+      '<mark style="background-color: #ffd700;">urgent</mark> and <mark style="background-color: #ffd700;">normal</mark>'
+    );
+  });
 });
