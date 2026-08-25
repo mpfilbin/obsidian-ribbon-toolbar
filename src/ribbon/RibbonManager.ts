@@ -4,6 +4,7 @@ import { writable, type Writable } from "svelte/store";
 import RibbonBar from "./components/RibbonBar.svelte";
 import type { EditorLike } from "./commands/actions/types";
 import type { FrontmatterPropertyConfig } from "./commands/actions/frontmatter";
+import type { HighlightColorConfig } from "./commands/actions/highlightMark";
 import { findInjectionPoint } from "./injectionPoint";
 
 interface RibbonInstance {
@@ -17,6 +18,7 @@ export class RibbonManager {
   private enabled: boolean;
   private defaultCollapsed: boolean;
   private propertiesStore: Writable<FrontmatterPropertyConfig[]>;
+  private highlightColorsStore: Writable<HighlightColorConfig[]>;
   private app: App;
 
   constructor(options: {
@@ -24,11 +26,13 @@ export class RibbonManager {
     enabled: boolean;
     defaultCollapsed: boolean;
     frontmatterProperties: FrontmatterPropertyConfig[];
+    highlightColors: HighlightColorConfig[];
   }) {
     this.app = options.app;
     this.enabled = options.enabled;
     this.defaultCollapsed = options.defaultCollapsed;
     this.propertiesStore = writable(options.frontmatterProperties);
+    this.highlightColorsStore = writable(options.highlightColors);
   }
 
   setEnabled(enabled: boolean): void {
@@ -45,6 +49,10 @@ export class RibbonManager {
     // mutate their array in place before calling this, so always publish a
     // fresh array reference to guarantee subscribers are notified.
     this.propertiesStore.set([...properties]);
+  }
+
+  setHighlightColors(colors: HighlightColorConfig[]): void {
+    this.highlightColorsStore.set([...colors]);
   }
 
   syncAllLeaves(views: MarkdownView[]): void {
@@ -95,6 +103,7 @@ export class RibbonManager {
         editorStore,
         defaultCollapsed: this.defaultCollapsed,
         propertiesStore: this.propertiesStore,
+        highlightColorsStore: this.highlightColorsStore,
         app: this.app,
       },
     });
