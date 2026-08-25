@@ -4,10 +4,11 @@ import * as home from "./actions/home";
 import * as insertActions from "./actions/insert";
 import * as layout from "./actions/layout";
 import * as tableEdit from "./actions/tableEdit";
+import * as latex from "./actions/latex";
 import type { FrontmatterPropertyConfig } from "./actions/frontmatter";
 import { insertProperty } from "./actions/frontmatter";
 
-export type TabId = "home" | "insert" | "layout" | "references";
+export type TabId = "home" | "insert" | "layout" | "references" | "latex";
 
 export interface CommandOption {
   id: string;
@@ -33,6 +34,7 @@ export const TABS: { id: TabId; label: string }[] = [
   { id: "insert", label: "Insert" },
   { id: "layout", label: "Layout" },
   { id: "references", label: "References" },
+  { id: "latex", label: "LaTeX" },
 ];
 
 function openCallout(editor: EditorLike, app: App): void {
@@ -361,6 +363,179 @@ export const COMMAND_REGISTRY: CommandEntry[] = [
     icon: "message-square",
     label: "Callout",
     modal: openCallout,
+  },
+
+  // LaTeX
+  {
+    id: "latex-inline-math",
+    tab: "latex",
+    group: "Math",
+    icon: "dollar-sign",
+    label: "Inline Math",
+    action: latex.toggleInlineMath,
+  },
+  {
+    id: "latex-block-math",
+    tab: "latex",
+    group: "Math",
+    icon: "square-function",
+    label: "Block Math",
+    action: latex.toggleBlockMath,
+  },
+  {
+    id: "latex-fraction",
+    tab: "latex",
+    group: "Structures",
+    icon: "divide",
+    label: "Fraction",
+    action: latex.insertFraction,
+  },
+  {
+    id: "latex-sqrt",
+    tab: "latex",
+    group: "Structures",
+    icon: "radical",
+    label: "Square Root",
+    action: latex.insertSquareRoot,
+  },
+  {
+    id: "latex-superscript",
+    tab: "latex",
+    group: "Structures",
+    icon: "superscript",
+    label: "Superscript",
+    action: latex.toggleLatexSuperscript,
+  },
+  {
+    id: "latex-subscript",
+    tab: "latex",
+    group: "Structures",
+    icon: "subscript",
+    label: "Subscript",
+    action: latex.toggleLatexSubscript,
+  },
+  {
+    id: "latex-sum",
+    tab: "latex",
+    group: "Structures",
+    icon: "sigma",
+    label: "Summation",
+    action: latex.insertSummation,
+  },
+  {
+    id: "latex-integral",
+    tab: "latex",
+    group: "Structures",
+    icon: "waves",
+    label: "Integral",
+    action: latex.insertIntegral,
+  },
+  {
+    id: "latex-limit",
+    tab: "latex",
+    group: "Structures",
+    icon: "arrow-down-right",
+    label: "Limit",
+    action: latex.insertLimit,
+  },
+  {
+    id: "latex-matrix",
+    tab: "latex",
+    group: "Environments",
+    icon: "grid-3x3",
+    label: "Matrix",
+    grid: latex.insertMatrixGrid,
+  },
+  {
+    id: "latex-cases",
+    tab: "latex",
+    group: "Environments",
+    icon: "split",
+    label: "Cases",
+    action: latex.insertCases,
+  },
+  {
+    id: "latex-align",
+    tab: "latex",
+    group: "Environments",
+    icon: "align-center",
+    label: "Align",
+    action: latex.insertAlign,
+  },
+  {
+    id: "latex-greek",
+    tab: "latex",
+    group: "Greek Letters",
+    icon: "pi",
+    label: "Greek Letters",
+    options: [
+      { id: "greek-alpha", label: "α  alpha", action: latex.insertLatexSymbol("\\alpha") },
+      { id: "greek-beta", label: "β  beta", action: latex.insertLatexSymbol("\\beta") },
+      { id: "greek-gamma", label: "γ  gamma", action: latex.insertLatexSymbol("\\gamma") },
+      { id: "greek-delta", label: "δ  delta", action: latex.insertLatexSymbol("\\delta") },
+      { id: "greek-epsilon", label: "ε  epsilon", action: latex.insertLatexSymbol("\\epsilon") },
+      { id: "greek-theta", label: "θ  theta", action: latex.insertLatexSymbol("\\theta") },
+      { id: "greek-lambda", label: "λ  lambda", action: latex.insertLatexSymbol("\\lambda") },
+      { id: "greek-mu", label: "μ  mu", action: latex.insertLatexSymbol("\\mu") },
+      { id: "greek-pi", label: "π  pi", action: latex.insertLatexSymbol("\\pi") },
+      { id: "greek-sigma", label: "σ  sigma", action: latex.insertLatexSymbol("\\sigma") },
+      { id: "greek-phi", label: "φ  phi", action: latex.insertLatexSymbol("\\phi") },
+      { id: "greek-omega", label: "ω  omega", action: latex.insertLatexSymbol("\\omega") },
+      { id: "greek-Delta", label: "Δ  Delta", action: latex.insertLatexSymbol("\\Delta") },
+      { id: "greek-Gamma", label: "Γ  Gamma", action: latex.insertLatexSymbol("\\Gamma") },
+      { id: "greek-Omega", label: "Ω  Omega", action: latex.insertLatexSymbol("\\Omega") },
+      { id: "greek-Sigma", label: "Σ  Sigma", action: latex.insertLatexSymbol("\\Sigma") },
+      { id: "greek-Theta", label: "Θ  Theta", action: latex.insertLatexSymbol("\\Theta") },
+    ],
+  },
+  {
+    id: "latex-operators",
+    tab: "latex",
+    group: "Operators",
+    icon: "equal",
+    label: "Operators",
+    options: [
+      { id: "op-times", label: "×  times", action: latex.insertLatexSymbol("\\times") },
+      { id: "op-div", label: "÷  div", action: latex.insertLatexSymbol("\\div") },
+      { id: "op-pm", label: "±  pm", action: latex.insertLatexSymbol("\\pm") },
+      { id: "op-mp", label: "∓  mp", action: latex.insertLatexSymbol("\\mp") },
+      { id: "op-cdot", label: "·  cdot", action: latex.insertLatexSymbol("\\cdot") },
+      { id: "op-leq", label: "≤  leq", action: latex.insertLatexSymbol("\\leq") },
+      { id: "op-geq", label: "≥  geq", action: latex.insertLatexSymbol("\\geq") },
+      { id: "op-neq", label: "≠  neq", action: latex.insertLatexSymbol("\\neq") },
+      { id: "op-approx", label: "≈  approx", action: latex.insertLatexSymbol("\\approx") },
+      { id: "op-equiv", label: "≡  equiv", action: latex.insertLatexSymbol("\\equiv") },
+      { id: "op-in", label: "∈  in", action: latex.insertLatexSymbol("\\in") },
+      { id: "op-notin", label: "∉  notin", action: latex.insertLatexSymbol("\\notin") },
+      { id: "op-subset", label: "⊂  subset", action: latex.insertLatexSymbol("\\subset") },
+      { id: "op-cup", label: "∪  cup", action: latex.insertLatexSymbol("\\cup") },
+      { id: "op-cap", label: "∩  cap", action: latex.insertLatexSymbol("\\cap") },
+      { id: "op-infty", label: "∞  infty", action: latex.insertLatexSymbol("\\infty") },
+    ],
+  },
+  {
+    id: "latex-arrows",
+    tab: "latex",
+    group: "Arrows",
+    icon: "arrow-right",
+    label: "Arrows",
+    options: [
+      { id: "arrow-rightarrow", label: "→  rightarrow", action: latex.insertLatexSymbol("\\rightarrow") },
+      { id: "arrow-leftarrow", label: "←  leftarrow", action: latex.insertLatexSymbol("\\leftarrow") },
+      { id: "arrow-Rightarrow", label: "⇒  Rightarrow", action: latex.insertLatexSymbol("\\Rightarrow") },
+      { id: "arrow-Leftarrow", label: "⇐  Leftarrow", action: latex.insertLatexSymbol("\\Leftarrow") },
+      {
+        id: "arrow-leftrightarrow",
+        label: "↔  leftrightarrow",
+        action: latex.insertLatexSymbol("\\leftrightarrow"),
+      },
+      {
+        id: "arrow-Leftrightarrow",
+        label: "⇔  Leftrightarrow",
+        action: latex.insertLatexSymbol("\\Leftrightarrow"),
+      },
+      { id: "arrow-mapsto", label: "↦  mapsto", action: latex.insertLatexSymbol("\\mapsto") },
+    ],
   },
 ];
 
