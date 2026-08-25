@@ -135,6 +135,15 @@ describe("Layout tab actions", () => {
     expect(editor.getValue()).toBe("# 日本語\ntext- [[#日本語]]\n");
   });
 
+  it("insertTableOfContents skips a '#'-prefixed line inside a fenced code block", () => {
+    const editor = createMockEditor("# Real Heading\n\n```\n# not a heading\n```\n\n## Another Heading");
+    editor.setCursor({ line: 6, ch: 19 });
+    insertTableOfContents(editor);
+    expect(editor.getValue()).toBe(
+      "# Real Heading\n\n```\n# not a heading\n```\n\n## Another Heading- [[#Real Heading]]\n  - [[#Another Heading]]\n"
+    );
+  });
+
   it("formatDocument reformats the whole document", () => {
     const editor = createMockEditor("## Title ##\n* item");
     formatDocument(editor);

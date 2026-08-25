@@ -1,6 +1,6 @@
 import type { EditorLike } from "./types";
 import { formatMarkdown } from "./formatMarkdown";
-import { buildHeadingLinkText } from "./headingLinkText";
+import { buildHeadingLinkText, collectHeadings } from "./headingLinkText";
 
 const HEADING_PATTERN = /^(#{1,6}) /;
 
@@ -90,14 +90,9 @@ export function moveLineDown(editor: EditorLike): void {
 }
 
 export function insertTableOfContents(editor: EditorLike): void {
-  const entries: string[] = [];
-  for (let line = 0; line <= editor.lastLine(); line++) {
-    const match = editor.getLine(line).match(HEADING_PATTERN);
-    if (!match) continue;
-    const level = match[1].length;
-    const text = editor.getLine(line).slice(match[0].length);
-    entries.push(`${"  ".repeat(level - 1)}- ${buildHeadingLinkText(text, null)}`);
-  }
+  const entries = collectHeadings(editor).map(
+    (heading) => `${"  ".repeat(heading.level - 1)}- ${buildHeadingLinkText(heading.text, null)}`
+  );
   const toc = entries.length > 0 ? entries.join("\n") : "- (no headings found)";
   editor.replaceSelection(`${toc}\n`);
 }
