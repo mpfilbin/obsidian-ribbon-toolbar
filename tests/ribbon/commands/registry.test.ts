@@ -99,7 +99,7 @@ describe("COMMAND_REGISTRY", () => {
     }
   });
 
-  it("table row/column/alignment editing commands appear in the registry in 3x3 grid reading order", () => {
+  it("table row/column editing commands appear in the registry in 3x2 grid reading order", () => {
     const compactIds = COMMAND_REGISTRY.filter((entry) => entry.compact).map((entry) => entry.id);
     expect(compactIds).toEqual([
       "table-insert-row-above",
@@ -108,25 +108,20 @@ describe("COMMAND_REGISTRY", () => {
       "table-insert-row-below",
       "table-insert-column-right",
       "table-delete-column",
-      "table-align-left",
-      "table-align-center",
-      "table-align-right",
     ]);
   });
 
-  it("table column alignment commands are direct actions in the Insert tab's Tables group", () => {
-    const alignmentCommands = [
-      { id: "table-align-left", expectedAction: alignColumnLeft },
-      { id: "table-align-center", expectedAction: alignColumnCenter },
-      { id: "table-align-right", expectedAction: alignColumnRight },
-    ];
-    for (const { id, expectedAction } of alignmentCommands) {
-      const entry = COMMAND_REGISTRY.find((e) => e.id === id);
-      expect(entry?.tab).toBe("insert");
-      expect(entry?.group).toBe("Tables");
-      expect(entry?.action).toBe(expectedAction);
-      expect(entry?.compact).toBe(true);
-    }
+  it("table-align offers Left/Center/Right options instead of a direct action, and is not compact", () => {
+    const align = COMMAND_REGISTRY.find((entry) => entry.id === "table-align");
+    expect(align?.tab).toBe("insert");
+    expect(align?.group).toBe("Tables");
+    expect(align?.action).toBeUndefined();
+    expect(align?.compact).toBeFalsy();
+    expect(align?.options).toEqual([
+      { id: "table-align-left", label: "Align Left", action: alignColumnLeft },
+      { id: "table-align-center", label: "Align Center", action: alignColumnCenter },
+      { id: "table-align-right", label: "Align Right", action: alignColumnRight },
+    ]);
   });
 
   it("the Table insert grid-picker command is not compact", () => {
