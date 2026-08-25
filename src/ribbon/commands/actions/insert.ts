@@ -28,3 +28,7 @@ export function insertCodeBlock(editor: EditorLike): void {
 }
 
 export const insertTag = (editor: EditorLike): void => wrapSelection(editor, "#", "", "tag");
+
+export function insertSymbol(symbol: string): (editor: EditorLike) => void {
+  return (editor: EditorLike): void => insertAtCursor(editor, symbol);
+}

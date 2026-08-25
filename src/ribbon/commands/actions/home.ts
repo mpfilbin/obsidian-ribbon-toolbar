@@ -13,6 +13,23 @@ export const toggleSuperscript = (editor: EditorLike): void =>
   wrapSelection(editor, "<sup>", "</sup>", "superscript text");
 export const toggleSubscript = (editor: EditorLike): void =>
   wrapSelection(editor, "<sub>", "</sub>", "subscript text");
+export const toggleComment = (editor: EditorLike): void => wrapSelection(editor, "%%", "%%", "comment");
+
+function transformCase(transform: (text: string) => string): (editor: EditorLike) => void {
+  return (editor: EditorLike): void => {
+    if (!editor.somethingSelected()) return;
+    editor.replaceSelection(transform(editor.getSelection()));
+  };
+}
+
+export const toUpperCase = transformCase((text) => text.toUpperCase());
+export const toLowerCase = transformCase((text) => text.toLowerCase());
+export const toTitleCase = transformCase((text) =>
+  text.replace(/\w\S*/g, (word) => word[0].toUpperCase() + word.slice(1).toLowerCase())
+);
+export const toSentenceCase = transformCase((text) =>
+  text.toLowerCase().replace(/(^\s*\w|[.!?]\s+\w)/g, (match) => match.toUpperCase())
+);
 
 export function setHeading(level: 1 | 2 | 3): (editor: EditorLike) => void {
   return (editor: EditorLike): void => {

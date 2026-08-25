@@ -13,7 +13,12 @@ import {
   insertColumnRight,
   deleteRow,
   deleteColumn,
+  alignColumnLeft,
+  alignColumnCenter,
+  alignColumnRight,
 } from "../../../src/ribbon/commands/actions/tableEdit";
+import { toggleComment, toUpperCase, toLowerCase, toTitleCase, toSentenceCase } from "../../../src/ribbon/commands/actions/home";
+import { createMockEditor } from "../../support/mockEditor";
 
 describe("COMMAND_REGISTRY", () => {
   it("has a unique id for every command", () => {
@@ -94,7 +99,7 @@ describe("COMMAND_REGISTRY", () => {
     }
   });
 
-  it("table row/column editing commands appear in the registry in 3x2 grid reading order", () => {
+  it("table row/column/alignment editing commands appear in the registry in 3x3 grid reading order", () => {
     const compactIds = COMMAND_REGISTRY.filter((entry) => entry.compact).map((entry) => entry.id);
     expect(compactIds).toEqual([
       "table-insert-row-above",
@@ -103,12 +108,79 @@ describe("COMMAND_REGISTRY", () => {
       "table-insert-row-below",
       "table-insert-column-right",
       "table-delete-column",
+      "table-align-left",
+      "table-align-center",
+      "table-align-right",
     ]);
+  });
+
+  it("table column alignment commands are direct actions in the Insert tab's Tables group", () => {
+    const alignmentCommands = [
+      { id: "table-align-left", expectedAction: alignColumnLeft },
+      { id: "table-align-center", expectedAction: alignColumnCenter },
+      { id: "table-align-right", expectedAction: alignColumnRight },
+    ];
+    for (const { id, expectedAction } of alignmentCommands) {
+      const entry = COMMAND_REGISTRY.find((e) => e.id === id);
+      expect(entry?.tab).toBe("insert");
+      expect(entry?.group).toBe("Tables");
+      expect(entry?.action).toBe(expectedAction);
+      expect(entry?.compact).toBe(true);
+    }
   });
 
   it("the Table insert grid-picker command is not compact", () => {
     const table = COMMAND_REGISTRY.find((entry) => entry.id === "table");
     expect(table?.compact).toBeFalsy();
+  });
+});
+
+describe("Document parity commands", () => {
+  it("comment is a direct action in the Home tab's Font group", () => {
+    const comment = COMMAND_REGISTRY.find((entry) => entry.id === "comment");
+    expect(comment?.tab).toBe("home");
+    expect(comment?.group).toBe("Font");
+    expect(comment?.action).toBe(toggleComment);
+  });
+
+  it("change-case offers the four case-transform options in the Home tab's Font group", () => {
+    const changeCase = COMMAND_REGISTRY.find((entry) => entry.id === "change-case");
+    expect(changeCase?.tab).toBe("home");
+    expect(changeCase?.group).toBe("Font");
+    expect(changeCase?.action).toBeUndefined();
+    expect(changeCase?.options).toEqual([
+      { id: "case-upper", label: "UPPERCASE", action: toUpperCase },
+      { id: "case-lower", label: "lowercase", action: toLowerCase },
+      { id: "case-title", label: "Title Case", action: toTitleCase },
+      { id: "case-sentence", label: "Sentence case", action: toSentenceCase },
+    ]);
+  });
+
+  it("symbols offers a curated set of typography symbol options in the Insert tab", () => {
+    const symbols = COMMAND_REGISTRY.find((entry) => entry.id === "symbols");
+    expect(symbols?.tab).toBe("insert");
+    expect(symbols?.group).toBe("Symbols");
+    expect(symbols?.action).toBeUndefined();
+    expect(symbols?.options?.length).toBe(14);
+    for (const option of symbols?.options ?? []) {
+      expect(typeof option.action).toBe("function");
+    }
+  });
+
+  it("the Em Dash symbol option inserts an em dash at the cursor", () => {
+    const symbols = COMMAND_REGISTRY.find((entry) => entry.id === "symbols");
+    const emDash = symbols?.options?.find((option) => option.id === "sym-em-dash");
+    const editor = createMockEditor("");
+    emDash?.action(editor);
+    expect(editor.getValue()).toBe("—");
+  });
+
+  it("ref-heading-link opens the heading link modal instead of a direct action", () => {
+    const headingLink = COMMAND_REGISTRY.find((entry) => entry.id === "ref-heading-link");
+    expect(headingLink?.tab).toBe("references");
+    expect(headingLink?.group).toBe("Links");
+    expect(headingLink?.modal).toBeTypeOf("function");
+    expect(headingLink?.action).toBeUndefined();
   });
 });
 

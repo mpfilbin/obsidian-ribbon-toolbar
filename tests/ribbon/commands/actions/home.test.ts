@@ -7,6 +7,7 @@ import {
   toggleBold,
   toggleBulletList,
   toggleChecklist,
+  toggleComment,
   toggleHighlight,
   toggleInlineCode,
   toggleItalic,
@@ -15,6 +16,10 @@ import {
   toggleSubscript,
   toggleSuperscript,
   toggleUnderline,
+  toLowerCase,
+  toSentenceCase,
+  toTitleCase,
+  toUpperCase,
 } from "../../../../src/ribbon/commands/actions/home";
 
 describe("Home tab actions", () => {
@@ -72,6 +77,54 @@ describe("Home tab actions", () => {
     editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: 2 });
     toggleSubscript(editor);
     expect(editor.getValue()).toBe("<sub>hi</sub>");
+  });
+
+  it("toggleComment wraps the selection in %%", () => {
+    const editor = createMockEditor("hi");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: 2 });
+    toggleComment(editor);
+    expect(editor.getValue()).toBe("%%hi%%");
+  });
+
+  it("toggleComment inserts a placeholder and selects it when nothing is selected", () => {
+    const editor = createMockEditor("");
+    toggleComment(editor);
+    expect(editor.getValue()).toBe("%%comment%%");
+    expect(editor.getSelection()).toBe("comment");
+  });
+
+  it("toUpperCase uppercases the selection", () => {
+    const editor = createMockEditor("hello World");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: 11 });
+    toUpperCase(editor);
+    expect(editor.getValue()).toBe("HELLO WORLD");
+  });
+
+  it("toUpperCase does nothing when there is no selection", () => {
+    const editor = createMockEditor("hello World");
+    toUpperCase(editor);
+    expect(editor.getValue()).toBe("hello World");
+  });
+
+  it("toLowerCase lowercases the selection", () => {
+    const editor = createMockEditor("hello World");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: 11 });
+    toLowerCase(editor);
+    expect(editor.getValue()).toBe("hello world");
+  });
+
+  it("toTitleCase capitalizes each word of the selection", () => {
+    const editor = createMockEditor("the quick BROWN fox");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: 20 });
+    toTitleCase(editor);
+    expect(editor.getValue()).toBe("The Quick Brown Fox");
+  });
+
+  it("toSentenceCase capitalizes the first letter of each sentence in the selection", () => {
+    const editor = createMockEditor("hello world. how ARE you? i am fine!");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: 37 });
+    toSentenceCase(editor);
+    expect(editor.getValue()).toBe("Hello world. How are you? I am fine!");
   });
 
   it("setHeading(2) sets the current line to an H2, replacing any existing heading", () => {
