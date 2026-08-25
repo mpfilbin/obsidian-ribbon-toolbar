@@ -16,4 +16,11 @@ describe("insertFootnote", () => {
     insertFootnote(editor);
     expect(editor.getValue()).toBe("first[^1] second[^2][^3]\n\n[^3]: ");
   });
+
+  it("includes the provided text in the appended definition", () => {
+    const editor = createMockEditor("text");
+    editor.setCursor({ line: 0, ch: 4 });
+    insertFootnote(editor, "a note about text");
+    expect(editor.getValue()).toBe("text[^1]\n\n[^1]: a note about text");
+  });
 });

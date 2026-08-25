@@ -185,6 +185,26 @@
   resize: vertical;
 }
 
+.ribbon-bar-footnote-modal .setting-item {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  column-gap: 12px;
+  align-items: start;
+}
+
+.ribbon-bar-footnote-modal .setting-item-info {
+  text-align: right;
+}
+
+.ribbon-bar-footnote-modal .setting-item-control textarea {
+  width: 100%;
+}
+
+.ribbon-bar-footnote-content {
+  min-height: 4em;
+  resize: vertical;
+}
+
 .ribbon-table-picker-menu {
   position: absolute;
   top: 100%;

@@ -2,7 +2,7 @@ import type { EditorLike } from "./types";
 
 const FOOTNOTE_PATTERN = /\[\^(\d+)\]/g;
 
-export function insertFootnote(editor: EditorLike): void {
+export function insertFootnote(editor: EditorLike, text: string = ""): void {
   let maxIndex = 0;
   for (let line = 0; line <= editor.lastLine(); line++) {
     const matches = editor.getLine(line).matchAll(FOOTNOTE_PATTERN);
@@ -17,5 +17,5 @@ export function insertFootnote(editor: EditorLike): void {
 
   const endLine = editor.lastLine();
   const endCh = editor.getLine(endLine).length;
-  editor.replaceRange(`\n\n[^${nextIndex}]: `, { line: endLine, ch: endCh });
+  editor.replaceRange(`\n\n[^${nextIndex}]: ${text}`, { line: endLine, ch: endCh });
 }
