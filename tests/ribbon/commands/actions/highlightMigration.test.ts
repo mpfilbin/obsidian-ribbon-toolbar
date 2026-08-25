@@ -31,6 +31,10 @@ describe("countHighlights", () => {
     expect(countHighlights("Title\n====")).toBe(0);
   });
 
+  it("does not count an indented setext heading underline as a highlight", () => {
+    expect(countHighlights("  ====")).toBe(0);
+  });
+
   it("does not count '==' comparison operators in plain prose as a highlight", () => {
     expect(countHighlights("assert a == b and c == d")).toBe(0);
   });

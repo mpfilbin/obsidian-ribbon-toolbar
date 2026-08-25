@@ -12,7 +12,7 @@ const HIGHLIGHT_PATTERN = /==([^=\s](?:.*?[^=\s])?)==/g;
 // a setext heading underline (e.g. "====" under a title), never a highlight.
 // This is a defense-in-depth guard alongside HIGHLIGHT_PATTERN's own exclusion
 // of pure "=" content.
-const SETEXT_UNDERLINE_PATTERN = /^=+\s*$/;
+const SETEXT_UNDERLINE_PATTERN = /^\s*=+\s*$/;
 
 // The Extended Markdown Syntax community plugin extends ==...== with an
 // optional color tag right after the opening delimiter, e.g. =={cyan}text==.

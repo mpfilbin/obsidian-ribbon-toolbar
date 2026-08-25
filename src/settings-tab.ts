@@ -122,7 +122,16 @@ export class RibbonBarSettingTab extends PluginSettingTab {
 
     this.plugin.settings.highlightColors.forEach((color, index) => {
       new Setting(containerEl)
-        .setName(color.name)
+        .addText((text) => {
+          text.setPlaceholder("Color name").setValue(color.name);
+          text.onChange(async (value) => {
+            const trimmed = value.trim();
+            if (trimmed.length === 0) return;
+            color.name = trimmed;
+            await this.plugin.saveSettings();
+            this.plugin.setHighlightColors(this.plugin.settings.highlightColors);
+          });
+        })
         .addColorPicker((picker) => {
           picker.setValue(color.color).onChange(async (value) => {
             color.color = value;

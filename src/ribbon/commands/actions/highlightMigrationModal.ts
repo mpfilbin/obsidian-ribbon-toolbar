@@ -10,9 +10,13 @@ export async function scanVaultForHighlights(app: App): Promise<HighlightMigrati
   const files = app.vault.getMarkdownFiles();
   const candidates: HighlightMigrationCandidate[] = [];
   for (const file of files) {
-    const content = await app.vault.cachedRead(file);
-    const count = countHighlights(content);
-    if (count > 0) candidates.push({ file, count });
+    try {
+      const content = await app.vault.cachedRead(file);
+      const count = countHighlights(content);
+      if (count > 0) candidates.push({ file, count });
+    } catch (error) {
+      console.error("Ribbon Bar: failed to scan for highlights in", file.path, error);
+    }
   }
   return candidates;
 }
