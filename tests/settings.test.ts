@@ -15,6 +15,16 @@ describe("DEFAULT_SETTINGS", () => {
       { name: "source", type: "text" },
     ]);
   });
+
+  it("defaults to a Yellow/Green/Blue/Pink/Purple highlight palette", () => {
+    expect(DEFAULT_SETTINGS.highlightColors).toEqual([
+      { name: "Yellow", color: "#ffd700" },
+      { name: "Green", color: "#7bed9f" },
+      { name: "Blue", color: "#70a1ff" },
+      { name: "Pink", color: "#ff6b81" },
+      { name: "Purple", color: "#c9a0ff" },
+    ]);
+  });
 });
 
 describe("mergeSettings", () => {
@@ -41,6 +51,17 @@ describe("mergeSettings", () => {
     result.frontmatterProperties[0].type = "number";
 
     expect(DEFAULT_SETTINGS.frontmatterProperties[0].type).toBe("list");
+  });
+
+  it("does not alias DEFAULT_SETTINGS.highlightColors when nothing is stored", () => {
+    const result = mergeSettings(null);
+    expect(result.highlightColors).not.toBe(DEFAULT_SETTINGS.highlightColors);
+  });
+
+  it("mutating a returned highlight color object never leaks into DEFAULT_SETTINGS", () => {
+    const result = mergeSettings(null);
+    result.highlightColors[0].color = "#000000";
+    expect(DEFAULT_SETTINGS.highlightColors[0].color).toBe("#ffd700");
   });
 
   it("overrides individual top-level fields from stored data", () => {
