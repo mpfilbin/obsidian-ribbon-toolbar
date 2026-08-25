@@ -4,7 +4,6 @@ import * as home from "./actions/home";
 import * as insertActions from "./actions/insert";
 import * as layout from "./actions/layout";
 import * as tableEdit from "./actions/tableEdit";
-import * as references from "./actions/references";
 import type { FrontmatterPropertyConfig } from "./actions/frontmatter";
 import { insertProperty } from "./actions/frontmatter";
 
@@ -60,6 +59,12 @@ function openEmbed(editor: EditorLike, app: App): void {
     .catch((error) => console.error("Ribbon Bar: failed to open embed modal", error));
 }
 
+function openFootnote(editor: EditorLike, app: App): void {
+  void import("./actions/footnoteModal")
+    .then((module) => module.openFootnoteModal(editor, app))
+    .catch((error) => console.error("Ribbon Bar: failed to open footnote modal", error));
+}
+
 export const COMMAND_REGISTRY: CommandEntry[] = [
   // Home
   { id: "bold", tab: "home", group: "Font", icon: "bold", label: "Bold", action: home.toggleBold },
@@ -81,6 +86,30 @@ export const COMMAND_REGISTRY: CommandEntry[] = [
     action: home.toggleHighlight,
   },
   { id: "inline-code", tab: "home", group: "Font", icon: "code", label: "Code", action: home.toggleInlineCode },
+  {
+    id: "underline",
+    tab: "home",
+    group: "Font",
+    icon: "underline",
+    label: "Underline",
+    action: home.toggleUnderline,
+  },
+  {
+    id: "superscript",
+    tab: "home",
+    group: "Font",
+    icon: "superscript",
+    label: "Superscript",
+    action: home.toggleSuperscript,
+  },
+  {
+    id: "subscript",
+    tab: "home",
+    group: "Font",
+    icon: "subscript",
+    label: "Subscript",
+    action: home.toggleSubscript,
+  },
   {
     id: "clear-formatting",
     tab: "home",
@@ -307,7 +336,7 @@ export const COMMAND_REGISTRY: CommandEntry[] = [
     group: "Citations",
     icon: "asterisk",
     label: "Footnote",
-    action: references.insertFootnote,
+    modal: openFootnote,
   },
   {
     id: "ref-internal-link",

@@ -12,6 +12,9 @@ import {
   toggleItalic,
   toggleNumberedList,
   toggleStrikethrough,
+  toggleSubscript,
+  toggleSuperscript,
+  toggleUnderline,
 } from "../../../../src/ribbon/commands/actions/home";
 
 describe("Home tab actions", () => {
@@ -48,6 +51,27 @@ describe("Home tab actions", () => {
     editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: 2 });
     toggleInlineCode(editor);
     expect(editor.getValue()).toBe("`hi`");
+  });
+
+  it("toggleUnderline wraps the selection", () => {
+    const editor = createMockEditor("hi");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: 2 });
+    toggleUnderline(editor);
+    expect(editor.getValue()).toBe("<u>hi</u>");
+  });
+
+  it("toggleSuperscript wraps the selection", () => {
+    const editor = createMockEditor("hi");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: 2 });
+    toggleSuperscript(editor);
+    expect(editor.getValue()).toBe("<sup>hi</sup>");
+  });
+
+  it("toggleSubscript wraps the selection", () => {
+    const editor = createMockEditor("hi");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: 2 });
+    toggleSubscript(editor);
+    expect(editor.getValue()).toBe("<sub>hi</sub>");
   });
 
   it("setHeading(2) sets the current line to an H2, replacing any existing heading", () => {
@@ -131,9 +155,86 @@ describe("Home tab actions", () => {
     expect(editor.getValue()).toBe("bold and italic and gone and hi and code");
   });
 
+  it("clearFormatting strips underline/superscript/subscript markers from the selection", () => {
+    const editor = createMockEditor("<u>under</u> and <sup>sup</sup> and <sub>sub</sub>");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: editor.getValue().length });
+    clearFormatting(editor);
+    expect(editor.getValue()).toBe("under and sup and sub");
+  });
+
   it("clearFormatting does nothing when there is no selection", () => {
     const editor = createMockEditor("**bold**");
     clearFormatting(editor);
     expect(editor.getValue()).toBe("**bold**");
+  });
+
+  it("clearFormatting strips links down to their visible text", () => {
+    const editor = createMockEditor("see [the docs](https://example.com) for more");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: editor.getValue().length });
+    clearFormatting(editor);
+    expect(editor.getValue()).toBe("see the docs for more");
+  });
+
+  it("clearFormatting strips images down to their alt text", () => {
+    const editor = createMockEditor("![a cat](https://example.com/cat.png)");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: editor.getValue().length });
+    clearFormatting(editor);
+    expect(editor.getValue()).toBe("a cat");
+  });
+
+  it("clearFormatting strips arbitrary HTML tags, keeping inner text", () => {
+    const editor = createMockEditor("<mark>highlighted</mark> and <span class=\"x\">span</span>");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: editor.getValue().length });
+    clearFormatting(editor);
+    expect(editor.getValue()).toBe("highlighted and span");
+  });
+
+  it("clearFormatting strips a footnote ref from the selection", () => {
+    const editor = createMockEditor("see this[^1] here");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: editor.getValue().length });
+    clearFormatting(editor);
+    expect(editor.getValue()).toBe("see this here");
+  });
+
+  it("clearFormatting also deletes the footnote's definition line elsewhere in the document", () => {
+    const editor = createMockEditor("see this[^1] here\n\nsome other text\n\n[^1]: a note about this");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: editor.getLine(0).length });
+    clearFormatting(editor);
+    expect(editor.getValue()).toBe("see this here\n\nsome other text");
+  });
+
+  it("clearFormatting strips a leading heading marker from selected lines", () => {
+    const editor = createMockEditor("# Heading");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: editor.getValue().length });
+    clearFormatting(editor);
+    expect(editor.getValue()).toBe("Heading");
+  });
+
+  it("clearFormatting strips a leading blockquote marker from selected lines", () => {
+    const editor = createMockEditor("> Quote");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: editor.getValue().length });
+    clearFormatting(editor);
+    expect(editor.getValue()).toBe("Quote");
+  });
+
+  it("clearFormatting strips a leading checklist marker from selected lines", () => {
+    const editor = createMockEditor("- [ ] task");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: editor.getValue().length });
+    clearFormatting(editor);
+    expect(editor.getValue()).toBe("task");
+  });
+
+  it("clearFormatting strips a leading numbered list marker from selected lines", () => {
+    const editor = createMockEditor("1. item");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: editor.getValue().length });
+    clearFormatting(editor);
+    expect(editor.getValue()).toBe("item");
+  });
+
+  it("clearFormatting strips a leading bullet marker from selected lines", () => {
+    const editor = createMockEditor("- item");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: editor.getValue().length });
+    clearFormatting(editor);
+    expect(editor.getValue()).toBe("item");
   });
 });
