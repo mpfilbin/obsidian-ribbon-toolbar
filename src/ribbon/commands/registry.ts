@@ -625,8 +625,8 @@ export function buildHighlightColorCommands(colors: HighlightColorConfig[]): Com
       group: "Font",
       icon: "highlighter",
       label: "Highlight Color",
-      options: colors.map((color) => ({
-        id: `highlight-color-${color.name.toLowerCase().replace(/\s+/g, "-")}`,
+      options: colors.map((color, index) => ({
+        id: `highlight-color-${index}`,
         label: color.name,
         swatch: color.color,
         action: highlightMark.highlightWithColor(color.color),

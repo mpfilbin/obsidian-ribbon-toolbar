@@ -92,9 +92,7 @@ class HighlightMigrationModal extends Modal {
     for (const candidate of this.candidates) {
       if (!this.selected.has(candidate.file.path)) continue;
       try {
-        const content = await this.app.vault.read(candidate.file);
-        const rewritten = migrateHighlightsInText(content, this.color);
-        await this.app.vault.modify(candidate.file, rewritten);
+        await this.app.vault.process(candidate.file, (data) => migrateHighlightsInText(data, this.color));
         migrated++;
       } catch (error) {
         console.error("Ribbon Bar: failed to migrate highlights in", candidate.file.path, error);

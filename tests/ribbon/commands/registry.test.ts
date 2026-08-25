@@ -210,6 +210,16 @@ describe("buildHighlightColorCommands", () => {
     commands[0].options?.[0].action(editor);
     expect(editor.getValue()).toBe('<mark style="background-color: #ffd700;">hi</mark>');
   });
+
+  it("generates non-colliding option ids even when color names collide after slugging", () => {
+    const colors = [
+      { name: "Light Blue", color: "#aaa" },
+      { name: "light blue", color: "#bbb" },
+    ];
+    const commands = buildHighlightColorCommands(colors);
+    const [first, second] = commands[0].options ?? [];
+    expect(first.id).not.toBe(second.id);
+  });
 });
 
 describe("LaTeX tab commands", () => {
