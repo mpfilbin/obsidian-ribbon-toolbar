@@ -169,5 +169,24 @@ export class RibbonBarSettingTab extends PluginSettingTab {
           this.display();
         });
       });
+
+    new Setting(containerEl)
+      .setName("Migrate ==highlights== to <mark> tags")
+      .setDesc(
+        this.plugin.settings.highlightColors.length === 0
+          ? "Add at least one highlight color above before migrating."
+          : "Scans every note in the vault for ==...== highlights and lets you choose which ones to convert."
+      )
+      .addButton((button) => {
+        button.setButtonText("Scan vault");
+        button.setDisabled(this.plugin.settings.highlightColors.length === 0);
+        button.onClick(() => {
+          const color = this.plugin.settings.highlightColors[0]?.color;
+          if (!color) return;
+          void import("./ribbon/commands/actions/highlightMigrationModal")
+            .then((module) => module.openHighlightMigrationModal(this.app, color))
+            .catch((error) => console.error("Ribbon Bar: failed to open highlight migration modal", error));
+        });
+      });
   }
 }
