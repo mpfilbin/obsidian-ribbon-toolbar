@@ -209,7 +209,7 @@ describe("buildHighlightColorCommands", () => {
     editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: 2 });
     commands[0].options?.[0].action(editor);
     expect(editor.getValue()).toBe(
-      '<mark style="background-color: #ffd700; border-radius: 0.2em; padding: 0.1em 0.2em;">hi</mark>'
+      '<mark class="ribbon-bar-highlight" style="background-color: #ffd700;">hi</mark>'
     );
   });
 

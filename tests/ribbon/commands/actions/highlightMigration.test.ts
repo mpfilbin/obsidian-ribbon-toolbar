@@ -44,14 +44,14 @@ describe("migrateHighlightsInText", () => {
   it("rewrites ==...== spans to <mark> tags with the given color", () => {
     const text = "see ==this== and ==that==";
     expect(migrateHighlightsInText(text, "#ffd700")).toBe(
-      'see <mark style="background-color: #ffd700; border-radius: 0.2em; padding: 0.1em 0.2em;">this</mark> and <mark style="background-color: #ffd700; border-radius: 0.2em; padding: 0.1em 0.2em;">that</mark>'
+      'see <mark class="ribbon-bar-highlight" style="background-color: #ffd700;">this</mark> and <mark class="ribbon-bar-highlight" style="background-color: #ffd700;">that</mark>'
     );
   });
 
   it("leaves fenced code block content untouched", () => {
     const text = "==real==\n\n```\n==not a highlight==\n```\n\n==also real==";
     expect(migrateHighlightsInText(text, "#ffd700")).toBe(
-      '<mark style="background-color: #ffd700; border-radius: 0.2em; padding: 0.1em 0.2em;">real</mark>\n\n```\n==not a highlight==\n```\n\n<mark style="background-color: #ffd700; border-radius: 0.2em; padding: 0.1em 0.2em;">also real</mark>'
+      '<mark class="ribbon-bar-highlight" style="background-color: #ffd700;">real</mark>\n\n```\n==not a highlight==\n```\n\n<mark class="ribbon-bar-highlight" style="background-color: #ffd700;">also real</mark>'
     );
   });
 
@@ -73,7 +73,7 @@ describe("migrateHighlightsInText", () => {
 
   it("still migrates a normal highlight (regression check)", () => {
     expect(migrateHighlightsInText("==hi==", "#ffd700")).toBe(
-      '<mark style="background-color: #ffd700; border-radius: 0.2em; padding: 0.1em 0.2em;">hi</mark>'
+      '<mark class="ribbon-bar-highlight" style="background-color: #ffd700;">hi</mark>'
     );
   });
 
@@ -91,19 +91,19 @@ describe("migrateHighlightsInText", () => {
 
   it("migrates a real highlight while leaving inline code on the same line untouched", () => {
     expect(migrateHighlightsInText("==highlight this== and `a == b` code", "#ffd700")).toBe(
-      '<mark style="background-color: #ffd700; border-radius: 0.2em; padding: 0.1em 0.2em;">highlight this</mark> and `a == b` code'
+      '<mark class="ribbon-bar-highlight" style="background-color: #ffd700;">highlight this</mark> and `a == b` code'
     );
   });
 
   it("strips an Extended Markdown Syntax color tag and uses the migration color instead", () => {
     expect(migrateHighlightsInText("=={cyan}Highlighted Text==", "#ffd700")).toBe(
-      '<mark style="background-color: #ffd700; border-radius: 0.2em; padding: 0.1em 0.2em;">Highlighted Text</mark>'
+      '<mark class="ribbon-bar-highlight" style="background-color: #ffd700;">Highlighted Text</mark>'
     );
   });
 
   it("strips a color tag alongside a normal highlight on the same line", () => {
     expect(migrateHighlightsInText("=={red}urgent== and ==normal==", "#ffd700")).toBe(
-      '<mark style="background-color: #ffd700; border-radius: 0.2em; padding: 0.1em 0.2em;">urgent</mark> and <mark style="background-color: #ffd700; border-radius: 0.2em; padding: 0.1em 0.2em;">normal</mark>'
+      '<mark class="ribbon-bar-highlight" style="background-color: #ffd700;">urgent</mark> and <mark class="ribbon-bar-highlight" style="background-color: #ffd700;">normal</mark>'
     );
   });
 });

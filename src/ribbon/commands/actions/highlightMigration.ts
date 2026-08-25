@@ -1,5 +1,5 @@
 import { computeFenceLineKinds } from "./formatMarkdown";
-import { buildMarkStyle } from "./highlightMark";
+import { buildMarkOpenTag } from "./highlightMark";
 
 // Content must start and end with a character that is neither "=" (so a run of
 // "=" characters, as in a setext heading underline like "====", can never match)
@@ -72,7 +72,7 @@ export function migrateHighlightsInText(text: string, color: string): string {
       const { masked, spans } = maskInlineCode(line);
       const replaced = masked.replace(HIGHLIGHT_PATTERN, (_match, content: string) => {
         const stripped = content.replace(COLOR_TAG_PATTERN, "");
-        return `<mark style="${buildMarkStyle(color)}">${stripped}</mark>`;
+        return `${buildMarkOpenTag(color)}${stripped}</mark>`;
       });
       return unmaskInlineCode(replaced, spans);
     })
