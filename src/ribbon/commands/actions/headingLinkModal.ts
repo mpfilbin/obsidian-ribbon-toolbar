@@ -29,7 +29,8 @@ class HeadingLinkSuggestModal extends SuggestModal<HeadingEntry> {
   }
 
   renderSuggestion(item: HeadingEntry, el: HTMLElement): void {
-    el.createEl("div", { text: `${"  ".repeat(item.level - 1)}${item.text}` });
+    const row = el.createEl("div", { text: item.text });
+    row.style.paddingLeft = `${(item.level - 1) * 16}px`;
   }
 
   onChooseSuggestion(item: HeadingEntry): void {

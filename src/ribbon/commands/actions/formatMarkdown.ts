@@ -3,7 +3,7 @@ import { isSeparatorRow, findTableBlockEnd, splitTableRow, parseAlignment } from
 
 const FENCE_MARKER_PATTERN = /^\s*(`{3,}|~{3,})/;
 
-type FenceLineKind = "fence" | "fence-content" | null;
+export type FenceLineKind = "fence" | "fence-content" | null;
 
 /**
  * Classifies each line as a fence delimiter, fence content, or neither.
@@ -12,7 +12,7 @@ type FenceLineKind = "fence" | "fence-content" | null;
  * a shorter or differently-charactered marker nested inside (e.g. a ``` or
  * ~~~ block shown as an example inside a ```` fence) doesn't end it early.
  */
-function computeFenceLineKinds(lines: string[]): FenceLineKind[] {
+export function computeFenceLineKinds(lines: string[]): FenceLineKind[] {
   const kinds: FenceLineKind[] = new Array(lines.length).fill(null);
   let openFence: { char: string; length: number } | null = null;
 

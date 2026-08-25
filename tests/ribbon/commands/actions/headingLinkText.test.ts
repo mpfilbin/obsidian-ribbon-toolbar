@@ -24,6 +24,16 @@ describe("collectHeadings", () => {
     const editor = createMockEditor("##   Section Two   ");
     expect(collectHeadings(editor)).toEqual([{ line: 0, level: 2, text: "Section Two" }]);
   });
+
+  it("does not treat a '#'-prefixed line inside a fenced code block as a heading", () => {
+    const editor = createMockEditor(
+      "# Real Heading\n\n```\n# not a heading\n```\n\n## Another Real Heading"
+    );
+    expect(collectHeadings(editor)).toEqual([
+      { line: 0, level: 1, text: "Real Heading" },
+      { line: 6, level: 2, text: "Another Real Heading" },
+    ]);
+  });
 });
 
 describe("buildHeadingLinkText", () => {
