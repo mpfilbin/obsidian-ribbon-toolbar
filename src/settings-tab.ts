@@ -113,5 +113,61 @@ export class RibbonBarSettingTab extends PluginSettingTab {
           this.display();
         });
       });
+
+    containerEl.createEl("h3", { text: "Highlight colors" });
+    containerEl.createEl("p", {
+      text: "Each color becomes an option in the Home tab's Highlight Color dropdown.",
+      cls: "setting-item-description",
+    });
+
+    this.plugin.settings.highlightColors.forEach((color, index) => {
+      new Setting(containerEl)
+        .setName(color.name)
+        .addColorPicker((picker) => {
+          picker.setValue(color.color).onChange(async (value) => {
+            color.color = value;
+            await this.plugin.saveSettings();
+            this.plugin.setHighlightColors(this.plugin.settings.highlightColors);
+          });
+        })
+        .addExtraButton((button) => {
+          button.setIcon("trash");
+          button.setTooltip("Remove color");
+          button.onClick(async () => {
+            this.plugin.settings.highlightColors.splice(index, 1);
+            await this.plugin.saveSettings();
+            this.plugin.setHighlightColors(this.plugin.settings.highlightColors);
+            this.display();
+          });
+        });
+    });
+
+    let newColorName = "";
+    let newColorValue = "#ffd700";
+
+    new Setting(containerEl)
+      .setName("Add color")
+      .addText((text) => {
+        text.setPlaceholder("Color name");
+        text.onChange((value) => {
+          newColorName = value;
+        });
+      })
+      .addColorPicker((picker) => {
+        picker.setValue(newColorValue).onChange((value) => {
+          newColorValue = value;
+        });
+      })
+      .addButton((button) => {
+        button.setButtonText("Add");
+        button.onClick(async () => {
+          const trimmed = newColorName.trim();
+          if (trimmed.length === 0) return;
+          this.plugin.settings.highlightColors.push({ name: trimmed, color: newColorValue });
+          await this.plugin.saveSettings();
+          this.plugin.setHighlightColors(this.plugin.settings.highlightColors);
+          this.display();
+        });
+      });
   }
 }
