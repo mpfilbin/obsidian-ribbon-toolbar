@@ -46,7 +46,14 @@ export const toggleNumberedList = (editor: EditorLike): void => toggleListPrefix
 export const toggleChecklist = (editor: EditorLike): void => toggleListPrefix(editor, "checklist", "- [ ] ");
 export const toggleBlockquote = (editor: EditorLike): void => togglePrefix(editor, "> ");
 
-const FORMATTING_MARKERS = [/\*\*(.*?)\*\*/g, /\*(.*?)\*/g, /~~(.*?)~~/g, /==(.*?)==/g, /`(.*?)`/g];
+const FORMATTING_MARKERS = [
+  /\*\*(.*?)\*\*/g,
+  /\*(.*?)\*/g,
+  /~~(.*?)~~/g,
+  /==(.*?)==/g,
+  /`(.*?)`/g,
+  /%%(.*?)%%/g,
+];
 
 const IMAGE_PATTERN = /!\[([^\]]*)\]\([^)]*\)/g;
 const LINK_PATTERN = /\[([^\]]*)\]\([^)]*\)/g;
