@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildHighlightColorCommands,
   buildPropertyCommands,
   COMMAND_REGISTRY,
   TABS,
@@ -176,6 +177,38 @@ describe("Document parity commands", () => {
     expect(headingLink?.group).toBe("Links");
     expect(headingLink?.modal).toBeTypeOf("function");
     expect(headingLink?.action).toBeUndefined();
+  });
+});
+
+describe("buildHighlightColorCommands", () => {
+  it("returns an empty array when no colors are configured", () => {
+    expect(buildHighlightColorCommands([])).toEqual([]);
+  });
+
+  it("builds one Highlight Color dropdown command with one option per configured color", () => {
+    const colors = [
+      { name: "Yellow", color: "#ffd700" },
+      { name: "Green", color: "#7bed9f" },
+    ];
+    const commands = buildHighlightColorCommands(colors);
+    expect(commands).toHaveLength(1);
+    expect(commands[0]).toMatchObject({
+      id: "highlight-color",
+      tab: "home",
+      group: "Font",
+      label: "Highlight Color",
+    });
+    expect(commands[0].options).toHaveLength(2);
+    expect(commands[0].options?.[0]).toMatchObject({ label: "Yellow", swatch: "#ffd700" });
+    expect(commands[0].options?.[1]).toMatchObject({ label: "Green", swatch: "#7bed9f" });
+  });
+
+  it("each color option's action highlights the selection with that color", () => {
+    const commands = buildHighlightColorCommands([{ name: "Yellow", color: "#ffd700" }]);
+    const editor = createMockEditor("hi");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: 2 });
+    commands[0].options?.[0].action(editor);
+    expect(editor.getValue()).toBe('<mark style="background-color: #ffd700;">hi</mark>');
   });
 });
 

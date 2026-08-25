@@ -5,7 +5,6 @@ export const toggleBold = (editor: EditorLike): void => wrapSelection(editor, "*
 export const toggleItalic = (editor: EditorLike): void => wrapSelection(editor, "*", "*", "italic text");
 export const toggleStrikethrough = (editor: EditorLike): void =>
   wrapSelection(editor, "~~", "~~", "strikethrough text");
-export const toggleHighlight = (editor: EditorLike): void => wrapSelection(editor, "==", "==", "highlighted text");
 export const toggleInlineCode = (editor: EditorLike): void => wrapSelection(editor, "`", "`", "code");
 export const toggleUnderline = (editor: EditorLike): void =>
   wrapSelection(editor, "<u>", "</u>", "underlined text");
