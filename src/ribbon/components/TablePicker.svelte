@@ -9,6 +9,8 @@
   const GRID_COLUMNS = 10;
   const GRID_ROWS = 8;
 
+  let itemLabel = $derived(command.label.toLowerCase());
+
   let open = $state(false);
   let menuStyle = $state("");
   let hoverCol = $state(0);
@@ -84,7 +86,7 @@
               type="button"
               class="ribbon-table-picker-cell"
               class:active={col <= hoverCol && row <= hoverRow}
-              aria-label={`${row} × ${col} table`}
+              aria-label={`${row} × ${col} ${itemLabel}`}
               onmouseenter={() => hover(col, row)}
               onclick={() => choose(col, row)}
             ></button>
@@ -92,7 +94,7 @@
         {/each}
       </div>
       <div class="ribbon-table-picker-label">
-        {hoverCol > 0 && hoverRow > 0 ? `${hoverRow} × ${hoverCol} Table` : "Select table size"}
+        {hoverCol > 0 && hoverRow > 0 ? `${hoverRow} × ${hoverCol} ${command.label}` : `Select ${itemLabel} size`}
       </div>
     </div>
   {/if}

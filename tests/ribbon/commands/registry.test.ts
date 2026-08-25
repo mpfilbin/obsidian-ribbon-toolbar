@@ -112,6 +112,74 @@ describe("COMMAND_REGISTRY", () => {
   });
 });
 
+describe("LaTeX tab commands", () => {
+  it("groups commands within the LaTeX tab in first-seen order", () => {
+    expect(groupsForTab("latex")).toEqual([
+      "Math",
+      "Structures",
+      "Environments",
+      "Greek Letters",
+      "Operators",
+      "Arrows",
+    ]);
+  });
+
+  it("Math and Structures commands are direct actions", () => {
+    const ids = [
+      "latex-inline-math",
+      "latex-block-math",
+      "latex-fraction",
+      "latex-sqrt",
+      "latex-superscript",
+      "latex-subscript",
+      "latex-sum",
+      "latex-integral",
+      "latex-limit",
+    ];
+    for (const id of ids) {
+      const entry = COMMAND_REGISTRY.find((e) => e.id === id);
+      expect(entry?.tab).toBe("latex");
+      expect(typeof entry?.action).toBe("function");
+    }
+  });
+
+  it("latex-matrix opens the grid picker instead of a direct action", () => {
+    const matrix = COMMAND_REGISTRY.find((entry) => entry.id === "latex-matrix");
+    expect(matrix?.group).toBe("Environments");
+    expect(matrix?.grid).toBeTypeOf("function");
+    expect(matrix?.action).toBeUndefined();
+  });
+
+  it("latex-cases and latex-align are direct actions in the Environments group", () => {
+    for (const id of ["latex-cases", "latex-align"]) {
+      const entry = COMMAND_REGISTRY.find((e) => e.id === id);
+      expect(entry?.group).toBe("Environments");
+      expect(typeof entry?.action).toBe("function");
+    }
+  });
+
+  it("latex-greek offers a curated set of Greek letter options", () => {
+    const greek = COMMAND_REGISTRY.find((entry) => entry.id === "latex-greek");
+    expect(greek?.group).toBe("Greek Letters");
+    expect(greek?.options?.length).toBe(17);
+    expect(greek?.action).toBeUndefined();
+  });
+
+  it("latex-operators offers a curated set of operator/relation/set options", () => {
+    const operators = COMMAND_REGISTRY.find((entry) => entry.id === "latex-operators");
+    expect(operators?.group).toBe("Operators");
+    expect(operators?.options?.length).toBe(16);
+    expect(operators?.action).toBeUndefined();
+  });
+
+  it("latex-arrows offers a curated set of arrow options", () => {
+    const arrows = COMMAND_REGISTRY.find((entry) => entry.id === "latex-arrows");
+    expect(arrows?.group).toBe("Arrows");
+    expect(arrows?.options?.length).toBe(7);
+    expect(arrows?.action).toBeUndefined();
+  });
+});
+
 describe("buildPropertyCommands", () => {
   it("builds one Properties-group command per configured property", () => {
     const commands = buildPropertyCommands([
