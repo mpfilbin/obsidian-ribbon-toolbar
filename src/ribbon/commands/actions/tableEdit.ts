@@ -110,6 +110,29 @@ export function insertColumnRight(editor: EditorLike): void {
   insertColumn(editor, 1);
 }
 
+function setColumnAlignment(editor: EditorLike, alignment: string): void {
+  const cursor = editor.getCursor();
+  const block = findEnclosingTable(editor, cursor.line);
+  if (!block) return;
+  const { start, end, align } = block;
+
+  const lines = readLines(editor);
+  const rows = rowsFromBlock(lines, start, end);
+  const columns = rows[0].length;
+  const col = columnAt(lines[cursor.line], cursor.ch, columns);
+
+  const newAlign = [...align];
+  newAlign[col] = alignment;
+
+  const rendered = replaceBlock(editor, start, end, lines, rows, newAlign);
+  const rowOffset = cursor.line - start;
+  editor.setCursor({ line: cursor.line, ch: cellStartCh(rendered[rowOffset], col) });
+}
+
+export const alignColumnLeft = (editor: EditorLike): void => setColumnAlignment(editor, "l");
+export const alignColumnCenter = (editor: EditorLike): void => setColumnAlignment(editor, "c");
+export const alignColumnRight = (editor: EditorLike): void => setColumnAlignment(editor, "r");
+
 export function deleteRow(editor: EditorLike): void {
   const cursor = editor.getCursor();
   const block = findEnclosingTable(editor, cursor.line);

@@ -4,6 +4,7 @@ import {
   insertCodeBlock,
   insertHorizontalRule,
   insertImage,
+  insertSymbol,
   insertTableGrid,
   insertTag,
 } from "../../../../src/ribbon/commands/actions/insert";
@@ -60,5 +61,18 @@ describe("Insert tab actions", () => {
     insertTag(editor);
     expect(editor.getValue()).toBe("#tag");
     expect(editor.getSelection()).toBe("tag");
+  });
+
+  it("insertSymbol returns an action that inserts the given character at the cursor", () => {
+    const editor = createMockEditor("");
+    insertSymbol("—")(editor);
+    expect(editor.getValue()).toBe("—");
+  });
+
+  it("insertSymbol replaces the current selection with the given character", () => {
+    const editor = createMockEditor("hi");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: 2 });
+    insertSymbol("©")(editor);
+    expect(editor.getValue()).toBe("©");
   });
 });

@@ -1,6 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { createMockEditor } from "../../../support/mockEditor";
-import { deleteColumn, deleteRow, insertColumnLeft, insertColumnRight, insertRowAbove, insertRowBelow } from "../../../../src/ribbon/commands/actions/tableEdit";
+import {
+  alignColumnCenter,
+  alignColumnLeft,
+  alignColumnRight,
+  deleteColumn,
+  deleteRow,
+  insertColumnLeft,
+  insertColumnRight,
+  insertRowAbove,
+  insertRowBelow,
+} from "../../../../src/ribbon/commands/actions/tableEdit";
 
 const BASE_TABLE = "| Name | Age |\n| --- | --- |\n| Alice | 30 |\n| Bob | 25 |";
 
@@ -105,6 +115,51 @@ describe("insertColumnRight", () => {
   it("does nothing when the cursor is not inside a table", () => {
     const editor = createMockEditor("just a paragraph", { line: 0, ch: 0 });
     insertColumnRight(editor);
+    expect(editor.getValue()).toBe("just a paragraph");
+  });
+});
+
+describe("alignColumnLeft", () => {
+  it("sets left alignment on the column the cursor is on", () => {
+    const editor = createMockEditor(BASE_TABLE, { line: 2, ch: 4 });
+    alignColumnLeft(editor);
+    expect(editor.getValue()).toBe("| Name  | Age |\n| :---- | --- |\n| Alice | 30  |\n| Bob   | 25  |");
+    expect(editor.getCursor()).toEqual({ line: 2, ch: 1 });
+  });
+
+  it("does nothing when the cursor is not inside a table", () => {
+    const editor = createMockEditor("just a paragraph", { line: 0, ch: 0 });
+    alignColumnLeft(editor);
+    expect(editor.getValue()).toBe("just a paragraph");
+  });
+});
+
+describe("alignColumnCenter", () => {
+  it("sets center alignment on the column the cursor is on", () => {
+    const editor = createMockEditor(BASE_TABLE, { line: 2, ch: 4 });
+    alignColumnCenter(editor);
+    expect(editor.getValue()).toBe("|  Name | Age |\n| :---: | --- |\n| Alice | 30  |\n|  Bob  | 25  |");
+    expect(editor.getCursor()).toEqual({ line: 2, ch: 1 });
+  });
+
+  it("does nothing when the cursor is not inside a table", () => {
+    const editor = createMockEditor("just a paragraph", { line: 0, ch: 0 });
+    alignColumnCenter(editor);
+    expect(editor.getValue()).toBe("just a paragraph");
+  });
+});
+
+describe("alignColumnRight", () => {
+  it("sets right alignment on the column the cursor is on", () => {
+    const editor = createMockEditor(BASE_TABLE, { line: 2, ch: 4 });
+    alignColumnRight(editor);
+    expect(editor.getValue()).toBe("|  Name | Age |\n| ----: | --- |\n| Alice | 30  |\n|   Bob | 25  |");
+    expect(editor.getCursor()).toEqual({ line: 2, ch: 1 });
+  });
+
+  it("does nothing when the cursor is not inside a table", () => {
+    const editor = createMockEditor("just a paragraph", { line: 0, ch: 0 });
+    alignColumnRight(editor);
     expect(editor.getValue()).toBe("just a paragraph");
   });
 });

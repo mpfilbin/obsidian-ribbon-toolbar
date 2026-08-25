@@ -67,6 +67,12 @@ function openFootnote(editor: EditorLike, app: App): void {
     .catch((error) => console.error("Ribbon Bar: failed to open footnote modal", error));
 }
 
+function openHeadingLink(editor: EditorLike, app: App): void {
+  void import("./actions/headingLinkModal")
+    .then((module) => module.openHeadingLinkModal(editor, app))
+    .catch((error) => console.error("Ribbon Bar: failed to open heading link modal", error));
+}
+
 export const COMMAND_REGISTRY: CommandEntry[] = [
   // Home
   { id: "bold", tab: "home", group: "Font", icon: "bold", label: "Bold", action: home.toggleBold },
@@ -111,6 +117,27 @@ export const COMMAND_REGISTRY: CommandEntry[] = [
     icon: "subscript",
     label: "Subscript",
     action: home.toggleSubscript,
+  },
+  {
+    id: "comment",
+    tab: "home",
+    group: "Font",
+    icon: "eye-off",
+    label: "Comment",
+    action: home.toggleComment,
+  },
+  {
+    id: "change-case",
+    tab: "home",
+    group: "Font",
+    icon: "case-sensitive",
+    label: "Change Case",
+    options: [
+      { id: "case-upper", label: "UPPERCASE", action: home.toUpperCase },
+      { id: "case-lower", label: "lowercase", action: home.toLowerCase },
+      { id: "case-title", label: "Title Case", action: home.toTitleCase },
+      { id: "case-sentence", label: "Sentence case", action: home.toSentenceCase },
+    ],
   },
   {
     id: "clear-formatting",
@@ -241,6 +268,33 @@ export const COMMAND_REGISTRY: CommandEntry[] = [
     compact: true,
   },
   {
+    id: "table-align-left",
+    tab: "insert",
+    group: "Tables",
+    icon: "align-left",
+    label: "Align Column Left",
+    action: tableEdit.alignColumnLeft,
+    compact: true,
+  },
+  {
+    id: "table-align-center",
+    tab: "insert",
+    group: "Tables",
+    icon: "align-center",
+    label: "Align Column Center",
+    action: tableEdit.alignColumnCenter,
+    compact: true,
+  },
+  {
+    id: "table-align-right",
+    tab: "insert",
+    group: "Tables",
+    icon: "align-right",
+    label: "Align Column Right",
+    action: tableEdit.alignColumnRight,
+    compact: true,
+  },
+  {
     id: "code-block",
     tab: "insert",
     group: "Code",
@@ -263,6 +317,29 @@ export const COMMAND_REGISTRY: CommandEntry[] = [
     icon: "message-square",
     label: "Callout",
     modal: openCallout,
+  },
+  {
+    id: "symbols",
+    tab: "insert",
+    group: "Symbols",
+    icon: "type",
+    label: "Symbols",
+    options: [
+      { id: "sym-em-dash", label: "—  Em Dash", action: insertActions.insertSymbol("—") },
+      { id: "sym-en-dash", label: "–  En Dash", action: insertActions.insertSymbol("–") },
+      { id: "sym-ellipsis", label: "…  Ellipsis", action: insertActions.insertSymbol("…") },
+      { id: "sym-nbsp", label: "Non-breaking Space", action: insertActions.insertSymbol(" ") },
+      { id: "sym-copyright", label: "©  Copyright", action: insertActions.insertSymbol("©") },
+      { id: "sym-registered", label: "®  Registered", action: insertActions.insertSymbol("®") },
+      { id: "sym-trademark", label: "™  Trademark", action: insertActions.insertSymbol("™") },
+      { id: "sym-degree", label: "°  Degree", action: insertActions.insertSymbol("°") },
+      { id: "sym-section", label: "§  Section", action: insertActions.insertSymbol("§") },
+      { id: "sym-paragraph", label: "¶  Paragraph", action: insertActions.insertSymbol("¶") },
+      { id: "sym-bullet", label: "•  Bullet", action: insertActions.insertSymbol("•") },
+      { id: "sym-check", label: "✓  Checkmark", action: insertActions.insertSymbol("✓") },
+      { id: "sym-cross", label: "✗  Cross", action: insertActions.insertSymbol("✗") },
+      { id: "sym-arrow-right", label: "→  Right Arrow", action: insertActions.insertSymbol("→") },
+    ],
   },
 
   // Layout
@@ -355,6 +432,14 @@ export const COMMAND_REGISTRY: CommandEntry[] = [
     icon: "tag",
     label: "Tag",
     action: insertActions.insertTag,
+  },
+  {
+    id: "ref-heading-link",
+    tab: "references",
+    group: "Links",
+    icon: "list-tree",
+    label: "Heading Link",
+    modal: openHeadingLink,
   },
   {
     id: "ref-callout",
