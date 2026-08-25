@@ -105,13 +105,11 @@ describe("Layout tab actions", () => {
     expect(editor.getValue()).toBe("first\nsecond");
   });
 
-  it("insertTableOfContents lists headings as nested links", () => {
+  it("insertTableOfContents lists headings as nested same-note heading links", () => {
     const editor = createMockEditor("# Intro\ntext\n## Details\nmore text");
     editor.setCursor({ line: 3, ch: 9 });
     insertTableOfContents(editor);
-    expect(editor.getValue()).toBe(
-      "# Intro\ntext\n## Details\nmore text- [Intro](#intro)\n  - [Details](#details)\n"
-    );
+    expect(editor.getValue()).toBe("# Intro\ntext\n## Details\nmore text- [[#Intro]]\n  - [[#Details]]\n");
   });
 
   it("insertTableOfContents inserts a placeholder when there are no headings", () => {
@@ -121,20 +119,20 @@ describe("Layout tab actions", () => {
     expect(editor.getValue()).toBe("no headings here- (no headings found)\n");
   });
 
-  it("insertTableOfContents de-duplicates repeated heading text with distinct anchors", () => {
+  it("insertTableOfContents produces identical links for repeated heading text (Obsidian resolves a heading link to the first match)", () => {
     const editor = createMockEditor("# Section\n## Overview\n# Section\n## Overview");
     editor.setCursor({ line: 3, ch: 12 });
     insertTableOfContents(editor);
     expect(editor.getValue()).toBe(
-      "# Section\n## Overview\n# Section\n## Overview- [Section](#section)\n  - [Overview](#overview)\n- [Section](#section-1)\n  - [Overview](#overview-1)\n"
+      "# Section\n## Overview\n# Section\n## Overview- [[#Section]]\n  - [[#Overview]]\n- [[#Section]]\n  - [[#Overview]]\n"
     );
   });
 
-  it("insertTableOfContents falls back to a non-empty slug for a heading with no slugifiable characters", () => {
+  it("insertTableOfContents preserves non-ASCII heading text as-is", () => {
     const editor = createMockEditor("# 日本語\ntext");
     editor.setCursor({ line: 1, ch: 4 });
     insertTableOfContents(editor);
-    expect(editor.getValue()).toBe("# 日本語\ntext- [日本語](#heading)\n");
+    expect(editor.getValue()).toBe("# 日本語\ntext- [[#日本語]]\n");
   });
 
   it("formatDocument reformats the whole document", () => {

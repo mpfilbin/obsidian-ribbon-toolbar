@@ -1,5 +1,6 @@
 import type { EditorLike } from "./types";
 import { formatMarkdown } from "./formatMarkdown";
+import { buildHeadingLinkText } from "./headingLinkText";
 
 const HEADING_PATTERN = /^(#{1,6}) /;
 
@@ -88,36 +89,14 @@ export function moveLineDown(editor: EditorLike): void {
   editor.setCursor({ line: cursor.line + 1, ch: cursor.ch });
 }
 
-function slugify(heading: string): string {
-  const slug = heading
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-");
-  return slug || "heading";
-}
-
-/**
- * Disambiguates a slug against ones already used earlier in the same TOC
- * (e.g. two "## Overview" sections), appending -1, -2, ... like GitHub's
- * heading anchors do, so every link resolves to a distinct heading.
- */
-function uniqueSlug(base: string, seen: Map<string, number>): string {
-  const count = seen.get(base) ?? 0;
-  seen.set(base, count + 1);
-  return count === 0 ? base : `${base}-${count}`;
-}
-
 export function insertTableOfContents(editor: EditorLike): void {
   const entries: string[] = [];
-  const seenSlugs = new Map<string, number>();
   for (let line = 0; line <= editor.lastLine(); line++) {
     const match = editor.getLine(line).match(HEADING_PATTERN);
     if (!match) continue;
     const level = match[1].length;
     const text = editor.getLine(line).slice(match[0].length);
-    const slug = uniqueSlug(slugify(text), seenSlugs);
-    entries.push(`${"  ".repeat(level - 1)}- [${text}](#${slug})`);
+    entries.push(`${"  ".repeat(level - 1)}- ${buildHeadingLinkText(text, null)}`);
   }
   const toc = entries.length > 0 ? entries.join("\n") : "- (no headings found)";
   editor.replaceSelection(`${toc}\n`);
