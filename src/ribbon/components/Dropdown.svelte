@@ -66,7 +66,12 @@
     <ul class="ribbon-dropdown-menu" style={menuStyle} use:portal bind:this={menuEl}>
       {#each command.options ?? [] as option (option.id)}
         <li>
-          <button type="button" onclick={() => choose(option.action)}>{option.label}</button>
+          <button type="button" onclick={() => choose(option.action)}>
+            {#if option.swatch}
+              <span class="ribbon-dropdown-swatch" style={`background-color: ${option.swatch};`}></span>
+            {/if}
+            {option.label}
+          </button>
         </li>
       {/each}
     </ul>

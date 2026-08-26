@@ -8,7 +8,6 @@ import {
   toggleBulletList,
   toggleChecklist,
   toggleComment,
-  toggleHighlight,
   toggleInlineCode,
   toggleItalic,
   toggleNumberedList,
@@ -42,13 +41,6 @@ describe("Home tab actions", () => {
     editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: 2 });
     toggleStrikethrough(editor);
     expect(editor.getValue()).toBe("~~hi~~");
-  });
-
-  it("toggleHighlight wraps the selection", () => {
-    const editor = createMockEditor("hi");
-    editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: 2 });
-    toggleHighlight(editor);
-    expect(editor.getValue()).toBe("==hi==");
   });
 
   it("toggleInlineCode wraps the selection", () => {
@@ -213,6 +205,13 @@ describe("Home tab actions", () => {
     editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: editor.getValue().length });
     clearFormatting(editor);
     expect(editor.getValue()).toBe("under and sup and sub");
+  });
+
+  it("clearFormatting strips comment markers from the selection", () => {
+    const editor = createMockEditor("see %%this is hidden%% text");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: editor.getValue().length });
+    clearFormatting(editor);
+    expect(editor.getValue()).toBe("see this is hidden text");
   });
 
   it("clearFormatting does nothing when there is no selection", () => {

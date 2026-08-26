@@ -5,6 +5,8 @@ import * as insertActions from "./actions/insert";
 import * as layout from "./actions/layout";
 import * as tableEdit from "./actions/tableEdit";
 import * as latex from "./actions/latex";
+import * as highlightMark from "./actions/highlightMark";
+import type { HighlightColorConfig } from "./actions/highlightMark";
 import type { FrontmatterPropertyConfig } from "./actions/frontmatter";
 import { insertProperty } from "./actions/frontmatter";
 
@@ -14,6 +16,7 @@ export interface CommandOption {
   id: string;
   label: string;
   action: (editor: EditorLike) => void;
+  swatch?: string;
 }
 
 export interface CommandEntry {
@@ -84,14 +87,6 @@ export const COMMAND_REGISTRY: CommandEntry[] = [
     icon: "strikethrough",
     label: "Strikethrough",
     action: home.toggleStrikethrough,
-  },
-  {
-    id: "highlight",
-    tab: "home",
-    group: "Font",
-    icon: "highlighter",
-    label: "Highlight",
-    action: home.toggleHighlight,
   },
   { id: "inline-code", tab: "home", group: "Font", icon: "code", label: "Code", action: home.toggleInlineCode },
   {
@@ -268,31 +263,16 @@ export const COMMAND_REGISTRY: CommandEntry[] = [
     compact: true,
   },
   {
-    id: "table-align-left",
+    id: "table-align",
     tab: "insert",
     group: "Tables",
     icon: "align-left",
-    label: "Align Column Left",
-    action: tableEdit.alignColumnLeft,
-    compact: true,
-  },
-  {
-    id: "table-align-center",
-    tab: "insert",
-    group: "Tables",
-    icon: "align-center",
-    label: "Align Column Center",
-    action: tableEdit.alignColumnCenter,
-    compact: true,
-  },
-  {
-    id: "table-align-right",
-    tab: "insert",
-    group: "Tables",
-    icon: "align-right",
-    label: "Align Column Right",
-    action: tableEdit.alignColumnRight,
-    compact: true,
+    label: "Align",
+    options: [
+      { id: "table-align-left", label: "Align Left", action: tableEdit.alignColumnLeft },
+      { id: "table-align-center", label: "Align Center", action: tableEdit.alignColumnCenter },
+      { id: "table-align-right", label: "Align Right", action: tableEdit.alignColumnRight },
+    ],
   },
   {
     id: "code-block",
@@ -634,6 +614,25 @@ export function groupsForTab(tab: TabId): string[] {
     if (!groups.includes(entry.group)) groups.push(entry.group);
   }
   return groups;
+}
+
+export function buildHighlightColorCommands(colors: HighlightColorConfig[]): CommandEntry[] {
+  if (colors.length === 0) return [];
+  return [
+    {
+      id: "highlight-color",
+      tab: "home",
+      group: "Font",
+      icon: "highlighter",
+      label: "Highlight Color",
+      options: colors.map((color, index) => ({
+        id: `highlight-color-${index}`,
+        label: color.name,
+        swatch: color.color,
+        action: highlightMark.highlightWithColor(color.color),
+      })),
+    },
+  ];
 }
 
 export function buildPropertyCommands(properties: FrontmatterPropertyConfig[]): CommandEntry[] {
