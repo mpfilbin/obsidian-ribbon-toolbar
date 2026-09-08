@@ -207,6 +207,13 @@ describe("Home tab actions", () => {
     expect(editor.getValue()).toBe("this is important and done text");
   });
 
+  it("clearFormatting does not let a color-highlight match span a line break", () => {
+    const editor = createMockEditor("==🔴\nnot a highlight==");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 1, ch: 17 });
+    clearFormatting(editor);
+    expect(editor.getValue()).toBe("==🔴\nnot a highlight==");
+  });
+
   it("clearFormatting strips underline/superscript/subscript markers from the selection", () => {
     const editor = createMockEditor("<u>under</u> and <sup>sup</sup> and <sub>sub</sub>");
     editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: editor.getValue().length });
