@@ -4,7 +4,6 @@ import { RibbonBarSettingTab } from "./settings-tab";
 import type { RibbonBarPluginLike } from "./plugin-contract";
 import { RibbonManager } from "./ribbon/RibbonManager";
 import type { FrontmatterPropertyConfig } from "./ribbon/commands/actions/frontmatter";
-import type { HighlightColorConfig } from "./ribbon/commands/actions/highlightMark";
 
 export default class RibbonBarPlugin extends Plugin implements RibbonBarPluginLike {
   settings: RibbonBarSettings = mergeSettings(null);
@@ -18,7 +17,6 @@ export default class RibbonBarPlugin extends Plugin implements RibbonBarPluginLi
       enabled: this.settings.ribbonEnabled,
       defaultCollapsed: this.settings.defaultCollapsed,
       frontmatterProperties: this.settings.frontmatterProperties,
-      highlightColors: this.settings.highlightColors,
     });
 
     this.addSettingTab(new RibbonBarSettingTab(this.app, this));
@@ -48,10 +46,6 @@ export default class RibbonBarPlugin extends Plugin implements RibbonBarPluginLi
 
   setFrontmatterProperties(properties: FrontmatterPropertyConfig[]): void {
     this.ribbonManager.setFrontmatterProperties(properties);
-  }
-
-  setHighlightColors(colors: HighlightColorConfig[]): void {
-    this.ribbonManager.setHighlightColors(colors);
   }
 
   private markdownViews(): MarkdownView[] {

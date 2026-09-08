@@ -27,7 +27,7 @@ The ribbon appears above every open Markdown pane, in Source, Live Preview, and 
 
 ### Home tab
 
-Bold, Italic, Strikethrough, Highlight, Code, Clear Formatting, Heading (dropdown: H1–H3), Bulleted List, Numbered List, Checklist, Quote
+Bold, Italic, Strikethrough, Highlight (dropdown: Default plus Obsidian's native red/orange/green/blue/purple), Code, Clear Formatting, Heading (dropdown: H1–H3), Bulleted List, Numbered List, Checklist, Quote
 
 ### Insert tab
 

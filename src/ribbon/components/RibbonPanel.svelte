@@ -4,38 +4,23 @@
   import type { CommandEntry, TabId } from "../commands/registry";
   import type { EditorLike } from "../commands/actions/types";
   import type { FrontmatterPropertyConfig } from "../commands/actions/frontmatter";
-  import type { HighlightColorConfig } from "../commands/actions/highlightMark";
-  import {
-    buildHighlightColorCommands,
-    buildPropertyCommands,
-    commandsForTab,
-    groupsForTab,
-  } from "../commands/registry";
+  import { buildPropertyCommands, commandsForTab, groupsForTab } from "../commands/registry";
   import Group from "./Group.svelte";
 
   let {
     tab,
     editor,
     propertiesStore,
-    highlightColorsStore,
     app,
   }: {
     tab: TabId;
     editor: EditorLike | null;
     propertiesStore: Writable<FrontmatterPropertyConfig[]>;
-    highlightColorsStore: Writable<HighlightColorConfig[]>;
     app: App;
   } = $props();
 
   let properties = $derived($propertiesStore);
-  let highlightColors = $derived($highlightColorsStore);
-  let dynamicCommands = $derived(
-    tab === "references"
-      ? buildPropertyCommands(properties)
-      : tab === "home"
-        ? buildHighlightColorCommands(highlightColors)
-        : []
-  );
+  let dynamicCommands = $derived(tab === "references" ? buildPropertyCommands(properties) : []);
   let dynamicGroups = $derived(tab === "references" && dynamicCommands.length > 0 ? ["Properties"] : []);
   let groups = $derived([...groupsForTab(tab), ...dynamicGroups]);
   let commands = $derived([...commandsForTab(tab), ...dynamicCommands]);

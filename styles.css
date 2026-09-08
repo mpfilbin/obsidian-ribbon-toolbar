@@ -160,26 +160,6 @@
   background-color: var(--background-modifier-hover);
 }
 
-.ribbon-dropdown-swatch {
-  display: inline-block;
-  width: 12px;
-  height: 12px;
-  margin-right: 6px;
-  border-radius: 3px;
-  border: 1px solid var(--background-modifier-border);
-  vertical-align: middle;
-}
-
-/* Applied to <mark> tags this plugin writes into note content (both the
-   Highlight Color ribbon action and the ==...== migration tool). Only the
-   shared "look" lives here - background-color stays inline per element since
-   it's a per-instance, user-configured value this stylesheet can't know
-   ahead of time. See highlightMark.ts's buildMarkOpenTag. */
-.ribbon-bar-highlight {
-  border-radius: 0.2em;
-  padding: 0.1em 0.2em;
-}
-
 .ribbon-bar.collapsed .ribbon-tab-strip {
   padding-bottom: 2px;
 }

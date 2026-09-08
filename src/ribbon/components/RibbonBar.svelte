@@ -5,7 +5,6 @@
   import type { TabId } from "../commands/registry";
   import type { EditorLike } from "../commands/actions/types";
   import type { FrontmatterPropertyConfig } from "../commands/actions/frontmatter";
-  import type { HighlightColorConfig } from "../commands/actions/highlightMark";
   import Tab from "./Tab.svelte";
   import RibbonPanel from "./RibbonPanel.svelte";
 
@@ -13,13 +12,11 @@
     editorStore,
     defaultCollapsed,
     propertiesStore,
-    highlightColorsStore,
     app,
   }: {
     editorStore: Writable<EditorLike | null>;
     defaultCollapsed: boolean;
     propertiesStore: Writable<FrontmatterPropertyConfig[]>;
-    highlightColorsStore: Writable<HighlightColorConfig[]>;
     app: App;
   } = $props();
 
@@ -49,6 +46,6 @@
     {/each}
   </div>
   {#if !collapsed}
-    <RibbonPanel tab={activeTab} {editor} {propertiesStore} {highlightColorsStore} {app} />
+    <RibbonPanel tab={activeTab} {editor} {propertiesStore} {app} />
   {/if}
 </div>
