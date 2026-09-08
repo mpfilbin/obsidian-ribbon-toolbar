@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  buildHighlightColorCommands,
   buildPropertyCommands,
   COMMAND_REGISTRY,
   TABS,
@@ -180,47 +179,37 @@ describe("Document parity commands", () => {
   });
 });
 
-describe("buildHighlightColorCommands", () => {
-  it("returns an empty array when no colors are configured", () => {
-    expect(buildHighlightColorCommands([])).toEqual([]);
+describe("highlight command", () => {
+  const highlight = COMMAND_REGISTRY.find((entry) => entry.id === "highlight");
+
+  it("is a static Home tab Font-group dropdown with Default plus the five native colors", () => {
+    expect(highlight?.tab).toBe("home");
+    expect(highlight?.group).toBe("Font");
+    expect(highlight?.action).toBeUndefined();
+    expect(highlight?.options?.map((option) => option.label)).toEqual([
+      "Default",
+      "🔴  Red",
+      "🟠  Orange",
+      "🟢  Green",
+      "🔵  Blue",
+      "🟣  Purple",
+    ]);
   });
 
-  it("builds one Highlight Color dropdown command with one option per configured color", () => {
-    const colors = [
-      { name: "Yellow", color: "#ffd700" },
-      { name: "Green", color: "#7bed9f" },
-    ];
-    const commands = buildHighlightColorCommands(colors);
-    expect(commands).toHaveLength(1);
-    expect(commands[0]).toMatchObject({
-      id: "highlight-color",
-      tab: "home",
-      group: "Font",
-      label: "Highlight Color",
-    });
-    expect(commands[0].options).toHaveLength(2);
-    expect(commands[0].options?.[0]).toMatchObject({ label: "Yellow", swatch: "#ffd700" });
-    expect(commands[0].options?.[1]).toMatchObject({ label: "Green", swatch: "#7bed9f" });
-  });
-
-  it("each color option's action highlights the selection with that color", () => {
-    const commands = buildHighlightColorCommands([{ name: "Yellow", color: "#ffd700" }]);
+  it("the Red option wraps the selection in a native color highlight", () => {
+    const red = highlight?.options?.find((option) => option.id === "highlight-red");
     const editor = createMockEditor("hi");
     editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: 2 });
-    commands[0].options?.[0].action(editor);
-    expect(editor.getValue()).toBe(
-      '<mark class="ribbon-bar-highlight" style="background-color: #ffd700;">hi</mark>'
-    );
+    red?.action(editor);
+    expect(editor.getValue()).toBe("==🔴hi==");
   });
 
-  it("generates non-colliding option ids even when color names collide after slugging", () => {
-    const colors = [
-      { name: "Light Blue", color: "#aaa" },
-      { name: "light blue", color: "#bbb" },
-    ];
-    const commands = buildHighlightColorCommands(colors);
-    const [first, second] = commands[0].options ?? [];
-    expect(first.id).not.toBe(second.id);
+  it("the Default option wraps the selection in a plain highlight", () => {
+    const plain = highlight?.options?.find((option) => option.id === "highlight-default");
+    const editor = createMockEditor("hi");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: 2 });
+    plain?.action(editor);
+    expect(editor.getValue()).toBe("==hi==");
   });
 });
 

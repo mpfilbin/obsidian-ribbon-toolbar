@@ -49,7 +49,10 @@ const FORMATTING_MARKERS = [
   /\*\*(.*?)\*\*/g,
   /\*(.*?)\*/g,
   /~~(.*?)~~/g,
-  /==(.*?)==/g,
+  // A native highlight, optionally carrying an Obsidian color-prefix emoji
+  // (==🔴text==) which is stripped along with the delimiters. Only spaces/tabs
+  // are allowed after the emoji - \s would let a match span a line break.
+  /==(?:[🔴🟠🟢🔵🟣][ \t]*)?(.*?)==/gu,
   /`(.*?)`/g,
   /%%(.*?)%%/g,
 ];
