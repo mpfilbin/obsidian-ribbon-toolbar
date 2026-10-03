@@ -8,6 +8,8 @@
  * tests can assert on interactions that have no observable DOM effect.
  */
 
+import { parse as yamlParse, stringify as yamlStringify } from "yaml";
+
 type ElOptions = string | { text?: string; cls?: string | string[]; attr?: Record<string, string>; value?: string };
 
 export const obsidianLog = {
@@ -18,6 +20,7 @@ export const obsidianLog = {
     this.icons.clear();
     modals.length = 0;
     createdSettings.length = 0;
+    notices.length = 0;
   },
 };
 
@@ -167,8 +170,21 @@ export function setIcon(el: HTMLElement, iconId: string): void {
   el.setAttribute("data-icon", iconId);
 }
 
+/** Every Notice shown, so tests can assert on user-facing messages. */
+export const notices: string[] = [];
+
 export class Notice {
-  constructor(public message: string) {}
+  constructor(public message: string) {
+    notices.push(message);
+  }
+}
+
+export function parseYaml(text: string): unknown {
+  return yamlParse(text);
+}
+
+export function stringifyYaml(value: unknown): string {
+  return yamlStringify(value);
 }
 
 class ValueComponent<V> {
