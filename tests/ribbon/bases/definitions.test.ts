@@ -166,3 +166,33 @@ describe("lazy-loaded base dialogs", () => {
     await vi.waitFor(() => expect(error).toHaveBeenCalled());
   });
 });
+
+describe("function cell labels", () => {
+  const cell = (menu: string, id: string) => byId(menu).options!.find((o) => o.id === id)!.display;
+
+  it("shows property accessors without parentheses, matching what is inserted", () => {
+    expect(cell("base-fn-text", "fn-text-length")).toBe(".length");
+    expect(cell("base-fn-list", "fn-list-length")).toBe(".length");
+    for (const part of ["year", "month", "day", "hour", "minute", "second"]) {
+      expect(cell("base-fn-date", `fn-date-${part}`)).toBe(`.${part}`);
+    }
+  });
+
+  it("shows calls with parentheses", () => {
+    expect(cell("base-fn-global", "fn-global-now")).toBe("now()");
+    expect(cell("base-fn-text", "fn-text-contains")).toBe(".contains()");
+    expect(cell("base-fn-file", "fn-file-hasTag")).toBe("hasTag()");
+  });
+
+  it("never shows parentheses for text that is inserted without them, or omits them when inserted", () => {
+    for (const menu of COMMAND_REGISTRY.filter((c) => c.id.startsWith("base-fn-"))) {
+      for (const option of menu.options!) {
+        const editor = createMockEditor("");
+        option.action(editor, {} as never);
+        expect(option.display!.endsWith("()"), `${option.id}: shows ${option.display}, inserts ${editor.getValue()}`).toBe(
+          editor.getValue().includes("(")
+        );
+      }
+    }
+  });
+});

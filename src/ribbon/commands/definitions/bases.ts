@@ -1,11 +1,9 @@
 import type { CommandEntry } from "../types";
 import { VIEW_TYPES } from "../../bases/model";
 import { QUICK_FILTERS } from "../../bases/filters";
-import { FUNCTION_GROUPS, functionsInGroup, type FunctionGroup } from "../../bases/functions";
+import { FUNCTION_GROUPS, functionsInGroup, type BaseFunction, type FunctionGroup } from "../../bases/functions";
 import { insertFunction } from "../../bases/insertFunction";
 import { addBaseQuickFilter, addBaseView, openBaseSection, openEmbedBase, openNewBase } from "../modalLoaders";
-
-const VIEW_ICONS: Record<string, string> = { table: "table", cards: "layout-grid", list: "list", map: "map" };
 
 const FUNCTION_MENUS: Record<FunctionGroup, { label: string; icon: string }> = {
   Global: { label: "Functions", icon: "square-function" },
@@ -15,6 +13,13 @@ const FUNCTION_MENUS: Record<FunctionGroup, { label: string; icon: string }> = {
   Date: { label: "Date", icon: "calendar" },
   File: { label: "File", icon: "file" },
 };
+
+/** What a menu cell shows: the call as it will be inserted (properties like `.length` get no parentheses). */
+export function functionCellText(fn: BaseFunction): string {
+  const prefix = fn.template.startsWith(".") ? "." : "";
+  const suffix = fn.template.includes("(") ? "()" : "";
+  return `${prefix}${fn.name}${suffix}`;
+}
 
 // One menu per function group. Each cell shows the call; hovering shows its signature.
 const functionMenus: CommandEntry[] = FUNCTION_GROUPS.map((group) => ({
@@ -30,7 +35,7 @@ const functionMenus: CommandEntry[] = FUNCTION_GROUPS.map((group) => ({
     return {
       id: `fn-${group.toLowerCase()}-${fn.name}`,
       label: `${fn.signature}: ${fn.description}`,
-      display: fn.template.startsWith(".") ? `.${fn.name}()` : `${fn.name}()`,
+      display: functionCellText(fn),
       action: (editor) => action(editor),
     };
   }),
