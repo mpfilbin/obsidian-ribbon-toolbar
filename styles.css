@@ -142,6 +142,8 @@
   border-radius: 4px;
   box-shadow: var(--shadow-s);
   min-width: 120px;
+  max-height: 50vh;
+  overflow-y: auto;
 }
 
 .ribbon-dropdown-menu li button {

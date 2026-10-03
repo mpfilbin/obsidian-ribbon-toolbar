@@ -151,12 +151,12 @@ describe("Document parity commands", () => {
     ]);
   });
 
-  it("symbols offers a curated set of typography symbol options in the Insert tab", () => {
+  it("symbols offers a curated set of typography, math, and currency symbol options in the Insert tab", () => {
     const symbols = COMMAND_REGISTRY.find((entry) => entry.id === "symbols");
     expect(symbols?.tab).toBe("insert");
     expect(symbols?.group).toBe("Symbols");
     expect(symbols?.action).toBeUndefined();
-    expect(symbols?.options?.length).toBe(14);
+    expect(symbols?.options?.length).toBe(45);
     for (const option of symbols?.options ?? []) {
       expect(typeof option.action).toBe("function");
     }
