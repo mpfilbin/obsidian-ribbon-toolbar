@@ -236,3 +236,107 @@ describe("RibbonManager", () => {
     });
   });
 });
+
+describe("ribbons that Obsidian removes from the page", () => {
+  // Obsidian can rebuild a view's DOM (for example while loading a large paste),
+  // taking our host element with it while the manager still thinks it is mounted.
+  const settle = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
+  const content = (view: FakeView) => view.containerEl.querySelector(".view-content")!;
+  const hostCount = (view: FakeView) => view.containerEl.querySelectorAll(".ribbon-bar-host").length;
+
+  it("puts the ribbon back on the next sync when its host was removed", () => {
+    const view = makeView();
+    const manager = makeManager();
+    manager.attach(view as never);
+    view.containerEl.querySelector(".ribbon-bar-host")!.remove();
+    expect(hostCount(view)).toBe(0);
+
+    manager.syncAllLeaves(asViews(view));
+    expect(hostCount(view)).toBe(1);
+    expect(content(view).firstElementChild!.classList.contains("ribbon-bar-host")).toBe(true);
+  });
+
+  it("restores a removed ribbon by itself, without waiting for a workspace event", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const view = makeView();
+    makeManager().attach(view as never);
+    view.containerEl.querySelector(".ribbon-bar-host")!.remove();
+    await settle();
+    expect(hostCount(view)).toBe(1);
+  });
+
+  it("keeps the same mounted ribbon, including its selected tab, when restoring it", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const view = makeView();
+    makeManager().attach(view as never);
+    const tab = [...view.containerEl.querySelectorAll<HTMLButtonElement>(".ribbon-tab")].find((t) => t.textContent!.trim() === "Insert")!;
+    tab.click();
+    flushSync();
+    view.containerEl.querySelector(".ribbon-bar-host")!.remove();
+    await settle();
+    expect(view.containerEl.querySelector(".ribbon-tab.active")!.textContent!.trim()).toBe("Insert");
+  });
+
+  it("moves the ribbon into a replacement .view-content when Obsidian swaps it out", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const view = makeView();
+    makeManager().attach(view as never);
+    const replacement = document.createElement("div");
+    replacement.className = "view-content";
+    content(view).replaceWith(replacement);
+    await settle();
+    expect(replacement.firstElementChild!.classList.contains("ribbon-bar-host")).toBe(true);
+    expect(hostCount(view)).toBe(1);
+  });
+
+  it("restores a ribbon when the whole .view-content is emptied", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const view = makeView();
+    makeManager().attach(view as never);
+    content(view).replaceChildren();
+    await settle();
+    expect(hostCount(view)).toBe(1);
+  });
+
+  it("says in the console when it had to restore a ribbon", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const view = makeView();
+    makeManager().attach(view as never);
+    view.containerEl.querySelector(".ribbon-bar-host")!.remove();
+    await settle();
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(String(warn.mock.calls[0][0])).toContain("Ribbon Bar: restored a ribbon");
+  });
+
+  it("leaves a healthy ribbon alone, however much else changes in the view", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const view = makeView();
+    makeManager().attach(view as never);
+    for (let i = 0; i < 50; i++) content(view).querySelector("p")!.append(document.createElement("span"));
+    content(view).append(document.createElement("div"));
+    await settle();
+    expect(hostCount(view)).toBe(1);
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it("does not bring a ribbon back after it was detached on purpose", async () => {
+    const view = makeView();
+    const manager = makeManager();
+    manager.attach(view as never);
+    manager.detach(view as never);
+    content(view).append(document.createElement("div"));
+    await settle();
+    expect(hostCount(view)).toBe(0);
+  });
+
+  it("gives up quietly when the view has no .view-content to restore into", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const view = makeView();
+    const manager = makeManager();
+    manager.attach(view as never);
+    content(view).remove();
+    await settle();
+    expect(hostCount(view)).toBe(0);
+    expect(() => manager.syncAllLeaves(asViews(view))).not.toThrow();
+  });
+});

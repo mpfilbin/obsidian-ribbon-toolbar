@@ -1,5 +1,15 @@
 .ribbon-bar-host {
   display: block;
+  /*
+   * Never let the ribbon be squeezed out, and keep it pinned to the top of its
+   * container: if something scrolls .view-content (for example the browser
+   * scrolling to the caret after a very large paste), the ribbon stays visible
+   * instead of scrolling out of view.
+   */
+  flex: 0 0 auto;
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
 .ribbon-bar {

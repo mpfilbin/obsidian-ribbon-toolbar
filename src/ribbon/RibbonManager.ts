@@ -11,6 +11,8 @@ interface RibbonInstance {
   host: HTMLElement;
   component: object;
   editorStore: Writable<EditorLike | null>;
+  // Watches for Obsidian removing our host from the page (see watch()).
+  observer: MutationObserver | null;
 }
 
 export class RibbonManager {
@@ -88,6 +90,7 @@ export class RibbonManager {
 
     const existing = this.instances.get(view);
     if (existing) {
+      this.ensureMounted(view, existing);
       existing.editorStore.set(this.editorFor(view));
       return;
     }
@@ -116,12 +119,57 @@ export class RibbonManager {
       },
     });
 
-    this.instances.set(view, { host, component, editorStore });
+    const instance: RibbonInstance = { host, component, editorStore, observer: null };
+    this.instances.set(view, instance);
+    this.watch(view, instance);
+  }
+
+  /**
+   * Obsidian can rebuild a view's DOM (the ribbon has been seen to vanish while
+   * pasting a lot of text), which removes our host element while the component
+   * stays mounted and the manager still believes the ribbon is showing. Put the
+   * existing host back, keeping its component (and so its selected tab).
+   * Returns whether the ribbon is in place afterwards.
+   */
+  private ensureMounted(view: MarkdownView, instance: RibbonInstance): boolean {
+    const target = findInjectionPoint(view.containerEl);
+    if (!target) return false;
+    if (instance.host.parentElement === target) return true;
+
+    console.warn("Ribbon Bar: restored a ribbon that was removed from the page", view);
+    target.prepend(instance.host);
+    return true;
+  }
+
+  /**
+   * Watches only the direct children of the view and of its .view-content (not
+   * the whole subtree, which churns constantly while editing), which is where our
+   * host lives and where it can be removed from or its parent replaced.
+   */
+  private watch(view: MarkdownView, instance: RibbonInstance): void {
+    if (typeof MutationObserver === "undefined") return;
+
+    const observe = (): void => {
+      instance.observer?.disconnect();
+      instance.observer = new MutationObserver(() => {
+        if (this.instances.get(view) !== instance) return;
+        const target = findInjectionPoint(view.containerEl);
+        if (target && instance.host.parentElement !== target) {
+          this.ensureMounted(view, instance);
+          observe();
+        }
+      });
+      instance.observer.observe(view.containerEl, { childList: true });
+      const target = findInjectionPoint(view.containerEl);
+      if (target) instance.observer.observe(target, { childList: true });
+    };
+    observe();
   }
 
   detach(view: MarkdownView): void {
     const instance = this.instances.get(view);
     if (!instance) return;
+    instance.observer?.disconnect();
     unmount(instance.component);
     instance.host.remove();
     this.instances.delete(view);
