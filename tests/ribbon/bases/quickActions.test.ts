@@ -112,3 +112,18 @@ describe("addBaseFilter and quick filters", () => {
     expect(folder.specFor(makeBaseApp({}, "Note.md").app)).toBeNull();
   });
 });
+
+describe("edge cases", () => {
+  it("reports a failure that isn't an Error", async () => {
+    const { app } = makeBaseApp({ "T.base": "views: []" });
+    app.vault.process = async () => Promise.reject("busy");
+    await editBase(createMockEditor("![[T.base]]", { line: 0, ch: 3 }), app, (config) => ({ config, message: "never" }));
+    expect(notices[0]).toBe("Couldn't update the base: busy");
+  });
+
+  it("has no folder filter when no note is active", () => {
+    const { app } = makeBaseApp();
+    app.workspace.getActiveFile = () => null;
+    expect(quickFilterSpecs()[0].specFor(app)).toBeNull();
+  });
+});

@@ -309,3 +309,48 @@ describe("embed base dialog", () => {
     expect(focus).toHaveBeenCalled();
   });
 });
+
+describe("failure and edge cases", () => {
+  it("still offers a base file whose contents can't be read", async () => {
+    const env = makeBaseApp({ "Locked.base": "views: []" });
+    env.app.vault.read = async () => {
+      throw new Error("denied");
+    };
+    openEmbedBaseModal(createMockEditor(""), env.app);
+    const results = await latest().getSuggestions("");
+    expect(results.map((c: any) => c.file.name)).toEqual(["Locked.base"]);
+  });
+
+  it("reports a non-Error failure to read a base", async () => {
+    const env = makeBaseApp({ "T.base": "views: []" });
+    env.app.vault.read = async () => Promise.reject("plain string");
+    await openBaseManager(createMockEditor("![[T.base]]", { line: 0, ch: 3 }), env.app, "views");
+    expect(notices[0]).toBe("Couldn't read the base: plain string");
+  });
+
+  it("reports a non-Error failure to save a base", async () => {
+    const env = makeBaseApp({ "T.base": "views: []" });
+    await openBaseManager(createMockEditor("![[T.base]]", { line: 0, ch: 3 }), env.app, "views");
+    env.app.vault.process = async () => Promise.reject("nope");
+    click(buttonLabeled("Save"));
+    await vi.waitFor(() => expect(notices).toContain("Couldn't save the base: nope"));
+  });
+
+  it("creates a file base when no note is active", async () => {
+    const env = makeBaseApp();
+    env.app.workspace.getActiveFile = () => null;
+    const editor = createMockEditor("");
+    openNewBaseModal(editor, env.app);
+    choose(settingNamed("Store as").dropdowns[0], "file");
+    typeInto(settingNamed("File name").texts[0], "Loose");
+    click(buttonLabeled("Create"));
+    await vi.waitFor(() => expect(editor.getValue()).toBe("![[Loose.base]]"));
+  });
+
+  it("opens a base in a note when no note is active, resolving embeds from the vault root", async () => {
+    const env = makeBaseApp({ "T.base": "views: []" });
+    env.app.workspace.getActiveFile = () => null;
+    await openBaseManager(createMockEditor("![[T.base]]", { line: 0, ch: 3 }), env.app, "views");
+    expect(latest().titleEl.textContent).toBe("Edit base · T.base");
+  });
+});
