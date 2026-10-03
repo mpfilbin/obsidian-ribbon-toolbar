@@ -1,15 +1,29 @@
 .ribbon-bar-host {
   display: block;
-  /*
-   * Never let the ribbon be squeezed out, and keep it pinned to the top of its
-   * container: if something scrolls .view-content (for example the browser
-   * scrolling to the caret after a very large paste), the ribbon stays visible
-   * instead of scrolling out of view.
-   */
+  /* Never let the ribbon be squeezed out, and keep it pinned to the top. */
   flex: 0 0 auto;
   position: sticky;
   top: 0;
   z-index: 2;
+}
+
+/*
+ * Obsidian sizes the editor to 100% of .view-content. Adding the ribbon above
+ * it makes the content taller than the container by the ribbon's height, so the
+ * container becomes scrollable and the browser can scroll the ribbon out of view
+ * (seen after pasting a large amount of text). Lay the container out as a column
+ * instead, so the ribbon takes its own height and the editor fills the rest.
+ */
+.view-content.ribbon-bar-active {
+  display: flex;
+  flex-direction: column;
+}
+
+.view-content.ribbon-bar-active > .markdown-source-view,
+.view-content.ribbon-bar-active > .markdown-reading-view {
+  flex: 1 1 0;
+  min-height: 0;
+  height: auto;
 }
 
 .ribbon-bar {

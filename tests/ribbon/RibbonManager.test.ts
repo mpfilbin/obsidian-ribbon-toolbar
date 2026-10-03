@@ -340,3 +340,74 @@ describe("ribbons that Obsidian removes from the page", () => {
     expect(() => manager.syncAllLeaves(asViews(view))).not.toThrow();
   });
 });
+
+describe("keeping the ribbon visible", () => {
+  // .view-content only holds the editor and the ribbon, so it should never scroll.
+  // If it does (the browser scrolling to the caret after a huge paste), the ribbon
+  // is carried off the top, so the manager scrolls it back.
+  const content = (view: FakeView) => view.containerEl.querySelector<HTMLElement>(".view-content")!;
+
+  /** jsdom doesn't scroll, so give the element a scrollTop that behaves like a browser's. */
+  function scrollable(el: HTMLElement) {
+    let top = 0;
+    Object.defineProperty(el, "scrollTop", { get: () => top, set: (value: number) => (top = value), configurable: true });
+    return { scrollTo: (value: number) => { top = value; el.dispatchEvent(new Event("scroll")); }, get: () => top };
+  }
+
+  it("marks the container it lives in so styles.css can lay it out around the ribbon", () => {
+    const view = makeView();
+    makeManager().attach(view as never);
+    expect(content(view).classList.contains("ribbon-bar-active")).toBe(true);
+  });
+
+  it("removes the mark when the ribbon is detached", () => {
+    const view = makeView();
+    const manager = makeManager();
+    manager.attach(view as never);
+    manager.detach(view as never);
+    expect(content(view).classList.contains("ribbon-bar-active")).toBe(false);
+  });
+
+  it("scrolls the container back to the top if something scrolls it", () => {
+    const view = makeView();
+    makeManager().attach(view as never);
+    const scroll = scrollable(content(view));
+    scroll.scrollTo(123);
+    expect(scroll.get()).toBe(0);
+  });
+
+  it("leaves a container that is already at the top alone", () => {
+    const view = makeView();
+    makeManager().attach(view as never);
+    const scroll = scrollable(content(view));
+    scroll.scrollTo(0);
+    expect(scroll.get()).toBe(0);
+  });
+
+  it("stops guarding the scroll position once the ribbon is detached", () => {
+    const view = makeView();
+    const manager = makeManager();
+    manager.attach(view as never);
+    const scroll = scrollable(content(view));
+    manager.detach(view as never);
+    scroll.scrollTo(80);
+    expect(scroll.get()).toBe(80);
+  });
+
+  it("moves the mark and the scroll guard to a replacement container", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const view = makeView();
+    makeManager().attach(view as never);
+    const old = content(view);
+    const replacement = document.createElement("div");
+    replacement.className = "view-content";
+    old.replaceWith(replacement);
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+
+    expect(replacement.classList.contains("ribbon-bar-active")).toBe(true);
+    expect(old.classList.contains("ribbon-bar-active")).toBe(false);
+    const scroll = scrollable(replacement);
+    scroll.scrollTo(50);
+    expect(scroll.get()).toBe(0);
+  });
+});
