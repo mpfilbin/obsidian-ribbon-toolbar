@@ -26,15 +26,16 @@ describe("highlightWithColor", () => {
 });
 
 describe("HIGHLIGHT_COLORS", () => {
-  it("lists Default plus the five Obsidian native highlight colors", () => {
+  it("lists Default plus the Obsidian native highlight colors", () => {
     expect(HIGHLIGHT_COLORS.map((color) => color.name)).toEqual([
       "Default",
       "Red",
       "Orange",
+      "Yellow",
       "Green",
       "Blue",
       "Purple",
     ]);
-    expect(HIGHLIGHT_COLORS.map((color) => color.emoji)).toEqual(["", "🔴", "🟠", "🟢", "🔵", "🟣"]);
+    expect(HIGHLIGHT_COLORS.map((color) => color.emoji)).toEqual(["", "🔴", "🟠", "🟡", "🟢", "🔵", "🟣"]);
   });
 });

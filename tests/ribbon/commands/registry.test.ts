@@ -182,7 +182,7 @@ describe("Document parity commands", () => {
 describe("highlight command", () => {
   const highlight = COMMAND_REGISTRY.find((entry) => entry.id === "highlight");
 
-  it("is a static Home tab Font-group dropdown with Default plus the five native colors", () => {
+  it("is a static Home tab Font-group dropdown with Default plus the native colors", () => {
     expect(highlight?.tab).toBe("home");
     expect(highlight?.group).toBe("Font");
     expect(highlight?.action).toBeUndefined();
@@ -190,6 +190,7 @@ describe("highlight command", () => {
       "Default",
       "🔴  Red",
       "🟠  Orange",
+      "🟡  Yellow",
       "🟢  Green",
       "🔵  Blue",
       "🟣  Purple",
