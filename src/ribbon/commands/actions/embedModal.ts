@@ -1,28 +1,22 @@
-import { App, SuggestModal, TFile, prepareFuzzySearch } from "obsidian";
+import { App, TFile } from "obsidian";
 import type { CachedMetadata } from "obsidian";
 import type { EditorLike } from "./types";
 import { buildEmbedText } from "./embedText";
 import { collectBlockCandidates } from "./embedBlocks";
+import { EditorSuggestModal } from "./editorSuggestModal";
+import { fuzzyFilter, RESULT_LIMIT, suggestNotes, type NoteSuggestion } from "./fuzzySuggest";
 
 type EmbedSuggestion =
-  | { type: "file"; file: TFile }
+  | NoteSuggestion
   | { type: "heading"; file: TFile; heading: string }
   | { type: "block"; file: TFile; blockId: string; preview: string }
-  | { type: "create"; name: string }
   | { type: "raw"; target: string };
 
-const RESULT_LIMIT = 20;
-
-class EmbedSuggestModal extends SuggestModal<EmbedSuggestion> {
+class EmbedSuggestModal extends EditorSuggestModal<EmbedSuggestion> {
   private blockContentCache: { file: TFile; lines: string[] } | null = null;
 
-  constructor(
-    app: App,
-    private editor: EditorLike,
-    private alias: string | null
-  ) {
-    super(app);
-    this.setPlaceholder("Find a file, or type Note# for headings, Note#^ for blocks...");
+  constructor(app: App, editor: EditorLike) {
+    super(app, editor, "Find a file, or type Note# for headings, Note#^ for blocks...");
   }
 
   async getSuggestions(query: string): Promise<EmbedSuggestion[]> {
@@ -41,31 +35,7 @@ class EmbedSuggestModal extends SuggestModal<EmbedSuggestion> {
   }
 
   private getFileSuggestions(query: string): EmbedSuggestion[] {
-    const files = this.app.vault.getFiles();
-    const trimmed = query.trim();
-
-    let fileSuggestions: EmbedSuggestion[];
-    if (trimmed) {
-      const search = prepareFuzzySearch(trimmed);
-      fileSuggestions = files
-        .map((file) => ({ file, result: search(file.basename) }))
-        .filter(
-          (entry): entry is { file: TFile; result: NonNullable<typeof entry.result> } => entry.result !== null
-        )
-        .sort((a, b) => b.result.score - a.result.score)
-        .map((entry) => ({ type: "file" as const, file: entry.file }));
-    } else {
-      fileSuggestions = files.map((file) => ({ type: "file" as const, file }));
-    }
-
-    const results = fileSuggestions.slice(0, RESULT_LIMIT);
-
-    const exactMatch = files.some((file) => file.basename.toLowerCase() === trimmed.toLowerCase());
-    if (trimmed && !exactMatch) {
-      results.push({ type: "create", name: trimmed });
-    }
-
-    return results;
+    return suggestNotes(this.app.vault.getFiles(), query);
   }
 
   private async getFragmentSuggestions(filePart: string, fragmentPart: string): Promise<EmbedSuggestion[]> {
@@ -90,22 +60,11 @@ class EmbedSuggestModal extends SuggestModal<EmbedSuggestion> {
   }
 
   private getHeadingSuggestions(file: TFile, cache: CachedMetadata, headingQuery: string): EmbedSuggestion[] {
-    const headings = cache.headings ?? [];
-    const trimmed = headingQuery.trim();
-
-    let matches: string[];
-    if (trimmed) {
-      const search = prepareFuzzySearch(trimmed);
-      matches = headings
-        .map((h) => ({ heading: h.heading, result: search(h.heading) }))
-        .filter(
-          (entry): entry is { heading: string; result: NonNullable<typeof entry.result> } => entry.result !== null
-        )
-        .sort((a, b) => b.result.score - a.result.score)
-        .map((entry) => entry.heading);
-    } else {
-      matches = headings.map((h) => h.heading);
-    }
+    const matches = fuzzyFilter(
+      (cache.headings ?? []).map((h) => h.heading),
+      headingQuery,
+      (heading) => heading
+    );
 
     return matches.slice(0, RESULT_LIMIT).map((heading) => ({ type: "heading" as const, file, heading }));
   }
@@ -131,20 +90,7 @@ class EmbedSuggestModal extends SuggestModal<EmbedSuggestion> {
       preview: lines[entry.line]?.trim() ?? "",
     }));
 
-    const trimmed = blockQuery.trim();
-    let matches: { id: string; preview: string }[];
-    if (trimmed) {
-      const search = prepareFuzzySearch(trimmed);
-      matches = candidates
-        .map((c) => ({ ...c, result: search(c.id) }))
-        .filter(
-          (entry): entry is { id: string; preview: string; result: NonNullable<typeof entry.result> } =>
-            entry.result !== null
-        )
-        .sort((a, b) => b.result.score - a.result.score);
-    } else {
-      matches = candidates;
-    }
+    const matches = fuzzyFilter(candidates, blockQuery, (candidate) => candidate.id);
 
     return matches
       .slice(0, RESULT_LIMIT)
@@ -198,16 +144,10 @@ class EmbedSuggestModal extends SuggestModal<EmbedSuggestion> {
         target = item.target;
         break;
     }
-    this.editor.replaceSelection(buildEmbedText(target, this.alias));
-    this.editor.focus();
-  }
-
-  onClose(): void {
-    this.editor.focus();
+    this.insert(buildEmbedText(target, this.alias));
   }
 }
 
 export function openEmbedModal(editor: EditorLike, app: App): void {
-  const alias = editor.somethingSelected() ? editor.getSelection() : null;
-  new EmbedSuggestModal(app, editor, alias).open();
+  new EmbedSuggestModal(app, editor).open();
 }

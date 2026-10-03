@@ -1,10 +1,11 @@
-import { App, Component, MarkdownRenderer, Modal, Setting } from "obsidian";
+import { App, Component, MarkdownRenderer, Setting } from "obsidian";
 import type { EditorLike } from "./types";
 import { CALLOUT_TYPES, calloutInsertText } from "./calloutTypes";
+import { FormModal } from "./formModal";
 
 const TYPE_DATALIST_ID = "ribbon-bar-callout-type-options";
 
-class CalloutFormModal extends Modal {
+class CalloutFormModal extends FormModal {
   private typeInput!: HTMLInputElement;
   private titleInput!: HTMLInputElement;
   private contentInput!: HTMLTextAreaElement;
@@ -13,12 +14,8 @@ class CalloutFormModal extends Modal {
   private previewTimer: number | undefined;
   private previewVersion = 0;
 
-  constructor(
-    app: App,
-    private editor: EditorLike
-  ) {
-    super(app);
-    this.setTitle("Insert callout");
+  constructor(app: App, editor: EditorLike) {
+    super(app, editor, "Insert callout");
   }
 
   onOpen(): void {
@@ -35,7 +32,7 @@ class CalloutFormModal extends Modal {
       this.typeInput = text.inputEl;
       text.inputEl.setAttribute("list", TYPE_DATALIST_ID);
       text.setPlaceholder("note");
-      text.inputEl.addEventListener("keydown", (event) => this.handleFieldKeydown(event));
+      this.submitOnEnter(text.inputEl);
       // Picking an entry from the datalist dropdown doesn't reliably fire
       // "input", so also refresh on "change" and when the dropdown closes.
       for (const eventName of ["input", "change", "blur"]) {
@@ -45,7 +42,7 @@ class CalloutFormModal extends Modal {
 
     new Setting(contentEl).setName("Title").addText((text) => {
       this.titleInput = text.inputEl;
-      text.inputEl.addEventListener("keydown", (event) => this.handleFieldKeydown(event));
+      this.submitOnEnter(text.inputEl);
       text.inputEl.addEventListener("input", () => this.schedulePreview());
     });
 
@@ -55,7 +52,7 @@ class CalloutFormModal extends Modal {
       textArea.setValue(initialContent);
       textArea.inputEl.rows = 8;
       textArea.inputEl.addClass("ribbon-bar-callout-content");
-      textArea.inputEl.addEventListener("keydown", (event) => this.handleFieldKeydown(event));
+      this.submitOnEnter(textArea.inputEl);
       textArea.inputEl.addEventListener("input", () => this.schedulePreview());
     });
 
@@ -63,24 +60,9 @@ class CalloutFormModal extends Modal {
     this.previewEl = contentEl.createDiv({ cls: "ribbon-bar-callout-preview markdown-rendered" });
     void this.renderPreview();
 
-    new Setting(contentEl).addButton((button) =>
-      button
-        .setButtonText("Insert")
-        .setCta()
-        .onClick(() => this.submit())
-    );
+    this.addInsertButton();
 
     this.typeInput.focus();
-  }
-
-  private handleFieldKeydown(event: KeyboardEvent): void {
-    const isTextarea = event.target instanceof HTMLTextAreaElement;
-    const isSubmitCombo = event.key === "Enter" && (isTextarea ? event.ctrlKey || event.metaKey : true);
-    if (!isSubmitCombo) {
-      return;
-    }
-    event.preventDefault();
-    this.submit();
   }
 
   private currentMarkdown(): string {
@@ -103,7 +85,7 @@ class CalloutFormModal extends Modal {
     this.previewEl.append(...Array.from(rendered.childNodes));
   }
 
-  private submit(): void {
+  protected submit(): void {
     const text = this.currentMarkdown();
     this.editor.replaceSelection(text);
     this.close();
@@ -112,7 +94,7 @@ class CalloutFormModal extends Modal {
   onClose(): void {
     window.clearTimeout(this.previewTimer);
     this.previewComponent.unload();
-    this.editor.focus();
+    super.onClose();
   }
 }
 

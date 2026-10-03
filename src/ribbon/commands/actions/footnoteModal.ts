@@ -1,16 +1,13 @@
-import { App, Modal, Setting } from "obsidian";
+import { App, Setting } from "obsidian";
 import type { EditorLike } from "./types";
 import { insertFootnote } from "./references";
+import { FormModal } from "./formModal";
 
-class FootnoteFormModal extends Modal {
+class FootnoteFormModal extends FormModal {
   private textInput!: HTMLTextAreaElement;
 
-  constructor(
-    app: App,
-    private editor: EditorLike
-  ) {
-    super(app);
-    this.setTitle("Insert footnote");
+  constructor(app: App, editor: EditorLike) {
+    super(app, editor, "Insert footnote");
   }
 
   onOpen(): void {
@@ -21,35 +18,17 @@ class FootnoteFormModal extends Modal {
       this.textInput = textArea.inputEl;
       textArea.inputEl.rows = 3;
       textArea.inputEl.addClass("ribbon-bar-footnote-content");
-      textArea.inputEl.addEventListener("keydown", (event) => this.handleFieldKeydown(event));
+      this.submitOnEnter(textArea.inputEl);
     });
 
-    new Setting(contentEl).addButton((button) =>
-      button
-        .setButtonText("Insert")
-        .setCta()
-        .onClick(() => this.submit())
-    );
+    this.addInsertButton();
 
     this.textInput.focus();
   }
 
-  private handleFieldKeydown(event: KeyboardEvent): void {
-    const isSubmitCombo = event.key === "Enter" && (event.ctrlKey || event.metaKey);
-    if (!isSubmitCombo) {
-      return;
-    }
-    event.preventDefault();
-    this.submit();
-  }
-
-  private submit(): void {
+  protected submit(): void {
     insertFootnote(this.editor, this.textInput.value.trim());
     this.close();
-  }
-
-  onClose(): void {
-    this.editor.focus();
   }
 }
 
