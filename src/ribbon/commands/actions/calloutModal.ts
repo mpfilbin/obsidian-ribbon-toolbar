@@ -36,7 +36,11 @@ class CalloutFormModal extends Modal {
       text.inputEl.setAttribute("list", TYPE_DATALIST_ID);
       text.setPlaceholder("note");
       text.inputEl.addEventListener("keydown", (event) => this.handleFieldKeydown(event));
-      text.inputEl.addEventListener("input", () => this.schedulePreview());
+      // Picking an entry from the datalist dropdown doesn't reliably fire
+      // "input", so also refresh on "change" and when the dropdown closes.
+      for (const eventName of ["input", "change", "blur"]) {
+        text.inputEl.addEventListener(eventName, () => this.schedulePreview());
+      }
     });
 
     new Setting(contentEl).setName("Title").addText((text) => {
