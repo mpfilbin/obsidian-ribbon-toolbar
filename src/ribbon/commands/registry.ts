@@ -3,7 +3,7 @@ import type { EditorLike } from "./actions/types";
 import * as home from "./actions/home";
 import * as insertActions from "./actions/insert";
 import * as layout from "./actions/layout";
-import { DELETE_COLUMN_ICON, DELETE_ROW_ICON } from "../icons";
+import { DELETE_COLUMN_ICON, DELETE_ROW_ICON } from "../iconIds";
 import * as tableEdit from "./actions/tableEdit";
 import * as latex from "./actions/latex";
 import { HIGHLIGHT_COLORS, highlightWithColor } from "./actions/highlight";
