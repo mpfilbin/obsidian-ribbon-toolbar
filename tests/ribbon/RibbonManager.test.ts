@@ -90,6 +90,51 @@ describe("RibbonManager", () => {
     expect(first.containerEl.querySelector(".ribbon-bar")!.classList.contains("collapsed")).toBe(true);
   });
 
+  describe("remembering the selected tab", () => {
+    const tabButton = (view: FakeView, label: string) =>
+      [...view.containerEl.querySelectorAll<HTMLButtonElement>(".ribbon-tab")].find(
+        (t) => t.textContent!.trim() === label
+      )!;
+    const activeTab = (view: FakeView) =>
+      view.containerEl.querySelector(".ribbon-tab.active")!.textContent!.trim();
+
+    it("opens new ribbons on the configured last tab", () => {
+      const view = makeView();
+      makeManager({ lastTab: "insert" }).attach(view as never);
+      expect(activeTab(view)).toBe("Insert");
+    });
+
+    it("reports tab selections, and opens later ribbons on the latest one without moving existing ones", () => {
+      const onLastTabChange = vi.fn();
+      const manager = makeManager({ onLastTabChange });
+      const first = makeView();
+      const second = makeView();
+      manager.attach(first as never);
+
+      tabButton(first, "References").click();
+      flushSync();
+      expect(onLastTabChange).toHaveBeenCalledWith("references");
+
+      manager.attach(second as never);
+      expect(activeTab(second)).toBe("References");
+
+      tabButton(second, "LaTeX").click();
+      flushSync();
+      expect(activeTab(first)).toBe("References");
+      expect(onLastTabChange).toHaveBeenLastCalledWith("latex");
+    });
+
+    it("works without a callback or a starting tab", () => {
+      const view = makeView();
+      makeManager().attach(view as never);
+      expect(activeTab(view)).toBe("Home");
+      expect(() => {
+        tabButton(view, "Layout").click();
+        flushSync();
+      }).not.toThrow();
+    });
+  });
+
   describe("editor availability", () => {
     it("disables buttons in Reading mode even though view.editor still exists", () => {
       const view = makeView({ mode: "preview" });

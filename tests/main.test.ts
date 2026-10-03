@@ -127,6 +127,20 @@ describe("RibbonBarPlugin", () => {
     expect(spies.properties).toHaveBeenCalledWith(properties);
   });
 
+  it("opens ribbons on the saved tab and saves the tab the user selects", async () => {
+    const { plugin } = await loadPlugin({ lastTab: "layout" });
+    expect(plugin.settings.lastTab).toBe("layout");
+
+    plugin.ribbonManager.rememberTab("latex");
+    expect(plugin.settings.lastTab).toBe("latex");
+    await vi.waitFor(() => expect(plugin.data).toMatchObject({ lastTab: "latex" }));
+  });
+
+  it("defaults the last tab to Home", async () => {
+    const { plugin } = await loadPlugin();
+    expect(plugin.settings.lastTab).toBe("home");
+  });
+
   it("persists settings via saveData and reloads them", async () => {
     const { plugin } = await loadPlugin();
     plugin.settings.ribbonEnabled = false;

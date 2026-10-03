@@ -22,6 +22,11 @@ export default class RibbonBarPlugin extends Plugin implements RibbonBarPluginLi
       enabled: this.settings.ribbonEnabled,
       defaultCollapsed: this.settings.defaultCollapsed,
       frontmatterProperties: this.settings.frontmatterProperties,
+      lastTab: this.settings.lastTab,
+      onLastTabChange: (tab) => {
+        this.settings.lastTab = tab;
+        void this.saveSettings();
+      },
     });
 
     this.addSettingTab(new RibbonBarSettingTab(this.app, this));

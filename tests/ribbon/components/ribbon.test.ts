@@ -131,6 +131,19 @@ describe("RibbonBar", () => {
     expect(target.querySelector(".ribbon-panel")).not.toBeNull();
   });
 
+  it("opens on the given initial tab, falling back to the first for an unknown one", () => {
+    expect(activeLabel(mountBar({ initialTab: "latex" }).target)).toBe("LaTeX");
+    expect(activeLabel(mountBar({ initialTab: "nonsense" }).target)).toBe("Home");
+  });
+
+  it("reports each tab selection", () => {
+    const ontabchange = vi.fn();
+    const { target } = mountBar({ ontabchange });
+    click(tabs(target)[2]);
+    click(tabs(target)[4]);
+    expect(ontabchange.mock.calls).toEqual([["layout"], ["latex"]]);
+  });
+
   it("switches panels when a tab is clicked", () => {
     const { target } = mountBar();
     click(tabs(target)[1]);
