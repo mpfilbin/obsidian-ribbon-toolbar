@@ -304,3 +304,19 @@ describe("Home tab actions", () => {
     expect(editor.getValue()).toBe("item");
   });
 });
+
+describe("clearFormatting footnote definition cleanup", () => {
+  it("deletes a definition that sits above other lines", () => {
+    const editor = createMockEditor("[^1]: note\nbody text[^1]");
+    editor.setSelection({ line: 1, ch: 0 }, { line: 1, ch: 13 });
+    clearFormatting(editor);
+    expect(editor.getValue()).toBe("body text");
+  });
+
+  it("blanks the line when the definition is the only line in the document", () => {
+    const editor = createMockEditor("[^1]: note see[^1]");
+    editor.setSelection({ line: 0, ch: 11 }, { line: 0, ch: 18 });
+    clearFormatting(editor);
+    expect(editor.getValue()).toBe("");
+  });
+});

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   buildPropertyCommands,
   COMMAND_REGISTRY,
@@ -305,5 +305,52 @@ describe("buildPropertyCommands", () => {
 
   it("returns an empty array for an empty property list", () => {
     expect(buildPropertyCommands([])).toEqual([]);
+  });
+});
+
+describe("lazy-loaded modal commands", () => {
+  const modalCommands: [string, string, string][] = [
+    ["callout", "calloutModal", "openCalloutModal"],
+    ["link", "externalLinkModal", "openExternalLinkModal"],
+    ["internal-link", "linkModal", "openLinkModal"],
+    ["embed", "embedModal", "openEmbedModal"],
+    ["footnote", "footnoteModal", "openFootnoteModal"],
+    ["ref-heading-link", "headingLinkModal", "openHeadingLinkModal"],
+  ];
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    for (const [, file] of modalCommands) vi.doUnmock(`../../../src/ribbon/commands/actions/${file}`);
+    vi.resetModules();
+  });
+
+  it.each(modalCommands)("%s opens its modal module with the editor and app", async (id, file, exportName) => {
+    const open = vi.fn();
+    vi.resetModules();
+    vi.doMock(`../../../src/ribbon/commands/actions/${file}`, () => ({ [exportName]: open }));
+    const { COMMAND_REGISTRY: registry } = await import("../../../src/ribbon/commands/registry");
+    const entry = registry.find((c) => c.id === id);
+    expect(entry?.modal, id).toBeTypeOf("function");
+
+    const editor = createMockEditor("");
+    const app = {} as never;
+    entry!.modal!(editor, app);
+    await vi.waitFor(() => expect(open).toHaveBeenCalledWith(editor, app));
+    vi.doUnmock(`../../../src/ribbon/commands/actions/${file}`);
+  });
+
+  it("logs instead of throwing when the modal fails to open", async () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.resetModules();
+    vi.doMock("../../../src/ribbon/commands/actions/calloutModal", () => ({
+      openCalloutModal: () => {
+        throw new Error("boom");
+      },
+    }));
+    const { COMMAND_REGISTRY: registry } = await import("../../../src/ribbon/commands/registry");
+    const entry = registry.find((c) => c.id === "callout")!;
+    expect(() => entry.modal!(createMockEditor(""), {} as never)).not.toThrow();
+    await vi.waitFor(() => expect(error).toHaveBeenCalled());
+    expect(String(error.mock.calls[0][0])).toContain("callout");
   });
 });

@@ -10,11 +10,14 @@
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
     "test": "vitest run",
     "typecheck": "tsc -noEmit -skipLibCheck",
-    "release": "bash scripts/release.sh"
+    "release": "bash scripts/release.sh",
+    "test:coverage": "vitest run --coverage"
   },
   "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^4.0.4",
     "@tsconfig/svelte": "^5.0.4",
     "@types/node": "^20.14.0",
+    "@vitest/coverage-v8": "^2.1.9",
     "esbuild": "^0.21.5",
     "esbuild-svelte": "^0.8.2",
     "jsdom": "^24.1.0",

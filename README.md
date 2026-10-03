@@ -79,8 +79,16 @@ On Windows, see [Working on Windows](#working-on-windows).
 ### Run tests
 
 ```bash
-npm run test
+npm run test            # run once
+npm run test:coverage   # with a coverage report
 ```
+
+Tests run under [Vitest](https://vitest.dev/). Pure editing logic is tested
+against a mock editor (`tests/support/mockEditor.ts`). The `obsidian` package
+ships types only, so tests alias it to a small stand-in
+(`tests/support/obsidian.ts`) that models modals, settings, and the plugin base
+class. UI tests mount the Svelte components and modals in jsdom, marked with a
+`// @vitest-environment jsdom` comment at the top of the file.
 
 ### Working on Windows
 
