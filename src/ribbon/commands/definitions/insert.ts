@@ -11,6 +11,7 @@ import {
 } from "../../iconIds";
 import { openCallout, openExternalLink, openInternalLink, openEmbed } from "../modalLoaders";
 import { SYMBOL_OPTIONS } from "../symbols";
+import { CODE_LANGUAGES } from "../codeLanguages";
 
 export const INSERT_COMMANDS: CommandEntry[] = [
   { id: "link", tab: "insert", group: "Links", icon: "link", label: "Link", modal: openExternalLink },
@@ -105,7 +106,13 @@ export const INSERT_COMMANDS: CommandEntry[] = [
     group: "Code",
     icon: "square-code",
     label: "Code Block",
-    action: insertActions.insertCodeBlock,
+    optionColumns: 3,
+    optionCellWidth: 120,
+    options: CODE_LANGUAGES.map(([fence, label]) => ({
+      id: `code-block-${fence || "plain"}`,
+      label,
+      action: insertActions.insertCodeBlockWithLanguage(fence),
+    })),
   },
   {
     id: "horizontal-rule",

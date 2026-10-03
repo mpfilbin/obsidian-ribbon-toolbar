@@ -31,7 +31,7 @@ Bold, Italic, Strikethrough, Highlight (dropdown: Default plus Obsidian's native
 
 ### Insert tab
 
-Link, Internal Link, Tag, Image, Table, Code Block, Horizontal Rule, Callout
+Link, Internal Link, Tag, Image, Table, Code Block (dropdown: Plain text plus common languages such as JavaScript, TypeScript, HTML, HTTP, C#, Java, C, C++, CSS, Bash / Shell, PHP, Ruby), Horizontal Rule, Callout
 
 ### Layout tab
 

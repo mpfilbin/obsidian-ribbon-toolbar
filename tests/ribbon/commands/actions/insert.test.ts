@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createMockEditor } from "../../../support/mockEditor";
 import {
   insertCodeBlock,
+  insertCodeBlockWithLanguage,
   insertHorizontalRule,
   insertImage,
   insertSymbol,
@@ -54,6 +55,33 @@ describe("Insert tab actions", () => {
     insertCodeBlock(editor);
     expect(editor.getValue()).toBe("```\ncode\n```");
     expect(editor.getSelection()).toBe("code");
+  });
+
+  it("insertCodeBlock puts the language on the opening fence when wrapping a selection", () => {
+    const editor = createMockEditor("let x");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: 5 });
+    insertCodeBlock(editor, "typescript");
+    expect(editor.getValue()).toBe("```typescript\nlet x\n```");
+  });
+
+  it("insertCodeBlock puts the language on the placeholder block and still selects the placeholder", () => {
+    const editor = createMockEditor("");
+    insertCodeBlock(editor, "csharp");
+    expect(editor.getValue()).toBe("```csharp\ncode\n```");
+    expect(editor.getSelection()).toBe("code");
+  });
+
+  it("insertCodeBlock selects the placeholder correctly mid-document", () => {
+    const editor = createMockEditor("intro\n", { line: 1, ch: 0 });
+    insertCodeBlock(editor, "bash");
+    expect(editor.getSelection()).toBe("code");
+    expect(editor.getValue()).toBe("intro\n```bash\ncode\n```");
+  });
+
+  it("insertCodeBlockWithLanguage returns an action bound to that language", () => {
+    const editor = createMockEditor("");
+    insertCodeBlockWithLanguage("python")(editor);
+    expect(editor.getValue()).toBe("```python\ncode\n```");
   });
 
   it("insertTag inserts a placeholder tag and selects it", () => {

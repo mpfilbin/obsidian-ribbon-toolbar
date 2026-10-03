@@ -160,7 +160,7 @@
 
 .ribbon-dropdown-menu-grid {
   display: grid;
-  grid-template-columns: repeat(var(--ribbon-menu-columns, 8), 32px);
+  grid-template-columns: repeat(var(--ribbon-menu-columns, 8), var(--ribbon-menu-cell-width, 32px));
   gap: 2px;
 }
 
@@ -169,6 +169,13 @@
   padding: 0;
   text-align: center;
   font-size: var(--font-ui-medium);
+}
+
+.ribbon-dropdown-menu-text li button {
+  padding: 0 10px;
+  text-align: left;
+  font-size: var(--font-ui-small);
+  white-space: nowrap;
 }
 
 .ribbon-dropdown-menu li button:hover {

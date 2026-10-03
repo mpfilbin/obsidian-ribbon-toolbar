@@ -14,9 +14,9 @@ export interface PaletteCommand {
  * command definitions, so the two never drift apart.
  *
  * Included: plain buttons, modal-backed buttons, and the options of ordinary
- * dropdowns (e.g. "Highlight: Red"). Left out: size-picker grids (they need a
- * size) and grid-layout option menus such as Symbols, whose dozens of entries
- * would crowd the palette.
+ * dropdowns (e.g. "Highlight: Red", "Code Block: Python"). Left out:
+ * size-picker grids (they need a size) and glyph-only menus such as Symbols,
+ * whose dozens of one-character entries would crowd the palette.
  */
 export function buildPaletteCommands(registry: CommandEntry[]): PaletteCommand[] {
   const tabLabels = new Map(TABS.map((tab) => [tab.id, tab.label]));
@@ -31,7 +31,7 @@ export function buildPaletteCommands(registry: CommandEntry[]): PaletteCommand[]
     } else if (entry.modal) {
       const modal = entry.modal;
       commands.push({ id: entry.id, name: prefix, run: (editor, app) => modal(editor, app) });
-    } else if (entry.options && !entry.optionColumns) {
+    } else if (entry.options && !entry.options.some((option) => option.display)) {
       for (const option of entry.options) {
         const action = option.action;
         commands.push({

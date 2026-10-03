@@ -61,12 +61,19 @@ describe("buildPaletteCommands", () => {
     expect(red).toHaveBeenCalledWith(editor);
   });
 
-  it("skips size-picker grids and grid-layout option menus", () => {
+  it("skips size-picker grids and glyph-only option menus", () => {
     const commands = buildPaletteCommands([
       entry({ id: "table", grid: vi.fn() }),
-      entry({ id: "symbols", optionColumns: 8, options: [{ id: "x", label: "X", action: vi.fn() }] }),
+      entry({ id: "symbols", optionColumns: 8, options: [{ id: "x", label: "X  Mark", display: "X", action: vi.fn() }] }),
     ]);
     expect(commands).toEqual([]);
+  });
+
+  it("includes grid-layout menus whose cells are text labels", () => {
+    const commands = buildPaletteCommands([
+      entry({ id: "code", label: "Code Block", optionColumns: 3, optionCellWidth: 120, options: [{ id: "py", label: "Python", action: vi.fn() }] }),
+    ]);
+    expect(commands.map((c) => c.name)).toEqual(["Home: Code Block: Python"]);
   });
 
   describe("for the real registry", () => {
@@ -86,6 +93,7 @@ describe("buildPaletteCommands", () => {
       expect(names).toContain("Home: Highlight: 🔴  Red");
       expect(names.some((n) => n.includes("Symbols"))).toBe(false);
       expect(names).not.toContain("Insert: Table");
+      expect(names).toContain("Insert: Code Block: Python");
     });
 
     it("runs a real command end to end", () => {

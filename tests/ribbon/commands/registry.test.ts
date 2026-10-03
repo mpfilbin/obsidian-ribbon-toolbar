@@ -396,3 +396,42 @@ describe("registry integrity", () => {
     }
   });
 });
+
+describe("code block command", () => {
+  const codeBlock = COMMAND_REGISTRY.find((entry) => entry.id === "code-block");
+
+  it("is an Insert > Code dropdown laid out as a grid of text labels", () => {
+    expect(codeBlock?.tab).toBe("insert");
+    expect(codeBlock?.group).toBe("Code");
+    expect(codeBlock?.action).toBeUndefined();
+    expect(codeBlock?.optionColumns).toBe(3);
+    expect(codeBlock?.optionCellWidth).toBeGreaterThan(32);
+  });
+
+  it("starts with Plain text, then offers the common languages", () => {
+    const labels = codeBlock?.options?.map((option) => option.label) ?? [];
+    expect(labels[0]).toBe("Plain text");
+    for (const language of ["JavaScript", "TypeScript", "HTML", "HTTP", "C#", "Java", "C", "C++", "CSS", "Bash / Shell", "PHP", "Ruby"]) {
+      expect(labels, language).toContain(language);
+    }
+  });
+
+  it.each([
+    ["code-block-plain", "```\ncode\n```"],
+    ["code-block-csharp", "```csharp\ncode\n```"],
+    ["code-block-cpp", "```cpp\ncode\n```"],
+    ["code-block-bash", "```bash\ncode\n```"],
+    ["code-block-http", "```http\ncode\n```"],
+  ])("%s inserts the right fenced block", (id, expected) => {
+    const option = codeBlock?.options?.find((o) => o.id === id);
+    const editor = createMockEditor("");
+    option?.action(editor);
+    expect(editor.getValue()).toBe(expected);
+  });
+
+  it("uses distinct, lowercase, whitespace-free fence ids", () => {
+    const ids = codeBlock?.options?.map((o) => o.id.replace("code-block-", "")) ?? [];
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const id of ids) expect(id).toMatch(/^[a-z+]+$/);
+  });
+});

@@ -133,6 +133,27 @@ describe("Dropdown", () => {
       expect(menu()!.style.left).toBe("8px");
     });
 
+    it("sizes grid cells from optionCellWidth and uses text-cell styling", () => {
+      const cmd = command({ optionColumns: 3, optionCellWidth: 120 });
+      open(cmd);
+      expect(menu()!.style.getPropertyValue("--ribbon-menu-cell-width")).toBe("120px");
+      expect(menu()!.style.getPropertyValue("--ribbon-menu-columns")).toBe("3");
+      expect(menu()!.classList.contains("ribbon-dropdown-menu-text")).toBe(true);
+    });
+
+    it("only tooltips options that show a compact glyph instead of their label", () => {
+      open(command({ optionColumns: 3, optionCellWidth: 120 }));
+      expect(items()[0].title).toBe("");
+      expect(items()[0].textContent!.trim()).toBe("UPPERCASE");
+    });
+
+    it("accounts for a wide cell width when keeping the menu inside the window", () => {
+      vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({ left: 1000, bottom: 10 } as DOMRect);
+      open(command({ optionColumns: 3, optionCellWidth: 120 }));
+      // 3 * (120 + 4) + 16 = 388; 1024 - 388 - 8
+      expect(menu()!.style.left).toBe("628px");
+    });
+
     it("leaves single-column menus unstyled by the grid", () => {
       open(command());
       expect(menu()!.classList.contains("ribbon-dropdown-menu-grid")).toBe(false);

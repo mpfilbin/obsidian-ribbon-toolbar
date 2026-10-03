@@ -22,6 +22,9 @@ export interface CommandEntry {
   options?: CommandOption[];
   // When set, the dropdown lays its options out in this many columns.
   optionColumns?: number;
+  // Width in px of each grid cell. Omit for the narrow glyph cells used by the
+  // Symbols menu; set it for grids of text labels.
+  optionCellWidth?: number;
   modal?: (editor: EditorLike, app: App) => void;
   grid?: (editor: EditorLike, columns: number, rows: number) => void;
   compact?: boolean;

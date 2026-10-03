@@ -6,7 +6,10 @@
 
   let { command, editor }: { command: CommandEntry; editor: EditorLike | null } = $props();
 
-  const GRID_CELL_PX = 36;
+  // Cell width when a command doesn't set optionCellWidth (glyph-sized cells).
+  const DEFAULT_CELL_PX = 32;
+  // Per-cell gap plus the menu's own padding, for estimating the menu's width.
+  const CELL_GAP_PX = 4;
 
   let open = $state(false);
   let menuStyle = $state("");
@@ -33,10 +36,11 @@
       const rect = toggleEl.getBoundingClientRect();
       // Grid menus are wider than the toggle; keep them inside the window.
       const columns = command.optionColumns;
-      const estimatedWidth = columns ? columns * GRID_CELL_PX + 16 : 0;
+      const cellWidth = command.optionCellWidth ?? DEFAULT_CELL_PX;
+      const estimatedWidth = columns ? columns * (cellWidth + CELL_GAP_PX) + 16 : 0;
       const left = Math.max(8, Math.min(rect.left, window.innerWidth - estimatedWidth - 8));
       menuStyle = `position: fixed; top: ${rect.bottom + 2}px; left: ${left}px;`;
-      if (columns) menuStyle += ` --ribbon-menu-columns: ${columns};`;
+      if (columns) menuStyle += ` --ribbon-menu-columns: ${columns}; --ribbon-menu-cell-width: ${cellWidth}px;`;
     }
   }
 
@@ -70,13 +74,15 @@
     <span class="ribbon-button-label">{command.label} ▾</span>
   </button>
   {#if open}
-    <ul class="ribbon-dropdown-menu" class:ribbon-dropdown-menu-grid={!!command.optionColumns} style={menuStyle} use:portal bind:this={menuEl}>
+    <ul class="ribbon-dropdown-menu" class:ribbon-dropdown-menu-grid={!!command.optionColumns}
+      class:ribbon-dropdown-menu-text={!!command.optionCellWidth}
+      style={menuStyle} use:portal bind:this={menuEl}>
       {#each command.options ?? [] as option (option.id)}
         <li>
           <button
             type="button"
-            title={command.optionColumns ? option.label : undefined}
-            aria-label={command.optionColumns ? option.label : undefined}
+            title={option.display ? option.label : undefined}
+            aria-label={option.display ? option.label : undefined}
             onclick={() => choose(option.action)}
           >
             {option.display ?? option.label}
