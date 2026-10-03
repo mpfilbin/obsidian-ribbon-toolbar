@@ -23,7 +23,7 @@
       {#if command.grid}
         <TablePicker {command} {editor} />
       {:else if command.options}
-        <Dropdown {command} {editor} />
+        <Dropdown {command} {editor} {app} />
       {:else}
         <Button {command} {editor} {app} />
       {/if}

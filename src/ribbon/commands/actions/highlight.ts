@@ -11,12 +11,13 @@ export interface HighlightColor {
 }
 
 // The fixed set Obsidian's native color highlights recognize (1.14+). This is
-// deliberately not user-configurable: Obsidian only tints these five emoji, so
+// deliberately not user-configurable: Obsidian only tints these emoji, so
 // an arbitrary palette has nothing to map to.
 export const HIGHLIGHT_COLORS: HighlightColor[] = [
   { id: "default", name: "Default", emoji: "" },
   { id: "red", name: "Red", emoji: "🔴" },
   { id: "orange", name: "Orange", emoji: "🟠" },
+  { id: "yellow", name: "Yellow", emoji: "🟡" },
   { id: "green", name: "Green", emoji: "🟢" },
   { id: "blue", name: "Blue", emoji: "🔵" },
   { id: "purple", name: "Purple", emoji: "🟣" },

@@ -66,8 +66,8 @@
   color: var(--text-faint);
 }
 
-.ribbon-button,
-.ribbon-dropdown .ribbon-button {
+.ribbon-bar .ribbon-button,
+.ribbon-bar .ribbon-dropdown .ribbon-button {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -85,12 +85,12 @@
   box-shadow: none;
 }
 
-.ribbon-button:hover:not(:disabled) {
+.ribbon-bar .ribbon-button:hover:not(:disabled) {
   background-color: var(--background-modifier-hover);
   border-color: var(--background-modifier-border);
 }
 
-.ribbon-button:disabled {
+.ribbon-bar .ribbon-button:disabled {
   color: var(--text-faint);
   cursor: not-allowed;
 }
@@ -116,7 +116,7 @@
   min-height: 0;
 }
 
-.ribbon-button-compact {
+.ribbon-bar .ribbon-button-compact {
   padding: 4px;
 }
 
@@ -142,6 +142,8 @@
   border-radius: 4px;
   box-shadow: var(--shadow-s);
   min-width: 120px;
+  max-height: 50vh;
+  overflow-y: auto;
 }
 
 .ribbon-dropdown-menu li button {
@@ -154,6 +156,26 @@
   color: var(--text-normal);
   cursor: pointer;
   box-shadow: none;
+}
+
+.ribbon-dropdown-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--ribbon-menu-columns, 8), var(--ribbon-menu-cell-width, 32px));
+  gap: 2px;
+}
+
+.ribbon-dropdown-menu-grid li button {
+  height: 32px;
+  padding: 0;
+  text-align: center;
+  font-size: var(--font-ui-medium);
+}
+
+.ribbon-dropdown-menu-text li button {
+  padding: 0 10px;
+  text-align: left;
+  font-size: var(--font-ui-small);
+  white-space: nowrap;
 }
 
 .ribbon-dropdown-menu li button:hover {
@@ -246,4 +268,90 @@
   font-size: var(--font-ui-smaller);
   color: var(--text-muted);
   text-align: center;
+}
+
+.ribbon-bar-callout-preview {
+  margin-top: 4px;
+  padding: 8px;
+  max-height: 40vh;
+  overflow-y: auto;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+}
+
+/* The dialog itself (.modal) sets the width, not its content element. */
+.modal.ribbon-bar-base-modal {
+  width: 880px;
+  max-width: 95vw;
+}
+
+/* Rows with several controls wrap instead of running off the right edge. */
+.ribbon-bar-base-body .setting-item {
+  flex-wrap: wrap;
+  row-gap: 6px;
+}
+
+.ribbon-bar-base-body .setting-item-control {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: 100%;
+}
+
+.ribbon-bar-base-body .setting-item-control input[type="text"],
+.ribbon-bar-base-body .setting-item-control select {
+  max-width: 100%;
+}
+
+.ribbon-bar-base-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.ribbon-bar-base-tab {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  box-shadow: none;
+  color: var(--text-muted);
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.ribbon-bar-base-tab.is-active {
+  color: var(--text-normal);
+  border-bottom-color: var(--interactive-accent);
+}
+
+.ribbon-bar-base-body {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.ribbon-bar-base-body h4 {
+  margin: 16px 0 4px;
+}
+
+.ribbon-bar-base-body .setting-item.is-active {
+  background-color: var(--background-modifier-hover);
+  border-radius: var(--radius-s);
+}
+
+.ribbon-bar-base-body textarea {
+  min-width: 220px;
+  font-family: var(--font-monospace);
+}
+
+.ribbon-bar-base-problems {
+  margin: 8px 0;
+  color: var(--text-error);
+  font-size: var(--font-ui-small);
+}
+
+.ribbon-bar-base-problems ul {
+  margin: 4px 0 0;
+  padding-left: 20px;
 }

@@ -181,3 +181,9 @@ describe("formatMarkdown", () => {
     );
   });
 });
+
+describe("formatMarkdown with an unterminated frontmatter block", () => {
+  it("formats the whole document as body when the opening --- is never closed", () => {
+    expect(formatMarkdown("---\ntitle: x   \n\n\n\ntext")).toBe("---\ntitle: x\n\ntext\n");
+  });
+});

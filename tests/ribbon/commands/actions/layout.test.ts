@@ -171,3 +171,18 @@ describe("Layout tab actions", () => {
     expect(editor.getCursor()).toEqual({ line: 1, ch: 5 });
   });
 });
+
+describe("outdentList with nothing to remove", () => {
+  it("leaves an unindented line and the cursor untouched", () => {
+    const editor = createMockEditor("- item", { line: 0, ch: 3 });
+    outdentList(editor);
+    expect(editor.getValue()).toBe("- item");
+    expect(editor.getCursor()).toEqual({ line: 0, ch: 3 });
+  });
+
+  it("leaves a line indented by fewer spaces than any indent width", () => {
+    const editor = createMockEditor(" - item", { line: 0, ch: 3 });
+    outdentList(editor);
+    expect(editor.getValue()).toBe(" - item");
+  });
+});

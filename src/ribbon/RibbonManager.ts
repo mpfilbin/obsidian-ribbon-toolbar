@@ -4,6 +4,7 @@ import { writable, type Writable } from "svelte/store";
 import RibbonBar from "./components/RibbonBar.svelte";
 import type { EditorLike } from "./commands/actions/types";
 import type { FrontmatterPropertyConfig } from "./commands/actions/frontmatter";
+import type { TabId } from "./commands/types";
 import { findInjectionPoint } from "./injectionPoint";
 
 interface RibbonInstance {
@@ -18,17 +19,24 @@ export class RibbonManager {
   private defaultCollapsed: boolean;
   private propertiesStore: Writable<FrontmatterPropertyConfig[]>;
   private app: App;
+  private lastTab: TabId | undefined;
+  private onLastTabChange: ((tab: TabId) => void) | undefined;
 
   constructor(options: {
     app: App;
     enabled: boolean;
     defaultCollapsed: boolean;
     frontmatterProperties: FrontmatterPropertyConfig[];
+    // The tab new ribbons open on, and a callback so the choice can be saved.
+    lastTab?: TabId;
+    onLastTabChange?: (tab: TabId) => void;
   }) {
     this.app = options.app;
     this.enabled = options.enabled;
     this.defaultCollapsed = options.defaultCollapsed;
     this.propertiesStore = writable(options.frontmatterProperties);
+    this.lastTab = options.lastTab;
+    this.onLastTabChange = options.onLastTabChange;
   }
 
   setEnabled(enabled: boolean): void {
@@ -68,6 +76,13 @@ export class RibbonManager {
     return view.getMode() === "preview" ? null : ((view.editor as unknown as EditorLike) ?? null);
   }
 
+  // New ribbons open on the most recently chosen tab; existing panes keep
+  // whatever tab they are showing.
+  private rememberTab(tab: TabId): void {
+    this.lastTab = tab;
+    this.onLastTabChange?.(tab);
+  }
+
   attach(view: MarkdownView): void {
     if (!this.enabled) return;
 
@@ -96,6 +111,8 @@ export class RibbonManager {
         defaultCollapsed: this.defaultCollapsed,
         propertiesStore: this.propertiesStore,
         app: this.app,
+        initialTab: this.lastTab,
+        ontabchange: (tab: TabId) => this.rememberTab(tab),
       },
     });
 

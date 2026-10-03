@@ -1,50 +1,19 @@
-import { App, SuggestModal, TFile, prepareFuzzySearch } from "obsidian";
+import { App, TFile } from "obsidian";
 import type { EditorLike } from "./types";
 import { buildLinkText } from "./linkText";
+import { EditorSuggestModal } from "./editorSuggestModal";
+import { suggestNotes, type NoteSuggestion } from "./fuzzySuggest";
 
-type LinkSuggestion = { type: "file"; file: TFile } | { type: "create"; name: string };
-
-const RESULT_LIMIT = 20;
-
-class LinkSuggestModal extends SuggestModal<LinkSuggestion> {
-  constructor(
-    app: App,
-    private editor: EditorLike,
-    private alias: string | null
-  ) {
-    super(app);
-    this.setPlaceholder("Find or create a note...");
+class LinkSuggestModal extends EditorSuggestModal<NoteSuggestion> {
+  constructor(app: App, editor: EditorLike) {
+    super(app, editor, "Find or create a note...");
   }
 
-  getSuggestions(query: string): LinkSuggestion[] {
-    const files = this.app.vault.getMarkdownFiles();
-    const trimmed = query.trim();
-
-    let fileSuggestions: LinkSuggestion[];
-    if (trimmed) {
-      const search = prepareFuzzySearch(trimmed);
-      fileSuggestions = files
-        .map((file) => ({ file, result: search(file.basename) }))
-        .filter(
-          (entry): entry is { file: TFile; result: NonNullable<typeof entry.result> } => entry.result !== null
-        )
-        .sort((a, b) => b.result.score - a.result.score)
-        .map((entry) => ({ type: "file" as const, file: entry.file }));
-    } else {
-      fileSuggestions = files.map((file) => ({ type: "file" as const, file }));
-    }
-
-    const results = fileSuggestions.slice(0, RESULT_LIMIT);
-
-    const exactMatch = files.some((file) => file.basename.toLowerCase() === trimmed.toLowerCase());
-    if (trimmed && !exactMatch) {
-      results.push({ type: "create", name: trimmed });
-    }
-
-    return results;
+  getSuggestions(query: string): NoteSuggestion[] {
+    return suggestNotes(this.app.vault.getMarkdownFiles(), query);
   }
 
-  renderSuggestion(item: LinkSuggestion, el: HTMLElement): void {
+  renderSuggestion(item: NoteSuggestion, el: HTMLElement): void {
     if (item.type === "create") {
       el.createEl("div", { text: `Create new note: "${item.name}"` });
       return;
@@ -55,20 +24,14 @@ class LinkSuggestModal extends SuggestModal<LinkSuggestion> {
     }
   }
 
-  onChooseSuggestion(item: LinkSuggestion): void {
+  onChooseSuggestion(item: NoteSuggestion): void {
     const sourcePath = this.app.workspace.getActiveFile()?.path ?? "";
     const target =
       item.type === "file" ? this.app.metadataCache.fileToLinktext(item.file, sourcePath) : item.name;
-    this.editor.replaceSelection(buildLinkText(target, this.alias));
-    this.editor.focus();
-  }
-
-  onClose(): void {
-    this.editor.focus();
+    this.insert(buildLinkText(target, this.alias));
   }
 }
 
 export function openLinkModal(editor: EditorLike, app: App): void {
-  const alias = editor.somethingSelected() ? editor.getSelection() : null;
-  new LinkSuggestModal(app, editor, alias).open();
+  new LinkSuggestModal(app, editor).open();
 }

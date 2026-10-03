@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   buildPropertyCommands,
   COMMAND_REGISTRY,
@@ -151,15 +151,24 @@ describe("Document parity commands", () => {
     ]);
   });
 
-  it("symbols offers a curated set of typography symbol options in the Insert tab", () => {
+  it("symbols offers a curated set of typography, math, and currency symbol options in the Insert tab", () => {
     const symbols = COMMAND_REGISTRY.find((entry) => entry.id === "symbols");
     expect(symbols?.tab).toBe("insert");
     expect(symbols?.group).toBe("Symbols");
     expect(symbols?.action).toBeUndefined();
-    expect(symbols?.options?.length).toBe(14);
+    expect(symbols?.options?.length).toBe(45);
     for (const option of symbols?.options ?? []) {
       expect(typeof option.action).toBe("function");
     }
+  });
+
+  it("symbols is laid out as a multi-column grid with a compact glyph per option", () => {
+    const symbols = COMMAND_REGISTRY.find((entry) => entry.id === "symbols");
+    expect(symbols?.optionColumns).toBe(8);
+    const emDash = symbols?.options?.find((option) => option.id === "sym-em-dash");
+    expect(emDash?.display).toBe("—");
+    const nbsp = symbols?.options?.find((option) => option.id === "sym-nbsp");
+    expect(nbsp?.display).toBe("\u2423");
   });
 
   it("the Em Dash symbol option inserts an em dash at the cursor", () => {
@@ -182,7 +191,7 @@ describe("Document parity commands", () => {
 describe("highlight command", () => {
   const highlight = COMMAND_REGISTRY.find((entry) => entry.id === "highlight");
 
-  it("is a static Home tab Font-group dropdown with Default plus the five native colors", () => {
+  it("is a static Home tab Font-group dropdown with Default plus the native colors", () => {
     expect(highlight?.tab).toBe("home");
     expect(highlight?.group).toBe("Font");
     expect(highlight?.action).toBeUndefined();
@@ -190,6 +199,7 @@ describe("highlight command", () => {
       "Default",
       "🔴  Red",
       "🟠  Orange",
+      "🟡  Yellow",
       "🟢  Green",
       "🔵  Blue",
       "🟣  Purple",
@@ -295,5 +305,133 @@ describe("buildPropertyCommands", () => {
 
   it("returns an empty array for an empty property list", () => {
     expect(buildPropertyCommands([])).toEqual([]);
+  });
+});
+
+describe("lazy-loaded modal commands", () => {
+  const modalCommands: [string, string, string][] = [
+    ["callout", "calloutModal", "openCalloutModal"],
+    ["link", "externalLinkModal", "openExternalLinkModal"],
+    ["internal-link", "linkModal", "openLinkModal"],
+    ["embed", "embedModal", "openEmbedModal"],
+    ["footnote", "footnoteModal", "openFootnoteModal"],
+    ["ref-heading-link", "headingLinkModal", "openHeadingLinkModal"],
+  ];
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    for (const [, file] of modalCommands) vi.doUnmock(`../../../src/ribbon/commands/actions/${file}`);
+    vi.resetModules();
+  });
+
+  it.each(modalCommands)("%s opens its modal module with the editor and app", async (id, file, exportName) => {
+    const open = vi.fn();
+    vi.resetModules();
+    vi.doMock(`../../../src/ribbon/commands/actions/${file}`, () => ({ [exportName]: open }));
+    const { COMMAND_REGISTRY: registry } = await import("../../../src/ribbon/commands/registry");
+    const entry = registry.find((c) => c.id === id);
+    expect(entry?.modal, id).toBeTypeOf("function");
+
+    const editor = createMockEditor("");
+    const app = {} as never;
+    entry!.modal!(editor, app);
+    await vi.waitFor(() => expect(open).toHaveBeenCalledWith(editor, app));
+    vi.doUnmock(`../../../src/ribbon/commands/actions/${file}`);
+  });
+
+  it("logs instead of throwing when the modal fails to open", async () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.resetModules();
+    vi.doMock("../../../src/ribbon/commands/actions/calloutModal", () => ({
+      openCalloutModal: () => {
+        throw new Error("boom");
+      },
+    }));
+    const { COMMAND_REGISTRY: registry } = await import("../../../src/ribbon/commands/registry");
+    const entry = registry.find((c) => c.id === "callout")!;
+    expect(() => entry.modal!(createMockEditor(""), {} as never)).not.toThrow();
+    await vi.waitFor(() => expect(error).toHaveBeenCalled());
+    expect(String(error.mock.calls[0][0])).toContain("callout");
+  });
+});
+
+describe("registry integrity", () => {
+  it("gives every command a unique id", () => {
+    const ids = COMMAND_REGISTRY.map((entry) => entry.id);
+    expect(ids.filter((id, index) => ids.indexOf(id) !== index)).toEqual([]);
+  });
+
+  it("places every command on a known tab with a group, icon and label", () => {
+    const tabIds = TABS.map((tab) => tab.id);
+    for (const entry of COMMAND_REGISTRY) {
+      expect(tabIds, entry.id).toContain(entry.tab);
+      expect(entry.group, entry.id).not.toBe("");
+      expect(entry.icon, entry.id).not.toBe("");
+      expect(entry.label, entry.id).not.toBe("");
+    }
+  });
+
+  it("gives every command exactly one way to run", () => {
+    for (const entry of COMMAND_REGISTRY) {
+      const behaviors = [entry.action, entry.options, entry.modal, entry.grid].filter((b) => b !== undefined);
+      expect(behaviors, entry.id).toHaveLength(1);
+    }
+  });
+
+  it("gives every dropdown option a unique id within its command and a runnable action", () => {
+    for (const entry of COMMAND_REGISTRY.filter((c) => c.options)) {
+      const ids = entry.options!.map((option) => option.id);
+      expect(new Set(ids).size, entry.id).toBe(ids.length);
+      for (const option of entry.options!) expect(option.action, option.id).toBeTypeOf("function");
+    }
+  });
+
+  it("keeps every tab populated, in TABS order", () => {
+    for (const tab of TABS) expect(commandsForTab(tab.id).length, tab.id).toBeGreaterThan(0);
+  });
+
+  it("only marks commands compact when they are plain buttons", () => {
+    for (const entry of COMMAND_REGISTRY.filter((c) => c.compact)) {
+      expect(entry.options ?? entry.grid, entry.id).toBeUndefined();
+    }
+  });
+});
+
+describe("code block command", () => {
+  const codeBlock = COMMAND_REGISTRY.find((entry) => entry.id === "code-block");
+
+  it("is an Insert > Code dropdown laid out as a grid of text labels", () => {
+    expect(codeBlock?.tab).toBe("insert");
+    expect(codeBlock?.group).toBe("Code");
+    expect(codeBlock?.action).toBeUndefined();
+    expect(codeBlock?.optionColumns).toBe(3);
+    expect(codeBlock?.optionCellWidth).toBeGreaterThan(32);
+  });
+
+  it("starts with Plain text, then offers the common languages", () => {
+    const labels = codeBlock?.options?.map((option) => option.label) ?? [];
+    expect(labels[0]).toBe("Plain text");
+    for (const language of ["JavaScript", "TypeScript", "HTML", "HTTP", "C#", "Java", "C", "C++", "CSS", "Bash / Shell", "PHP", "Ruby"]) {
+      expect(labels, language).toContain(language);
+    }
+  });
+
+  it.each([
+    ["code-block-plain", "```\ncode\n```"],
+    ["code-block-csharp", "```csharp\ncode\n```"],
+    ["code-block-cpp", "```cpp\ncode\n```"],
+    ["code-block-bash", "```bash\ncode\n```"],
+    ["code-block-http", "```http\ncode\n```"],
+  ])("%s inserts the right fenced block", (id, expected) => {
+    const option = codeBlock?.options?.find((o) => o.id === id);
+    const editor = createMockEditor("");
+    option?.action(editor);
+    expect(editor.getValue()).toBe(expected);
+  });
+
+  it("uses distinct, lowercase, whitespace-free fence ids", () => {
+    const ids = codeBlock?.options?.map((o) => o.id.replace("code-block-", "")) ?? [];
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const id of ids) expect(id).toMatch(/^[a-z+]+$/);
   });
 });

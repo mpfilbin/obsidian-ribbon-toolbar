@@ -45,3 +45,11 @@ describe("findEnclosingTable", () => {
     expect(findEnclosingTable(editor, 100)).toBeNull();
   });
 });
+
+describe("column alignment markers", () => {
+  it("parses a centered column (colons on both sides)", () => {
+    const doc = "| A | B | C |\n|:-:|:--|--:|\n| 1 | 2 | 3 |";
+    const editor = createMockEditor(doc, { line: 0, ch: 0 });
+    expect(findEnclosingTable(editor, 0)?.align).toEqual(["c", "l", "r"]);
+  });
+});

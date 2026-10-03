@@ -13,20 +13,25 @@
     defaultCollapsed,
     propertiesStore,
     app,
+    initialTab = TABS[0].id,
+    ontabchange,
   }: {
     editorStore: Writable<EditorLike | null>;
     defaultCollapsed: boolean;
     propertiesStore: Writable<FrontmatterPropertyConfig[]>;
     app: App;
+    initialTab?: TabId;
+    ontabchange?: (tab: TabId) => void;
   } = $props();
 
   let editor = $derived($editorStore);
 
-  let activeTab = $state<TabId>(TABS[0].id);
+  let activeTab = $state<TabId>(TABS.some((tab) => tab.id === initialTab) ? initialTab : TABS[0].id);
   let collapsed = $state(defaultCollapsed);
 
   function selectTab(tab: TabId) {
     activeTab = tab;
+    ontabchange?.(tab);
   }
 
   function toggleCollapsed() {

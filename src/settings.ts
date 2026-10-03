@@ -1,14 +1,18 @@
 import type { FrontmatterPropertyConfig } from "./ribbon/commands/actions/frontmatter";
+import type { TabId } from "./ribbon/commands/types";
 
 export interface RibbonBarSettings {
   ribbonEnabled: boolean;
   defaultCollapsed: boolean;
+  // The tab most recently selected, so new panes and restarts reopen on it.
+  lastTab: TabId;
   frontmatterProperties: FrontmatterPropertyConfig[];
 }
 
 export const DEFAULT_SETTINGS: RibbonBarSettings = {
   ribbonEnabled: true,
   defaultCollapsed: false,
+  lastTab: "home",
   frontmatterProperties: [
     { name: "tags", type: "list" },
     { name: "description", type: "text" },

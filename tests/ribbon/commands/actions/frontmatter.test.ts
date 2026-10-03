@@ -69,3 +69,11 @@ describe("insertProperty", () => {
     expect(editor.getValue()).toBe("---\na.b: 1\n---\nBody text");
   });
 });
+
+describe("insertProperty with an unterminated frontmatter block", () => {
+  it("treats an opening --- with no closing --- as no frontmatter and creates a new block", () => {
+    const editor = createMockEditor("---\ntitle: x\nbody", { line: 0, ch: 0 });
+    insertProperty({ name: "tags", type: "text" })(editor);
+    expect(editor.getValue().startsWith("---\ntags: \n---\n")).toBe(true);
+  });
+});

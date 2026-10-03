@@ -1,6 +1,6 @@
 {
   "name": "ribbon-bar",
-  "version": "0.14.0",
+  "version": "0.15.0",
   "private": true,
   "description": "An Office-style multi-tab editing ribbon for Obsidian Markdown notes.",
   "license": "MIT",
@@ -10,11 +10,14 @@
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
     "test": "vitest run",
     "typecheck": "tsc -noEmit -skipLibCheck",
-    "release": "bash scripts/release.sh"
+    "release": "bash scripts/release.sh",
+    "test:coverage": "vitest run --coverage"
   },
   "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^4.0.4",
     "@tsconfig/svelte": "^5.0.4",
     "@types/node": "^20.14.0",
+    "@vitest/coverage-v8": "^2.1.9",
     "esbuild": "^0.21.5",
     "esbuild-svelte": "^0.8.2",
     "jsdom": "^24.1.0",
@@ -22,7 +25,8 @@
     "svelte": "^5.0.0",
     "tslib": "^2.6.3",
     "typescript": "^5.5.2",
-    "vitest": "^2.0.0"
+    "vitest": "^2.0.0",
+    "yaml": "^2.9.1"
   },
   "dependencies": {
     "markdown-table": "^3.0.4"

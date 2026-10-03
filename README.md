@@ -31,7 +31,7 @@ Bold, Italic, Strikethrough, Highlight (dropdown: Default plus Obsidian's native
 
 ### Insert tab
 
-Link, Internal Link, Tag, Image, Table, Code Block, Horizontal Rule, Callout
+Link, Internal Link, Tag, Image, Table, Code Block (dropdown: Plain text plus common languages such as JavaScript, TypeScript, HTML, HTTP, C#, Java, C, C++, CSS, Bash / Shell, PHP, Ruby), Horizontal Rule, Callout
 
 ### Layout tab
 
@@ -41,9 +41,25 @@ Promote/Demote Heading, Indent/Outdent, Move Line Up/Down, Table of Contents
 
 Footnote, Internal Link, Tag, Callout
 
+### Bases tab
+
+Tools for [Obsidian Bases](https://obsidian.md/help/bases), working on both kinds of embedded base: a ```base code block inside the note, and a standalone `.base` file embedded with `![[Name.base]]` (optionally pinned to a view with `![[Name.base#View]]`). Commands act on the base the cursor is in or on; with the cursor elsewhere they use the note's only base, or ask which one when there are several.
+
+- **Base**: *New Base* creates an inline block or a separate `.base` file (first view type and name, optionally pre-filtered to this note's folder, a tag, or notes linking here) and embeds it. *Embed Base* embeds an existing `.base` file or one of its views. *Edit Base* opens the editor below.
+- **Views**: *Add View* adds a Table, Cards, List or Map view in one click. *Edit Views* renames, reorders, duplicates and deletes views and sets each view's columns, sorting, grouping, limit, per-column summaries, filters, and any other view-specific options.
+- **Filters**: *Quick Filter* adds a ready-made condition (this note's folder, links to or from this note, recently created or modified). *Filters* builds conditions from a property, operator and value, or from tags, folders, links and dates, for the whole base or one view, matching all, any or none of them.
+- **Formulas**: *Formulas* adds, edits, renames and deletes formulas, warning about unbalanced brackets or quotes, with an insert-a-function picker. The **Functions** menus (Functions, Text, Number, List, Date, File) insert a function call at the cursor; hover a cell for its signature.
+- **Columns**: *Properties* sets friendlier column names. *Summaries* manages custom summary formulas.
+
+The editor works on a copy and only writes the base when you press Save. Unrecognised keys in the base are preserved. Bases whose YAML can't be parsed are left alone.
+
 ### Collapsing the ribbon
 
 Double-click any tab to collapse the ribbon to just the tab strip. Double-click again to expand it.
+
+### Hotkeys and the command palette
+
+Ribbon commands are also available in Obsidian's command palette (search for "Ribbon Bar") and can be bound to hotkeys under Settings → Hotkeys. They are named by tab, for example "Home: Bold" or "Insert: Delete Row", run in an editable Markdown editor, and include each option of the ordinary dropdowns such as "Home: Highlight: Red". The size-picker (Table) and the Symbols grid are ribbon-only.
 
 ## Settings
 
@@ -74,11 +90,60 @@ npm run dev
 ./scripts/install.sh /path/to/your/vault
 ```
 
+On Windows, see [Working on Windows](#working-on-windows).
+
 ### Run tests
 
 ```bash
+npm run test            # run once
+npm run test:coverage   # with a coverage report
+```
+
+Tests run under [Vitest](https://vitest.dev/). Pure editing logic is tested
+against a mock editor (`tests/support/mockEditor.ts`). The `obsidian` package
+ships types only, so tests alias it to a small stand-in
+(`tests/support/obsidian.ts`) that models modals, settings, and the plugin base
+class. UI tests mount the Svelte components and modals in jsdom, marked with a
+`// @vitest-environment jsdom` comment at the top of the file.
+
+### Working on Windows
+
+Prerequisites: [Node.js](https://nodejs.org/) (includes `npm`) and Git. The
+PowerShell scripts work with the Windows PowerShell 5.1 that ships with
+Windows, or with PowerShell 7+.
+
+Setup, dev mode, and tests use the same `npm` commands as above and run fine
+from PowerShell or Command Prompt:
+
+```powershell
+npm install
+npm run dev
 npm run test
 ```
+
+Install the plugin into a test vault, and remove it again, with the
+PowerShell equivalents of `install.sh` and `uninstall.sh`:
+
+```powershell
+.\scripts\install.ps1 C:\path\to\your\vault
+.\scripts\uninstall.ps1 C:\path\to\your\vault
+```
+
+`install.ps1` builds the plugin and copies `main.js`, `manifest.json`, and
+`styles.css` to `<vault>\.obsidian\plugins\ribbon-bar`. `uninstall.ps1`
+deletes that folder and removes the plugin from the vault's
+`community-plugins.json`. After either, reload Obsidian's community plugins
+(or restart Obsidian) to pick up the change.
+
+If PowerShell refuses to run the scripts because of the execution policy, run
+them for a single invocation with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 C:\path\to\your\vault
+```
+
+`npm run release` runs a bash script, so run it from Git Bash or WSL rather
+than PowerShell.
 
 ### Bump version and prepare a release
 
