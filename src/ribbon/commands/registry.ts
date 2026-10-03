@@ -3,6 +3,7 @@ import type { EditorLike } from "./actions/types";
 import * as home from "./actions/home";
 import * as insertActions from "./actions/insert";
 import * as layout from "./actions/layout";
+import { DELETE_COLUMN_ICON, DELETE_ROW_ICON } from "../icons";
 import * as tableEdit from "./actions/tableEdit";
 import * as latex from "./actions/latex";
 import { HIGHLIGHT_COLORS, highlightWithColor } from "./actions/highlight";
@@ -240,7 +241,7 @@ export const COMMAND_REGISTRY: CommandEntry[] = [
     id: "table-delete-row",
     tab: "insert",
     group: "Tables",
-    icon: "rows-3",
+    icon: DELETE_ROW_ICON,
     label: "Delete Row",
     action: tableEdit.deleteRow,
     compact: true,
@@ -267,7 +268,7 @@ export const COMMAND_REGISTRY: CommandEntry[] = [
     id: "table-delete-column",
     tab: "insert",
     group: "Tables",
-    icon: "columns-3",
+    icon: DELETE_COLUMN_ICON,
     label: "Delete Column",
     action: tableEdit.deleteColumn,
     compact: true,

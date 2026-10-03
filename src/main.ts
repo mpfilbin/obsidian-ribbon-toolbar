@@ -3,6 +3,7 @@ import { mergeSettings, type RibbonBarSettings } from "./settings";
 import { RibbonBarSettingTab } from "./settings-tab";
 import type { RibbonBarPluginLike } from "./plugin-contract";
 import { RibbonManager } from "./ribbon/RibbonManager";
+import { registerCustomIcons } from "./ribbon/icons";
 import type { FrontmatterPropertyConfig } from "./ribbon/commands/actions/frontmatter";
 
 export default class RibbonBarPlugin extends Plugin implements RibbonBarPluginLike {
@@ -11,6 +12,7 @@ export default class RibbonBarPlugin extends Plugin implements RibbonBarPluginLi
 
   async onload(): Promise<void> {
     await this.loadSettings();
+    registerCustomIcons();
 
     this.ribbonManager = new RibbonManager({
       app: this.app,
