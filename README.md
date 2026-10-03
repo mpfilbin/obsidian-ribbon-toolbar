@@ -74,21 +74,52 @@ npm run dev
 ./scripts/install.sh /path/to/your/vault
 ```
 
-On Windows (PowerShell):
-
-```powershell
-.\scripts\install.ps1 C:\path\to\your\vault
-.\scripts\uninstall.ps1 C:\path\to\your\vault
-```
-
-If script execution is blocked, run them with
-`powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 <vault>`.
+On Windows, see [Working on Windows](#working-on-windows).
 
 ### Run tests
 
 ```bash
 npm run test
 ```
+
+### Working on Windows
+
+Prerequisites: [Node.js](https://nodejs.org/) (includes `npm`) and Git. The
+PowerShell scripts work with the Windows PowerShell 5.1 that ships with
+Windows, or with PowerShell 7+.
+
+Setup, dev mode, and tests use the same `npm` commands as above and run fine
+from PowerShell or Command Prompt:
+
+```powershell
+npm install
+npm run dev
+npm run test
+```
+
+Install the plugin into a test vault, and remove it again, with the
+PowerShell equivalents of `install.sh` and `uninstall.sh`:
+
+```powershell
+.\scripts\install.ps1 C:\path\to\your\vault
+.\scripts\uninstall.ps1 C:\path\to\your\vault
+```
+
+`install.ps1` builds the plugin and copies `main.js`, `manifest.json`, and
+`styles.css` to `<vault>\.obsidian\plugins\ribbon-bar`. `uninstall.ps1`
+deletes that folder and removes the plugin from the vault's
+`community-plugins.json`. After either, reload Obsidian's community plugins
+(or restart Obsidian) to pick up the change.
+
+If PowerShell refuses to run the scripts because of the execution policy, run
+them for a single invocation with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 C:\path\to\your\vault
+```
+
+`npm run release` runs a bash script, so run it from Git Bash or WSL rather
+than PowerShell.
 
 ### Bump version and prepare a release
 
