@@ -3,7 +3,14 @@ import type { EditorLike } from "./actions/types";
 import * as home from "./actions/home";
 import * as insertActions from "./actions/insert";
 import * as layout from "./actions/layout";
-import { DELETE_COLUMN_ICON, DELETE_ROW_ICON } from "../iconIds";
+import {
+  DELETE_COLUMN_ICON,
+  DELETE_ROW_ICON,
+  INSERT_COLUMN_LEFT_ICON,
+  INSERT_COLUMN_RIGHT_ICON,
+  INSERT_ROW_ABOVE_ICON,
+  INSERT_ROW_BELOW_ICON,
+} from "../iconIds";
 import * as tableEdit from "./actions/tableEdit";
 import * as latex from "./actions/latex";
 import { HIGHLIGHT_COLORS, highlightWithColor } from "./actions/highlight";
@@ -223,7 +230,7 @@ export const COMMAND_REGISTRY: CommandEntry[] = [
     id: "table-insert-row-above",
     tab: "insert",
     group: "Tables",
-    icon: "arrow-up-to-line",
+    icon: INSERT_ROW_ABOVE_ICON,
     label: "Insert Row Above",
     action: tableEdit.insertRowAbove,
     compact: true,
@@ -232,7 +239,7 @@ export const COMMAND_REGISTRY: CommandEntry[] = [
     id: "table-insert-column-left",
     tab: "insert",
     group: "Tables",
-    icon: "arrow-left-to-line",
+    icon: INSERT_COLUMN_LEFT_ICON,
     label: "Insert Column Left",
     action: tableEdit.insertColumnLeft,
     compact: true,
@@ -250,7 +257,7 @@ export const COMMAND_REGISTRY: CommandEntry[] = [
     id: "table-insert-row-below",
     tab: "insert",
     group: "Tables",
-    icon: "arrow-down-to-line",
+    icon: INSERT_ROW_BELOW_ICON,
     label: "Insert Row Below",
     action: tableEdit.insertRowBelow,
     compact: true,
@@ -259,7 +266,7 @@ export const COMMAND_REGISTRY: CommandEntry[] = [
     id: "table-insert-column-right",
     tab: "insert",
     group: "Tables",
-    icon: "arrow-right-to-line",
+    icon: INSERT_COLUMN_RIGHT_ICON,
     label: "Insert Column Right",
     action: tableEdit.insertColumnRight,
     compact: true,
