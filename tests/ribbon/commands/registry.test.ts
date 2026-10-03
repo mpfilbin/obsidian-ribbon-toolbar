@@ -354,3 +354,45 @@ describe("lazy-loaded modal commands", () => {
     expect(String(error.mock.calls[0][0])).toContain("callout");
   });
 });
+
+describe("registry integrity", () => {
+  it("gives every command a unique id", () => {
+    const ids = COMMAND_REGISTRY.map((entry) => entry.id);
+    expect(ids.filter((id, index) => ids.indexOf(id) !== index)).toEqual([]);
+  });
+
+  it("places every command on a known tab with a group, icon and label", () => {
+    const tabIds = TABS.map((tab) => tab.id);
+    for (const entry of COMMAND_REGISTRY) {
+      expect(tabIds, entry.id).toContain(entry.tab);
+      expect(entry.group, entry.id).not.toBe("");
+      expect(entry.icon, entry.id).not.toBe("");
+      expect(entry.label, entry.id).not.toBe("");
+    }
+  });
+
+  it("gives every command exactly one way to run", () => {
+    for (const entry of COMMAND_REGISTRY) {
+      const behaviors = [entry.action, entry.options, entry.modal, entry.grid].filter((b) => b !== undefined);
+      expect(behaviors, entry.id).toHaveLength(1);
+    }
+  });
+
+  it("gives every dropdown option a unique id within its command and a runnable action", () => {
+    for (const entry of COMMAND_REGISTRY.filter((c) => c.options)) {
+      const ids = entry.options!.map((option) => option.id);
+      expect(new Set(ids).size, entry.id).toBe(ids.length);
+      for (const option of entry.options!) expect(option.action, option.id).toBeTypeOf("function");
+    }
+  });
+
+  it("keeps every tab populated, in TABS order", () => {
+    for (const tab of TABS) expect(commandsForTab(tab.id).length, tab.id).toBeGreaterThan(0);
+  });
+
+  it("only marks commands compact when they are plain buttons", () => {
+    for (const entry of COMMAND_REGISTRY.filter((c) => c.compact)) {
+      expect(entry.options ?? entry.grid, entry.id).toBeUndefined();
+    }
+  });
+});
