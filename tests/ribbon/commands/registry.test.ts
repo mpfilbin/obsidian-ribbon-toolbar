@@ -162,6 +162,15 @@ describe("Document parity commands", () => {
     }
   });
 
+  it("symbols is laid out as a multi-column grid with a compact glyph per option", () => {
+    const symbols = COMMAND_REGISTRY.find((entry) => entry.id === "symbols");
+    expect(symbols?.optionColumns).toBe(8);
+    const emDash = symbols?.options?.find((option) => option.id === "sym-em-dash");
+    expect(emDash?.display).toBe("—");
+    const nbsp = symbols?.options?.find((option) => option.id === "sym-nbsp");
+    expect(nbsp?.display).toBe("\u2423");
+  });
+
   it("the Em Dash symbol option inserts an em dash at the cursor", () => {
     const symbols = COMMAND_REGISTRY.find((entry) => entry.id === "symbols");
     const emDash = symbols?.options?.find((option) => option.id === "sym-em-dash");

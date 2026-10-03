@@ -22,6 +22,9 @@ export type TabId = "home" | "insert" | "layout" | "references" | "latex";
 export interface CommandOption {
   id: string;
   label: string;
+  // Compact text shown in place of the label when the menu is a grid; the
+  // label is then only the tooltip.
+  display?: string;
   action: (editor: EditorLike) => void;
 }
 
@@ -33,6 +36,8 @@ export interface CommandEntry {
   label: string;
   action?: (editor: EditorLike) => void;
   options?: CommandOption[];
+  // When set, the dropdown lays its options out in this many columns.
+  optionColumns?: number;
   modal?: (editor: EditorLike, app: App) => void;
   grid?: (editor: EditorLike, columns: number, rows: number) => void;
   compact?: boolean;
@@ -81,6 +86,63 @@ function openHeadingLink(editor: EditorLike, app: App): void {
     .then((module) => module.openHeadingLinkModal(editor, app))
     .catch((error) => console.error("Ribbon Bar: failed to open heading link modal", error));
 }
+
+// [id, label, character] for every entry in the Insert > Symbols grid.
+const SYMBOLS: [string, string, string][] = [
+  ["sym-em-dash", "—  Em Dash", "—"],
+  ["sym-en-dash", "–  En Dash", "–"],
+  ["sym-ellipsis", "…  Ellipsis", "…"],
+  ["sym-nbsp", "Non-breaking Space", " "],
+  ["sym-copyright", "©  Copyright", "©"],
+  ["sym-registered", "®  Registered", "®"],
+  ["sym-trademark", "™  Trademark", "™"],
+  ["sym-degree", "°  Degree", "°"],
+  ["sym-section", "§  Section", "§"],
+  ["sym-paragraph", "¶  Paragraph", "¶"],
+  ["sym-bullet", "•  Bullet", "•"],
+  ["sym-check", "✓  Checkmark", "✓"],
+  ["sym-cross", "✗  Cross", "✗"],
+  ["sym-arrow-right", "→  Right Arrow", "→"],
+  ["sym-quote-left-double", "“  Left Double Quote", "“"],
+  ["sym-quote-right-double", "”  Right Double Quote", "”"],
+  ["sym-quote-left-single", "‘  Left Single Quote", "‘"],
+  ["sym-quote-right-single", "’  Right Single Quote", "’"],
+  ["sym-guillemet-left", "«  Left Guillemet", "«"],
+  ["sym-guillemet-right", "»  Right Guillemet", "»"],
+  ["sym-dagger", "†  Dagger", "†"],
+  ["sym-double-dagger", "‡  Double Dagger", "‡"],
+  ["sym-arrow-left", "←  Left Arrow", "←"],
+  ["sym-arrow-up", "↑  Up Arrow", "↑"],
+  ["sym-arrow-down", "↓  Down Arrow", "↓"],
+  ["sym-arrow-both", "↔  Left-Right Arrow", "↔"],
+  ["sym-arrow-double-right", "⇒  Right Double Arrow", "⇒"],
+  ["sym-arrow-double-both", "⇔  Left-Right Double Arrow", "⇔"],
+  ["sym-plus-minus", "±  Plus-Minus", "±"],
+  ["sym-multiply", "×  Multiplication", "×"],
+  ["sym-divide", "÷  Division", "÷"],
+  ["sym-not-equal", "≠  Not Equal", "≠"],
+  ["sym-approx", "≈  Approximately Equal", "≈"],
+  ["sym-less-equal", "≤  Less Than or Equal", "≤"],
+  ["sym-greater-equal", "≥  Greater Than or Equal", "≥"],
+  ["sym-infinity", "∞  Infinity", "∞"],
+  ["sym-square-root", "√  Square Root", "√"],
+  ["sym-micro", "µ  Micro", "µ"],
+  ["sym-euro", "€  Euro", "€"],
+  ["sym-pound", "£  Pound", "£"],
+  ["sym-yen", "¥  Yen", "¥"],
+  ["sym-cent", "¢  Cent", "¢"],
+  ["sym-star", "★  Star", "★"],
+  ["sym-heart", "♥  Heart", "♥"],
+  ["sym-warning", "⚠  Warning", "⚠"],
+];
+
+const SYMBOL_OPTIONS: CommandOption[] = SYMBOLS.map(([id, label, character]) => ({
+  id,
+  label,
+  // A non-breaking space is invisible, so show a visible stand-in in the grid.
+  display: character === "\u00a0" ? "\u2423" : character,
+  action: insertActions.insertSymbol(character),
+}));
 
 export const COMMAND_REGISTRY: CommandEntry[] = [
   // Home
@@ -322,53 +384,8 @@ export const COMMAND_REGISTRY: CommandEntry[] = [
     group: "Symbols",
     icon: "type",
     label: "Symbols",
-    options: [
-      { id: "sym-em-dash", label: "—  Em Dash", action: insertActions.insertSymbol("—") },
-      { id: "sym-en-dash", label: "–  En Dash", action: insertActions.insertSymbol("–") },
-      { id: "sym-ellipsis", label: "…  Ellipsis", action: insertActions.insertSymbol("…") },
-      { id: "sym-nbsp", label: "Non-breaking Space", action: insertActions.insertSymbol(" ") },
-      { id: "sym-copyright", label: "©  Copyright", action: insertActions.insertSymbol("©") },
-      { id: "sym-registered", label: "®  Registered", action: insertActions.insertSymbol("®") },
-      { id: "sym-trademark", label: "™  Trademark", action: insertActions.insertSymbol("™") },
-      { id: "sym-degree", label: "°  Degree", action: insertActions.insertSymbol("°") },
-      { id: "sym-section", label: "§  Section", action: insertActions.insertSymbol("§") },
-      { id: "sym-paragraph", label: "¶  Paragraph", action: insertActions.insertSymbol("¶") },
-      { id: "sym-bullet", label: "•  Bullet", action: insertActions.insertSymbol("•") },
-      { id: "sym-check", label: "✓  Checkmark", action: insertActions.insertSymbol("✓") },
-      { id: "sym-cross", label: "✗  Cross", action: insertActions.insertSymbol("✗") },
-      { id: "sym-arrow-right", label: "→  Right Arrow", action: insertActions.insertSymbol("→") },
-      { id: "sym-quote-left-double", label: "“  Left Double Quote", action: insertActions.insertSymbol("“") },
-      { id: "sym-quote-right-double", label: "”  Right Double Quote", action: insertActions.insertSymbol("”") },
-      { id: "sym-quote-left-single", label: "‘  Left Single Quote", action: insertActions.insertSymbol("‘") },
-      { id: "sym-quote-right-single", label: "’  Right Single Quote", action: insertActions.insertSymbol("’") },
-      { id: "sym-guillemet-left", label: "«  Left Guillemet", action: insertActions.insertSymbol("«") },
-      { id: "sym-guillemet-right", label: "»  Right Guillemet", action: insertActions.insertSymbol("»") },
-      { id: "sym-dagger", label: "†  Dagger", action: insertActions.insertSymbol("†") },
-      { id: "sym-double-dagger", label: "‡  Double Dagger", action: insertActions.insertSymbol("‡") },
-      { id: "sym-arrow-left", label: "←  Left Arrow", action: insertActions.insertSymbol("←") },
-      { id: "sym-arrow-up", label: "↑  Up Arrow", action: insertActions.insertSymbol("↑") },
-      { id: "sym-arrow-down", label: "↓  Down Arrow", action: insertActions.insertSymbol("↓") },
-      { id: "sym-arrow-both", label: "↔  Left-Right Arrow", action: insertActions.insertSymbol("↔") },
-      { id: "sym-arrow-double-right", label: "⇒  Right Double Arrow", action: insertActions.insertSymbol("⇒") },
-      { id: "sym-arrow-double-both", label: "⇔  Left-Right Double Arrow", action: insertActions.insertSymbol("⇔") },
-      { id: "sym-plus-minus", label: "±  Plus-Minus", action: insertActions.insertSymbol("±") },
-      { id: "sym-multiply", label: "×  Multiplication", action: insertActions.insertSymbol("×") },
-      { id: "sym-divide", label: "÷  Division", action: insertActions.insertSymbol("÷") },
-      { id: "sym-not-equal", label: "≠  Not Equal", action: insertActions.insertSymbol("≠") },
-      { id: "sym-approx", label: "≈  Approximately Equal", action: insertActions.insertSymbol("≈") },
-      { id: "sym-less-equal", label: "≤  Less Than or Equal", action: insertActions.insertSymbol("≤") },
-      { id: "sym-greater-equal", label: "≥  Greater Than or Equal", action: insertActions.insertSymbol("≥") },
-      { id: "sym-infinity", label: "∞  Infinity", action: insertActions.insertSymbol("∞") },
-      { id: "sym-square-root", label: "√  Square Root", action: insertActions.insertSymbol("√") },
-      { id: "sym-micro", label: "µ  Micro", action: insertActions.insertSymbol("µ") },
-      { id: "sym-euro", label: "€  Euro", action: insertActions.insertSymbol("€") },
-      { id: "sym-pound", label: "£  Pound", action: insertActions.insertSymbol("£") },
-      { id: "sym-yen", label: "¥  Yen", action: insertActions.insertSymbol("¥") },
-      { id: "sym-cent", label: "¢  Cent", action: insertActions.insertSymbol("¢") },
-      { id: "sym-star", label: "★  Star", action: insertActions.insertSymbol("★") },
-      { id: "sym-heart", label: "♥  Heart", action: insertActions.insertSymbol("♥") },
-      { id: "sym-warning", label: "⚠  Warning", action: insertActions.insertSymbol("⚠") },
-    ],
+    optionColumns: 8,
+    options: SYMBOL_OPTIONS,
   },
 
   // Layout

@@ -6,6 +6,8 @@
 
   let { command, editor }: { command: CommandEntry; editor: EditorLike | null } = $props();
 
+  const GRID_CELL_PX = 36;
+
   let open = $state(false);
   let menuStyle = $state("");
   let rootEl: HTMLDivElement | undefined = $state();
@@ -29,7 +31,12 @@
     open = !open;
     if (open && toggleEl) {
       const rect = toggleEl.getBoundingClientRect();
-      menuStyle = `position: fixed; top: ${rect.bottom + 2}px; left: ${rect.left}px;`;
+      // Grid menus are wider than the toggle; keep them inside the window.
+      const columns = command.optionColumns;
+      const estimatedWidth = columns ? columns * GRID_CELL_PX + 16 : 0;
+      const left = Math.max(8, Math.min(rect.left, window.innerWidth - estimatedWidth - 8));
+      menuStyle = `position: fixed; top: ${rect.bottom + 2}px; left: ${left}px;`;
+      if (columns) menuStyle += ` --ribbon-menu-columns: ${columns};`;
     }
   }
 
@@ -63,11 +70,16 @@
     <span class="ribbon-button-label">{command.label} ▾</span>
   </button>
   {#if open}
-    <ul class="ribbon-dropdown-menu" style={menuStyle} use:portal bind:this={menuEl}>
+    <ul class="ribbon-dropdown-menu" class:ribbon-dropdown-menu-grid={!!command.optionColumns} style={menuStyle} use:portal bind:this={menuEl}>
       {#each command.options ?? [] as option (option.id)}
         <li>
-          <button type="button" onclick={() => choose(option.action)}>
-            {option.label}
+          <button
+            type="button"
+            title={command.optionColumns ? option.label : undefined}
+            aria-label={command.optionColumns ? option.label : undefined}
+            onclick={() => choose(option.action)}
+          >
+            {option.display ?? option.label}
           </button>
         </li>
       {/each}

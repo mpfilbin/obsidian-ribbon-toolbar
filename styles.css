@@ -158,6 +158,19 @@
   box-shadow: none;
 }
 
+.ribbon-dropdown-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--ribbon-menu-columns, 8), 32px);
+  gap: 2px;
+}
+
+.ribbon-dropdown-menu-grid li button {
+  height: 32px;
+  padding: 0;
+  text-align: center;
+  font-size: var(--font-ui-medium);
+}
+
 .ribbon-dropdown-menu li button:hover {
   background-color: var(--background-modifier-hover);
 }
