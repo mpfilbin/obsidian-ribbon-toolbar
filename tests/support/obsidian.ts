@@ -108,9 +108,11 @@ export const modals: Modal[] = [];
 export class Modal {
   contentEl: HTMLElement;
   titleEl: HTMLElement;
+  modalEl: HTMLElement;
   opened = false;
   constructor(public app: App) {
     modals.push(this);
+    this.modalEl = document.createElement("div");
     this.contentEl = document.createElement("div");
     this.titleEl = document.createElement("div");
   }

@@ -46,7 +46,7 @@ export class BaseManagerModal extends Modal {
 
   onOpen(): void {
     const { contentEl } = this;
-    contentEl.addClass("ribbon-bar-base-modal");
+    this.modalEl.addClass("ribbon-bar-base-modal");
     this.tabsEl = contentEl.createDiv({ cls: "ribbon-bar-base-tabs" });
     this.bodyEl = contentEl.createDiv({ cls: "ribbon-bar-base-body" });
     this.problemsEl = contentEl.createDiv({ cls: "ribbon-bar-base-problems" });

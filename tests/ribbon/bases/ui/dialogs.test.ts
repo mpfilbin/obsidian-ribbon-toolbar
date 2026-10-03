@@ -34,6 +34,11 @@ describe("base editor dialog", () => {
     expect(activeTab(modal)).toBe("Formulas");
   });
 
+  it("widens the dialog itself, since Obsidian sizes the modal rather than its content", async () => {
+    const { modal } = await open();
+    expect(modal.modalEl.classList.contains("ribbon-bar-base-modal")).toBe(true);
+  });
+
   it("switches sections from the tabs", async () => {
     const { modal } = await open();
     modal.contentEl.querySelectorAll(".ribbon-bar-base-tab")[1].click();
