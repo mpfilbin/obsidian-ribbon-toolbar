@@ -1,7 +1,7 @@
 import type { App } from "obsidian";
 import type { EditorLike } from "./actions/types";
 
-export type TabId = "home" | "insert" | "layout" | "references" | "latex";
+export type TabId = "home" | "insert" | "layout" | "references" | "latex" | "bases";
 
 export interface CommandOption {
   id: string;
@@ -9,7 +9,8 @@ export interface CommandOption {
   // Compact text shown in place of the label when the menu is a grid; the
   // label is then only the tooltip.
   display?: string;
-  action: (editor: EditorLike) => void;
+  // Receives the Obsidian app so options can open dialogs or edit files.
+  action: (editor: EditorLike, app: App) => void;
 }
 
 export interface CommandEntry {

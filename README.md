@@ -41,6 +41,18 @@ Promote/Demote Heading, Indent/Outdent, Move Line Up/Down, Table of Contents
 
 Footnote, Internal Link, Tag, Callout
 
+### Bases tab
+
+Tools for [Obsidian Bases](https://obsidian.md/help/bases), working on both kinds of embedded base: a ```base code block inside the note, and a standalone `.base` file embedded with `![[Name.base]]` (optionally pinned to a view with `![[Name.base#View]]`). Commands act on the base the cursor is in or on; with the cursor elsewhere they use the note's only base, or ask which one when there are several.
+
+- **Base**: *New Base* creates an inline block or a separate `.base` file (first view type and name, optionally pre-filtered to this note's folder, a tag, or notes linking here) and embeds it. *Embed Base* embeds an existing `.base` file or one of its views. *Edit Base* opens the editor below.
+- **Views**: *Add View* adds a Table, Cards, List or Map view in one click. *Edit Views* renames, reorders, duplicates and deletes views and sets each view's columns, sorting, grouping, limit, per-column summaries, filters, and any other view-specific options.
+- **Filters**: *Quick Filter* adds a ready-made condition (this note's folder, links to or from this note, recently created or modified). *Filters* builds conditions from a property, operator and value, or from tags, folders, links and dates, for the whole base or one view, matching all, any or none of them.
+- **Formulas**: *Formulas* adds, edits, renames and deletes formulas, warning about unbalanced brackets or quotes, with an insert-a-function picker. The **Functions** menus (Functions, Text, Number, List, Date, File) insert a function call at the cursor; hover a cell for its signature.
+- **Columns**: *Properties* sets friendlier column names. *Summaries* manages custom summary formulas.
+
+The editor works on a copy and only writes the base when you press Save. Unrecognised keys in the base are preserved. Bases whose YAML can't be parsed are left alone.
+
 ### Collapsing the ribbon
 
 Double-click any tab to collapse the ribbon to just the tab strip. Double-click again to expand it.

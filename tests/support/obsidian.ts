@@ -225,6 +225,10 @@ export class TextComponent extends ValueComponent<string> {
     this.inputEl.placeholder = placeholder;
     return this;
   }
+  setDisabled(disabled: boolean): this {
+    this.inputEl.disabled = disabled;
+    return this;
+  }
 }
 
 export class TextAreaComponent extends ValueComponent<string> {

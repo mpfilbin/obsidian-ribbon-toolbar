@@ -57,8 +57,9 @@ describe("buildPaletteCommands", () => {
       ["highlight:plain", "Home: Highlight: Default"],
     ]);
     const editor = createMockEditor("");
-    commands[0].run(editor, {} as never);
-    expect(red).toHaveBeenCalledWith(editor);
+    const app = {} as never;
+    commands[0].run(editor, app);
+    expect(red).toHaveBeenCalledWith(editor, app);
   });
 
   it("skips size-picker grids and glyph-only option menus", () => {

@@ -143,6 +143,15 @@ export function setViewOption(config: BaseConfig, index: number, key: string, va
   return updateView(config, index, { [key]: value === "" || value === null ? undefined : value });
 }
 
+/** Reads an option value typed into a text field: booleans and numbers keep their type. */
+export function parseOptionValue(text: string): string | number | boolean {
+  const trimmed = text.trim();
+  if (trimmed === "true") return true;
+  if (trimmed === "false") return false;
+  if (trimmed !== "" && Number.isFinite(Number(trimmed))) return Number(trimmed);
+  return trimmed;
+}
+
 // -------------------------------------------------------------- filters
 
 export interface FilterGroup {

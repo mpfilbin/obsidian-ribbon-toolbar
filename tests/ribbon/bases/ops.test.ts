@@ -9,6 +9,7 @@ import {
   filterGroup,
   getPropertyDisplayName,
   moveView,
+  parseOptionValue,
   moveViewColumn,
   removeCondition,
   removeCustomSummary,
@@ -351,5 +352,19 @@ describe("validateBase", () => {
     expect(validateBase({ filters: {} as never, views: [{ type: "table", name: "T" }] }).map((p) => p.message)).toContain(
       "A filter group must be and / or / not with a list of conditions."
     );
+  });
+});
+
+describe("parseOptionValue", () => {
+  it.each([
+    ["true", true],
+    [" false ", false],
+    ["42", 42],
+    ["-1.5", -1.5],
+    ["cover", "cover"],
+    ["", ""],
+    ["12px", "12px"],
+  ])("%j -> %j", (input, expected) => {
+    expect(parseOptionValue(input)).toBe(expected);
   });
 });

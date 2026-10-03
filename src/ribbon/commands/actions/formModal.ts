@@ -34,10 +34,10 @@ export abstract class FormModal extends Modal {
     });
   }
 
-  protected addInsertButton(): void {
+  protected addInsertButton(label = "Insert"): void {
     new Setting(this.contentEl).addButton((button) =>
       button
-        .setButtonText("Insert")
+        .setButtonText(label)
         .setCta()
         .onClick(() => this.submit())
     );

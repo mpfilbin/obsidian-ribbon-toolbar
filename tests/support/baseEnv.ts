@@ -2,7 +2,7 @@ import { App, TFile } from "obsidian";
 import { makeFile } from "./vault";
 
 /** A fake vault holding .base files, plus the metadata-cache bits bases use. */
-export function makeBaseApp(files: Record<string, string> = {}, activePath = "Note.md") {
+export function makeBaseApp(files: Record<string, string> = {}, activePath = "Note.md", newFileFolder = "/") {
   const tfiles = new Map<string, TFile>();
   const contents = new Map<string, string>();
   for (const [path, text] of Object.entries(files)) {
@@ -25,6 +25,7 @@ export function makeBaseApp(files: Record<string, string> = {}, activePath = "No
       return file;
     },
     getFiles: () => [...tfiles.values()],
+    getMarkdownFiles: () => [...tfiles.values()].filter((f) => f.extension === "md"),
     getAbstractFileByPath: (path: string) => tfiles.get(path) ?? null,
     createFolder: async () => undefined,
   };
@@ -33,6 +34,8 @@ export function makeBaseApp(files: Record<string, string> = {}, activePath = "No
     getFirstLinkpathDest: (link: string) =>
       [...tfiles.values()].find((f) => f.path === link || f.name === link || f.basename === link) ?? null,
     getFileCache: () => null,
+    fileToLinktext: (file: TFile) => file.path,
   };
+  app.fileManager = { getNewFileParent: () => ({ path: newFileFolder }) };
   return { app, contents, tfiles };
 }

@@ -6,6 +6,7 @@ import { INSERT_COMMANDS } from "./definitions/insert";
 import { LAYOUT_COMMANDS } from "./definitions/layout";
 import { REFERENCES_COMMANDS } from "./definitions/references";
 import { LATEX_COMMANDS } from "./definitions/latex";
+import { BASES_COMMANDS } from "./definitions/bases";
 
 export type { CommandEntry, CommandOption, TabId } from "./types";
 
@@ -15,6 +16,7 @@ export const TABS: { id: TabId; label: string }[] = [
   { id: "layout", label: "Layout" },
   { id: "references", label: "References" },
   { id: "latex", label: "LaTeX" },
+  { id: "bases", label: "Bases" },
 ];
 
 // Within a tab, groups and commands appear in the order they are listed here.
@@ -24,6 +26,7 @@ export const COMMAND_REGISTRY: CommandEntry[] = [
   ...LAYOUT_COMMANDS,
   ...REFERENCES_COMMANDS,
   ...LATEX_COMMANDS,
+  ...BASES_COMMANDS,
 ];
 
 export function commandsForTab(tab: TabId): CommandEntry[] {

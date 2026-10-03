@@ -278,3 +278,61 @@
   border: 1px solid var(--background-modifier-border);
   border-radius: var(--radius-s);
 }
+
+.ribbon-bar-base-modal {
+  min-width: min(720px, 90vw);
+}
+
+.ribbon-bar-base-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.ribbon-bar-base-tab {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  box-shadow: none;
+  color: var(--text-muted);
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.ribbon-bar-base-tab.is-active {
+  color: var(--text-normal);
+  border-bottom-color: var(--interactive-accent);
+}
+
+.ribbon-bar-base-body {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.ribbon-bar-base-body h4 {
+  margin: 16px 0 4px;
+}
+
+.ribbon-bar-base-body .setting-item.is-active {
+  background-color: var(--background-modifier-hover);
+  border-radius: var(--radius-s);
+}
+
+.ribbon-bar-base-body textarea {
+  min-width: 220px;
+  font-family: var(--font-monospace);
+}
+
+.ribbon-bar-base-problems {
+  margin: 8px 0;
+  color: var(--text-error);
+  font-size: var(--font-ui-small);
+}
+
+.ribbon-bar-base-problems ul {
+  margin: 4px 0 0;
+  padding-left: 20px;
+}

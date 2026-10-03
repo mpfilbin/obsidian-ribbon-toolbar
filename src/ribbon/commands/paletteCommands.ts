@@ -37,7 +37,7 @@ export function buildPaletteCommands(registry: CommandEntry[]): PaletteCommand[]
         commands.push({
           id: `${entry.id}:${option.id}`,
           name: `${prefix}: ${option.label.trim()}`,
-          run: (editor) => action(editor),
+          run: (editor, app) => action(editor, app),
         });
       }
     }

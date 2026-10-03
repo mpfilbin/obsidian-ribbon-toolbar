@@ -1,10 +1,11 @@
 <script lang="ts">
   import type { CommandEntry } from "../commands/registry";
+  import type { App } from "obsidian";
   import type { EditorLike } from "../commands/actions/types";
   import { icon } from "./Button.svelte";
   import { isOutsideClick } from "./clickOutside";
 
-  let { command, editor }: { command: CommandEntry; editor: EditorLike | null } = $props();
+  let { command, editor, app }: { command: CommandEntry; editor: EditorLike | null; app?: App } = $props();
 
   // Cell width when a command doesn't set optionCellWidth (glyph-sized cells).
   const DEFAULT_CELL_PX = 32;
@@ -44,9 +45,9 @@
     }
   }
 
-  function choose(action: (editor: EditorLike) => void) {
+  function choose(action: (editor: EditorLike, app: App) => void) {
     if (editor) {
-      action(editor);
+      action(editor, app as App);
       editor.focus();
     }
     open = false;

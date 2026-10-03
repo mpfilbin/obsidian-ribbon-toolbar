@@ -26,8 +26,10 @@ function command(overrides: Partial<CommandEntry> = {}): CommandEntry {
 const menu = () => document.body.querySelector<HTMLElement>(".ribbon-dropdown-menu");
 const items = () => [...document.body.querySelectorAll<HTMLButtonElement>(".ribbon-dropdown-menu li button")];
 
+const app = { name: "app" } as never;
+
 function open(cmd: CommandEntry, editor = createMockEditor("")) {
-  const target = render(Dropdown, { command: cmd, editor });
+  const target = render(Dropdown, { command: cmd, editor, app });
   const toggle = target.querySelector<HTMLButtonElement>("button.ribbon-button")!;
   click(toggle);
   flushSync();
@@ -74,7 +76,7 @@ describe("Dropdown", () => {
     open(cmd, editor);
     click(items()[1]);
     flushSync();
-    expect(cmd.options![1].action).toHaveBeenCalledWith(editor);
+    expect(cmd.options![1].action).toHaveBeenCalledWith(editor, app);
     expect(cmd.options![0].action).not.toHaveBeenCalled();
     expect(focus).toHaveBeenCalled();
     expect(menu()).toBeNull();

@@ -38,3 +38,45 @@ export function openHeadingLink(editor: EditorLike, app: App): void {
     .then((module) => module.openHeadingLinkModal(editor, app))
     .catch((error) => console.error("Ribbon Bar: failed to open heading link modal", error));
 }
+
+// ---- Bases tab. The base editors pull in the Obsidian runtime, so they load on demand too.
+
+export function openNewBase(editor: EditorLike, app: App): void {
+  void import("../bases/ui/NewBaseModal")
+    .then((module) => module.openNewBaseModal(editor, app))
+    .catch((error) => console.error("Ribbon Bar: failed to open new base modal", error));
+}
+
+export function openEmbedBase(editor: EditorLike, app: App): void {
+  void import("../bases/ui/EmbedBaseModal")
+    .then((module) => module.openEmbedBaseModal(editor, app))
+    .catch((error) => console.error("Ribbon Bar: failed to open embed base modal", error));
+}
+
+/** Opens the base editor on one of its sections (views, filters, formulas, …). */
+export function openBaseSection(section: "views" | "filters" | "formulas" | "properties" | "summaries") {
+  return (editor: EditorLike, app: App): void => {
+    void import("../bases/ui/BaseManagerModal")
+      .then((module) => module.openBaseManager(editor, app, section))
+      .catch((error) => console.error("Ribbon Bar: failed to open base editor", error));
+  };
+}
+
+export function addBaseView(type: string) {
+  return (editor: EditorLike, app: App): void => {
+    void import("../bases/quickActions")
+      .then((module) => module.addBaseView(type)(editor, app))
+      .catch((error) => console.error("Ribbon Bar: failed to add a base view", error));
+  };
+}
+
+export function addBaseQuickFilter(id: string) {
+  return (editor: EditorLike, app: App): void => {
+    void import("../bases/quickActions")
+      .then((module) => {
+        const quick = module.quickFilterSpecs().find((q) => q.id === id);
+        if (quick) module.addBaseFilter(quick.specFor)(editor, app);
+      })
+      .catch((error) => console.error("Ribbon Bar: failed to add a base filter", error));
+  };
+}
