@@ -4,6 +4,9 @@ import { RibbonBarSettingTab } from "./settings-tab";
 import type { RibbonBarPluginLike } from "./plugin-contract";
 import { RibbonManager } from "./ribbon/RibbonManager";
 import { registerCustomIcons } from "./ribbon/icons";
+import { COMMAND_REGISTRY } from "./ribbon/commands/registry";
+import { buildPaletteCommands } from "./ribbon/commands/paletteCommands";
+import type { EditorLike } from "./ribbon/commands/actions/types";
 import type { FrontmatterPropertyConfig } from "./ribbon/commands/actions/frontmatter";
 
 export default class RibbonBarPlugin extends Plugin implements RibbonBarPluginLike {
@@ -22,6 +25,7 @@ export default class RibbonBarPlugin extends Plugin implements RibbonBarPluginLi
     });
 
     this.addSettingTab(new RibbonBarSettingTab(this.app, this));
+    this.registerPaletteCommands();
 
     this.app.workspace.onLayoutReady(() => this.syncRibbons());
     this.registerEvent(this.app.workspace.on("active-leaf-change", () => this.syncRibbons()));
@@ -48,6 +52,18 @@ export default class RibbonBarPlugin extends Plugin implements RibbonBarPluginLi
 
   setFrontmatterProperties(properties: FrontmatterPropertyConfig[]): void {
     this.ribbonManager.setFrontmatterProperties(properties);
+  }
+
+  // Exposes the ribbon's commands in the command palette so they can be bound
+  // to hotkeys. They only run in an editable Markdown editor, like the ribbon.
+  private registerPaletteCommands(): void {
+    for (const command of buildPaletteCommands(COMMAND_REGISTRY)) {
+      this.addCommand({
+        id: command.id,
+        name: command.name,
+        editorCallback: (editor) => command.run(editor as unknown as EditorLike, this.app),
+      });
+    }
   }
 
   private markdownViews(): MarkdownView[] {

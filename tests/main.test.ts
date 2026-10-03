@@ -4,6 +4,7 @@ import { App, obsidianLog } from "obsidian";
 import RibbonBarPlugin from "../src/main";
 import { DEFAULT_SETTINGS } from "../src/settings";
 import { RibbonBarSettingTab } from "../src/settings-tab";
+import { createMockEditor } from "./support/mockEditor";
 
 type Handler = () => void;
 
@@ -70,6 +71,18 @@ describe("RibbonBarPlugin", () => {
       const { plugin } = await loadPlugin();
       expect(plugin.settingTabs).toHaveLength(1);
       expect(plugin.settingTabs[0]).toBeInstanceOf(RibbonBarSettingTab);
+    });
+
+    it("registers the ribbon's commands in the palette, running them against the active editor", async () => {
+      const { plugin } = await loadPlugin();
+      const bold = plugin.commands.find((c: any) => c.id === "bold");
+      expect(bold.name).toBe("Home: Bold");
+      expect(plugin.commands.length).toBeGreaterThan(40);
+
+      const editor = createMockEditor("word");
+      editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: 4 });
+      bold.editorCallback(editor, {});
+      expect(editor.getValue()).toBe("**word**");
     });
 
     it("syncs ribbons once the layout is ready and on every workspace change event", async () => {

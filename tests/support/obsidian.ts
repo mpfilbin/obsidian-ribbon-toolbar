@@ -365,6 +365,10 @@ export class Plugin {
   async saveData(data: unknown): Promise<void> {
     this.data = JSON.parse(JSON.stringify(data));
   }
+  commands: { id: string; name: string; editorCallback?: (editor: unknown, view: unknown) => void }[] = [];
+  addCommand(command: { id: string; name: string; editorCallback?: (editor: unknown, view: unknown) => void }): void {
+    this.commands.push(command);
+  }
   addSettingTab(tab: unknown): void {
     this.settingTabs.push(tab);
   }

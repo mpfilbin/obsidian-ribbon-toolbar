@@ -45,6 +45,10 @@ Footnote, Internal Link, Tag, Callout
 
 Double-click any tab to collapse the ribbon to just the tab strip. Double-click again to expand it.
 
+### Hotkeys and the command palette
+
+Ribbon commands are also available in Obsidian's command palette (search for "Ribbon Bar") and can be bound to hotkeys under Settings → Hotkeys. They are named by tab, for example "Home: Bold" or "Insert: Delete Row", run in an editable Markdown editor, and include each option of the ordinary dropdowns such as "Home: Highlight: Red". The size-picker (Table) and the Symbols grid are ribbon-only.
+
 ## Settings
 
 | Setting | Description | Default |
