@@ -7,7 +7,14 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$PluginId = 'ribbon-bar'
+$RepoRoot = Split-Path -Parent $PSScriptRoot
+
+# Read the plugin id from manifest.json so the install folder always matches the plugin.
+$manifest = Get-Content -LiteralPath (Join-Path $RepoRoot 'manifest.json') -Raw | ConvertFrom-Json
+$PluginId = $manifest.id
+if (-not ($PluginId -is [string]) -or $PluginId.Length -eq 0) {
+  throw 'manifest.json is missing a valid plugin id'
+}
 
 if (-not $VaultPath) {
   Write-Host 'Usage: .\scripts\install.ps1 <path-to-obsidian-vault>'
@@ -21,7 +28,6 @@ if (-not (Test-Path -LiteralPath $VaultPath -PathType Container)) {
   exit 1
 }
 
-$RepoRoot = Split-Path -Parent $PSScriptRoot
 $PluginDir = Join-Path $VaultPath ".obsidian\plugins\$PluginId"
 
 Push-Location $RepoRoot

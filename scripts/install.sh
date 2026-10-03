@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PLUGIN_ID="ribbon-bar"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+# Read the id from manifest.json so the install folder always matches the plugin.
+PLUGIN_ID="$(node -e 'const fs = require("node:fs"); const path = require("node:path"); const manifest = JSON.parse(fs.readFileSync(path.join(process.argv[1], "manifest.json"), "utf8")); if (typeof manifest.id !== "string" || manifest.id.length === 0) { throw new Error("manifest.json is missing a valid plugin id"); } process.stdout.write(manifest.id);' "$REPO_ROOT")"
 
 if [ $# -eq 0 ]; then
   echo "Usage: $0 <path-to-obsidian-vault>"
