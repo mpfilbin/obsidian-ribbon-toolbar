@@ -74,6 +74,16 @@ npm run dev
 ./scripts/install.sh /path/to/your/vault
 ```
 
+On Windows (PowerShell):
+
+```powershell
+.\scripts\install.ps1 C:\path\to\your\vault
+.\scripts\uninstall.ps1 C:\path\to\your\vault
+```
+
+If script execution is blocked, run them with
+`powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 <vault>`.
+
 ### Run tests
 
 ```bash
