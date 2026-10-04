@@ -147,3 +147,23 @@ describe("duplicate detection for quoted keys", () => {
     expect(hasProperty(createMockEditor(note("axb: 1")), "a.b")).toBe(false);
   });
 });
+
+describe("insertProperty with configured defaults", () => {
+  it("uses a checkbox default of true, a configured date and a configured date-time", () => {
+    const editor = createMockEditor("");
+    insertProperty({ name: "done", type: "checkbox", defaultValue: "true" })(editor);
+    insertProperty({ name: "due", type: "date", defaultValue: "2025-01-31" })(editor);
+    insertProperty({ name: "at", type: "datetime", defaultValue: "2025-01-31T09:30" })(editor);
+    expect(editor.getValue()).toContain("done: true");
+    expect(editor.getValue()).toContain("due: 2025-01-31");
+    expect(editor.getValue()).toContain("at: 2025-01-31T09:30");
+  });
+
+  it("falls back to today and now when a date default is empty", () => {
+    const editor = createMockEditor("");
+    insertProperty({ name: "due", type: "date", defaultValue: "" })(editor);
+    insertProperty({ name: "at", type: "datetime" })(editor);
+    expect(editor.getValue()).toMatch(/due: \d{4}-\d{2}-\d{2}\n/);
+    expect(editor.getValue()).toMatch(/at: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}\n/);
+  });
+});
