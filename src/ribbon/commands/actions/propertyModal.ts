@@ -1,8 +1,8 @@
 import { App, Setting } from "obsidian";
 import type { EditorLike } from "./types";
 import { FormModal } from "./formModal";
-import { saveAndRefreshPropertiesPanel } from "./propertiesPanel";
-import { hasProperty, insertPropertyLines } from "./frontmatter";
+import { addPropertyToNote } from "./addProperty";
+import { hasProperty } from "./frontmatter";
 import {
   buildPropertyEntry,
   localDate,
@@ -144,15 +144,9 @@ class AddPropertyModal extends FormModal {
       this.errorEl.setText(`This note already has a property named "${entry.name}".`);
       return;
     }
-    // Close first and write once Obsidian has given the editor back, the same state in
-    // which choosing from the Properties menu writes, rather than while this dialog still
-    // has the editor covered (the note's Properties panel stayed stale after that).
+    // Close first so the editor is back in place when the property is written.
     this.close();
-    window.setTimeout(() => {
-      insertPropertyLines(this.editor, entry.name, entry.lines);
-      this.editor.focus();
-      void saveAndRefreshPropertiesPanel(this.app, this.editor);
-    }, 0);
+    void addPropertyToNote(this.app, this.editor, entry.name, entry.value, entry.lines);
   }
 }
 

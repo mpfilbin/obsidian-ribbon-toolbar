@@ -16,6 +16,9 @@ export const PROPERTY_ENTRY_TYPES: { id: PropertyEntryType; label: string }[] = 
   { id: "datetime", label: "Date & time" },
 ];
 
+/** The typed value, as the frontmatter API wants it. */
+export type PropertyValue = string | number | boolean | string[] | null;
+
 export interface PropertyEntryInput {
   name: string;
   type: PropertyEntryType;
@@ -23,7 +26,7 @@ export interface PropertyEntryInput {
   value: string;
 }
 
-export type PropertyEntryResult = { ok: true; name: string; lines: string[] } | { ok: false; error: string };
+export type PropertyEntryResult = { ok: true; name: string; lines: string[]; value: PropertyValue } | { ok: false; error: string };
 
 const PLAIN_KEY = /^[A-Za-z0-9_][A-Za-z0-9_ .-]*$/;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -75,32 +78,32 @@ export function buildPropertyEntry(input: PropertyEntryInput): PropertyEntryResu
 
   switch (input.type) {
     case "text":
-      return { ok: true, name, lines: [`${key}: ${yamlText(input.value.trim())}`.trimEnd()] };
+      return { ok: true, name, lines: [`${key}: ${yamlText(input.value.trim())}`.trimEnd()], value: input.value.trim() };
 
     case "number": {
-      if (value === "") return { ok: true, name, lines: [`${key}:`] };
+      if (value === "") return { ok: true, name, lines: [`${key}:`], value: null };
       if (!Number.isFinite(Number(value))) return { ok: false, error: "Enter a number." };
-      return { ok: true, name, lines: [`${key}: ${Number(value)}`] };
+      return { ok: true, name, lines: [`${key}: ${Number(value)}`], value: Number(value) };
     }
 
     case "checkbox":
-      return { ok: true, name, lines: [`${key}: ${input.value === "true" ? "true" : "false"}`] };
+      return { ok: true, name, lines: [`${key}: ${input.value === "true" ? "true" : "false"}`], value: input.value === "true" };
 
     case "date":
       if (value !== "" && !DATE.test(value)) return { ok: false, error: "Enter a date as YYYY-MM-DD." };
-      return { ok: true, name, lines: [`${key}: ${value}`.trimEnd()] };
+      return { ok: true, name, lines: [`${key}: ${value}`.trimEnd()], value };
 
     case "datetime":
       if (value !== "" && !DATE_TIME.test(value)) return { ok: false, error: "Enter a date and time as YYYY-MM-DDTHH:mm." };
-      return { ok: true, name, lines: [`${key}: ${value}`.trimEnd()] };
+      return { ok: true, name, lines: [`${key}: ${value}`.trimEnd()], value };
 
     case "list": {
       const items = input.value
         .split(/\r?\n/)
         .map((item) => item.trim())
         .filter((item) => item.length > 0);
-      if (items.length === 0) return { ok: true, name, lines: [`${key}:`, "  - "] };
-      return { ok: true, name, lines: [`${key}:`, ...items.map((item) => `  - ${yamlText(item)}`)] };
+      if (items.length === 0) return { ok: true, name, lines: [`${key}:`, "  - "], value: [] };
+      return { ok: true, name, lines: [`${key}:`, ...items.map((item) => `  - ${yamlText(item)}`)], value: items };
     }
   }
 }

@@ -212,80 +212,67 @@ describe("add property dialog", () => {
     });
   });
 
-  describe("saving the note", () => {
-    function openWithView(view: unknown) {
+  describe("writing through Obsidian", () => {
+    function openWithApi(processFrontMatter: (file: unknown, fn: (fm: Record<string, unknown>) => void) => Promise<void>, save = vi.fn(async () => {})) {
       const editor = createMockEditor("body");
       const app = appWith();
-      app.workspace = { getActiveViewOfType: () => view };
+      app.workspace = { getActiveFile: () => makeFile("note.md"), getActiveViewOfType: () => ({ save }) };
+      app.fileManager = { processFrontMatter };
       openAddPropertyModal(editor, app);
-      return { editor, modal: modals.at(-1) as any };
+      return { editor, modal: modals.at(-1) as any, save };
     }
-    const fill = () => {
+    const apply = () => {
+      const fm: Record<string, unknown> = {};
+      return { fm, run: async (_file: unknown, fn: (fm: Record<string, unknown>) => void) => fn(fm) };
+    };
+    const fill = (value = "open") => {
       typeInto(settingNamed("Name").texts[0], "status");
-      typeInto(valueField().texts[0], "open");
+      typeInto(valueField().texts[0], value);
       add();
     };
 
-    it("saves the note right after adding, so the Properties panel (driven by the metadata cache) refreshes", () => {
-      const save = vi.fn(async () => {});
-      const { editor } = openWithView({ save });
-      fill();
-      expect(editor.getValue()).toContain("status: open");
-      expect(save).toHaveBeenCalledTimes(1);
-    });
-
-    it("closes the dialog before writing to the note, so the editor is free when the property lands", () => {
-      const { editor, modal } = open();
-      typeInto(settingNamed("Name").texts[0], "status");
-      typeInto(valueField().texts[0], "open");
-      click(buttonLabeled("Add"));
-      expect(modal.opened).toBe(false);
-      expect(editor.getValue()).toBe("body"); // not written yet
-      flush();
-      expect(editor.getValue()).toContain("status: open");
-    });
-
-    it("refocuses the editor after writing", () => {
-      const { editor } = open();
-      const focus = vi.spyOn(editor, "focus");
-      typeInto(settingNamed("Name").texts[0], "status");
-      add();
-      expect(focus.mock.calls.length).toBeGreaterThanOrEqual(2); // once as the dialog closes, once after the write
-    });
-
-    it("then makes a do-nothing edit so the Properties panel redraws, leaving the note as written", async () => {
-      const { editor } = openWithView({ save: async () => {} });
-      const replace = vi.spyOn(editor, "replaceRange");
+    it("saves the note, then sets the property with its typed value through the frontmatter API", async () => {
+      const { fm, run } = apply();
+      const { editor, save } = openWithApi(run);
       fill();
       await vi.advanceTimersByTimeAsync(0);
-      const calls = replace.mock.calls;
-      const [text, from, to] = calls[calls.length - 1];
-      expect(text.length).toBe(1);
-      expect(editor.getValue().split("\n")[to!.line][to!.ch - 1]).toBe(text); // replaced a character with itself
-      expect(from).toEqual({ line: to!.line, ch: to!.ch - 1 });
-      expect(editor.getValue()).toBe("---\nstatus: open\n---\nbody");
+      expect(save).toHaveBeenCalledTimes(1);
+      expect(fm).toEqual({ status: "open" });
+      expect(editor.getValue()).toBe("body"); // the API writes the file, not the editor text
     });
 
-    it("does not save when nothing was added", () => {
-      const save = vi.fn(async () => {});
-      openWithView({ save });
-      add(); // no name: validation error
-      expect(save).not.toHaveBeenCalled();
-    });
-
-    it("still adds the property when there is no markdown view", () => {
-      const { editor } = openWithView(null);
+    it("closes the dialog and refocuses the editor", async () => {
+      const { fm, run } = apply();
+      const { editor, modal } = openWithApi(run);
+      const focus = vi.spyOn(editor, "focus");
       fill();
-      expect(editor.getValue()).toContain("status: open");
-    });
-
-    it("still adds the property, and only warns, when saving fails", async () => {
-      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-      const { editor, modal } = openWithView({ save: async () => Promise.reject(new Error("disk full")) });
-      fill();
-      expect(editor.getValue()).toContain("status: open");
       expect(modal.opened).toBe(false);
-      await vi.waitFor(() => expect(warn).toHaveBeenCalled());
+      await vi.advanceTimersByTimeAsync(0);
+      expect(focus).toHaveBeenCalled();
+      expect(fm).toEqual({ status: "open" });
+    });
+
+    it("falls back to writing the text into the note, and warns, when the API fails", async () => {
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const { editor } = openWithApi(async () => Promise.reject(new Error("nope")));
+      fill();
+      await vi.advanceTimersByTimeAsync(0);
+      expect(editor.getValue()).toContain("status: open");
+      expect(warn).toHaveBeenCalled();
+    });
+
+    it("writes the text into the note when there is no active file", () => {
+      const { editor } = open();
+      fill();
+      expect(editor.getValue()).toContain("status: open");
+    });
+
+    it("does not touch the note when validation fails", () => {
+      const processFrontMatter = vi.fn(async () => {});
+      const { save } = openWithApi(processFrontMatter);
+      add(); // no name
+      expect(save).not.toHaveBeenCalled();
+      expect(processFrontMatter).not.toHaveBeenCalled();
     });
   });
 

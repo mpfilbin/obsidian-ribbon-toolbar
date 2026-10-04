@@ -7,6 +7,7 @@ import {
   yamlKey,
   yamlText,
   type PropertyEntryInput,
+  type PropertyEntryType,
 } from "../../../../src/ribbon/commands/actions/propertyEntry";
 
 describe("yamlKey", () => {
@@ -169,5 +170,23 @@ describe("buildPropertyEntry", () => {
       expect(lines({ type: "list", value: "" })).toEqual(["prop:", "  - "]);
       expect(lines({ type: "list", value: " \n " })).toEqual(["prop:", "  - "]);
     });
+  });
+});
+
+describe("typed values for the frontmatter API", () => {
+  const valueOf = (type: PropertyEntryType, value: string) => {
+    const result = buildPropertyEntry({ name: "p", type, value });
+    return result.ok ? result.value : undefined;
+  };
+  it("gives each type its natural value", () => {
+    expect(valueOf("text", " 007 ")).toBe("007");
+    expect(valueOf("number", "3.5")).toBe(3.5);
+    expect(valueOf("number", "")).toBeNull();
+    expect(valueOf("checkbox", "true")).toBe(true);
+    expect(valueOf("checkbox", "false")).toBe(false);
+    expect(valueOf("date", "2025-01-31")).toBe("2025-01-31");
+    expect(valueOf("datetime", "2025-01-31T09:30")).toBe("2025-01-31T09:30");
+    expect(valueOf("list", "a\n\n b ")).toEqual(["a", "b"]);
+    expect(valueOf("list", "")).toEqual([]);
   });
 });
