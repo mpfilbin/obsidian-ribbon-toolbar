@@ -184,6 +184,15 @@ describe("add property dialog", () => {
       expect(modal.opened).toBe(true);
     });
 
+    it("recognises an existing property whose key had to be quoted", () => {
+      const { modal, editor } = open('---\n"a: b": 1\n---\nbody');
+      typeInto(settingNamed("Name").texts[0], "a: b");
+      typeInto(valueField().texts[0], "2");
+      add();
+      expect(error(modal)).toBe('This note already has a property named "a: b".');
+      expect(editor.getValue()).toBe('---\n"a: b": 1\n---\nbody');
+    });
+
     it("clears the message when the type changes", () => {
       const { modal } = open();
       add();

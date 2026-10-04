@@ -110,3 +110,40 @@ describe("hasProperty and insertPropertyLines", () => {
     expect(editor.getValue()).toBe("---\nstatus: open\n---\nbody");
   });
 });
+
+describe("duplicate detection for quoted keys", () => {
+  const note = (line: string) => `---\n${line}\n---\nbody`;
+
+  it.each([
+    ["a: b", '"a: b": 1'],
+    ["a: b", "'a: b': 1"],
+    ["status", '"status": open'],
+    ["status", "'status': open"],
+    ["it's", "'it''s': 1"],
+    ["say \"hi\"", '"say \\"hi\\"": 1'],
+    ["status", "status : open"],
+  ])("finds %j written as %s", (name, line) => {
+    expect(hasProperty(createMockEditor(note(line)), name)).toBe(true);
+  });
+
+  it("refuses to insert a property whose quoted key already exists", () => {
+    const editor = createMockEditor(note('"a: b": 1'));
+    expect(insertPropertyLines(editor, "a: b", ['"a: b": 2'])).toBe("exists");
+    expect(editor.getValue()).toBe(note('"a: b": 1'));
+  });
+
+  it("applies to predefined properties too", () => {
+    const editor = createMockEditor(note('"status": open'));
+    insertProperty({ name: "status", type: "text", defaultValue: "x" })(editor);
+    expect(editor.getValue()).toBe(note('"status": open'));
+  });
+
+  it.each(['"status-code": 1', "status-code: 1", '"status code": 1', "mystatus: 1"])("does not confuse %s with status", (line) => {
+    expect(hasProperty(createMockEditor(note(line)), "status")).toBe(false);
+  });
+
+  it("matches names that contain regex characters literally", () => {
+    expect(hasProperty(createMockEditor(note("a.b: 1")), "a.b")).toBe(true);
+    expect(hasProperty(createMockEditor(note("axb: 1")), "a.b")).toBe(false);
+  });
+});

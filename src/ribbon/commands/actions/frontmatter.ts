@@ -1,4 +1,5 @@
 import type { EditorLike, EditorPosition } from "./types";
+import { yamlKey } from "./propertyEntry";
 
 export type PropertyType = "automatic" | "text" | "list" | "number" | "checkbox" | "date" | "datetime";
 
@@ -29,8 +30,14 @@ function findFrontmatterRange(editor: EditorLike): FrontmatterRange | null {
   return null;
 }
 
+/**
+ * Matches the line that starts a property, however its key is written: bare, or
+ * wrapped in double or single quotes (as YAML requires for keys such as `a: b`),
+ * optionally with a space before the colon.
+ */
 function findPropertyLine(editor: EditorLike, range: FrontmatterRange, name: string): number | null {
-  const pattern = new RegExp(`^${escapeRegExp(name)}:`);
+  const spellings = new Set([name, yamlKey(name), JSON.stringify(name), `'${name.replace(/'/g, "''")}'`]);
+  const pattern = new RegExp(`^(?:${[...spellings].map(escapeRegExp).join("|")})[ \\t]*:`);
   for (let line = range.startLine + 1; line < range.endLine; line++) {
     if (pattern.test(editor.getLine(line))) return line;
   }
