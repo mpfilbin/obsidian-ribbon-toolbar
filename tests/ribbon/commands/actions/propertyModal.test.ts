@@ -253,6 +253,19 @@ describe("add property dialog", () => {
       expect(focus.mock.calls.length).toBeGreaterThanOrEqual(2); // once as the dialog closes, once after the write
     });
 
+    it("then makes a do-nothing edit so the Properties panel redraws, leaving the note as written", async () => {
+      const { editor } = openWithView({ save: async () => {} });
+      const replace = vi.spyOn(editor, "replaceRange");
+      fill();
+      await vi.advanceTimersByTimeAsync(0);
+      const calls = replace.mock.calls;
+      const [text, from, to] = calls[calls.length - 1];
+      expect(text.length).toBe(1);
+      expect(editor.getValue().split("\n")[to!.line][to!.ch - 1]).toBe(text); // replaced a character with itself
+      expect(from).toEqual({ line: to!.line, ch: to!.ch - 1 });
+      expect(editor.getValue()).toBe("---\nstatus: open\n---\nbody");
+    });
+
     it("does not save when nothing was added", () => {
       const save = vi.fn(async () => {});
       openWithView({ save });
