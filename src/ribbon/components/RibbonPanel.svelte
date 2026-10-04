@@ -4,7 +4,7 @@
   import type { CommandEntry, TabId } from "../commands/registry";
   import type { EditorLike } from "../commands/actions/types";
   import type { FrontmatterPropertyConfig } from "../commands/actions/frontmatter";
-  import { buildPropertyCommands, commandsForTab, groupsForTab } from "../commands/registry";
+  import { commandsForTabWithProperties, groupsOf } from "../commands/registry";
   import Group from "./Group.svelte";
 
   let {
@@ -19,11 +19,8 @@
     app: App;
   } = $props();
 
-  let properties = $derived($propertiesStore);
-  let dynamicCommands = $derived(tab === "references" ? buildPropertyCommands(properties) : []);
-  let dynamicGroups = $derived(tab === "references" && dynamicCommands.length > 0 ? ["Properties"] : []);
-  let groups = $derived([...groupsForTab(tab), ...dynamicGroups]);
-  let commands = $derived([...commandsForTab(tab), ...dynamicCommands]);
+  let commands = $derived(commandsForTabWithProperties(tab, $propertiesStore));
+  let groups = $derived(groupsOf(commands));
 </script>
 
 <div class="ribbon-panel">

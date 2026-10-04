@@ -39,7 +39,10 @@ Promote/Demote Heading, Indent/Outdent, Move Line Up/Down, Table of Contents
 
 ### References tab
 
-Footnote, Internal Link, Tag, Callout
+Footnote, Internal Link, Tag, Heading Link, Callout, and the **Properties** group for the note's frontmatter:
+
+- **Properties** is a single dropdown of your predefined properties (managed in the plugin's settings, by default `tags`, `description`, `cssclasses` and `source`). Choosing one adds it to the note's frontmatter, creating the frontmatter block if needed, and never duplicates a property the note already has.
+- **Add Property** opens a dialog for any property: choose its type (Text, List, Number, Checkbox, Date, Date & time), give it a name (existing property names from your vault are suggested, and choosing one selects its usual type) and a value. Values YAML would misread, such as the text `007` or `key: value`, are quoted automatically, and the dialog won't overwrite a property the note already has.
 
 ### Bases tab
 
@@ -67,6 +70,7 @@ Ribbon commands are also available in Obsidian's command palette (search for "Ri
 |---|---|---|
 | Enable ribbon | Show or hide the ribbon on all open panes | On |
 | Collapse ribbon by default | New panes start with their ribbon collapsed | Off |
+| Frontmatter properties | The predefined properties offered in the References tab's Properties menu, each with a type and optional default value | `tags`, `description`, `cssclasses`, `source` |
 
 ## Development
 

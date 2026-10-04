@@ -106,3 +106,10 @@ describe("buildPaletteCommands", () => {
     });
   });
 });
+
+describe("Add Property in the palette", () => {
+  it("is available for hotkeys, as a dialog command", () => {
+    const names = buildPaletteCommands(COMMAND_REGISTRY).map((c) => c.name);
+    expect(names).toContain("References: Add Property");
+  });
+});

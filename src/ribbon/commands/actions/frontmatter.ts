@@ -77,26 +77,41 @@ function placeCursorAtEndOf(editor: EditorLike, lineIndex: number): void {
   editor.setCursor(pos);
 }
 
+/** Whether the note's frontmatter already has a property with this name. */
+export function hasProperty(editor: EditorLike, name: string): boolean {
+  const range = findFrontmatterRange(editor);
+  return range !== null && findPropertyLine(editor, range, name) !== null;
+}
+
 /**
- * Inserts a property into the note's frontmatter (creating the frontmatter
- * block first if needed). No-ops if the property already exists, so
- * clicking the same property's button twice never creates a duplicate key.
+ * Writes already-formatted property lines into the note's frontmatter, creating
+ * the frontmatter block first if needed, and leaves the cursor at the end of the
+ * new property. Returns "exists" without changing anything if a property with
+ * this name is already there, so a key is never duplicated.
+ */
+export function insertPropertyLines(editor: EditorLike, name: string, lines: string[]): "inserted" | "exists" {
+  const range = findFrontmatterRange(editor);
+
+  if (!range) {
+    editor.replaceRange(`${DELIMITER}\n${lines.join("\n")}\n${DELIMITER}\n`, { line: 0, ch: 0 });
+    placeCursorAtEndOf(editor, lines.length);
+    return "inserted";
+  }
+
+  if (findPropertyLine(editor, range, name) !== null) return "exists";
+
+  editor.replaceRange(`${lines.join("\n")}\n`, { line: range.endLine, ch: 0 });
+  placeCursorAtEndOf(editor, range.endLine + lines.length - 1);
+  return "inserted";
+}
+
+/**
+ * Inserts a predefined property into the note's frontmatter (creating the
+ * frontmatter block first if needed). No-ops if the property already exists, so
+ * choosing the same property twice never creates a duplicate key.
  */
 export function insertProperty(config: FrontmatterPropertyConfig): (editor: EditorLike) => void {
   return (editor: EditorLike): void => {
-    const range = findFrontmatterRange(editor);
-
-    if (!range) {
-      const lines = formatValueLines(config);
-      editor.replaceRange(`${DELIMITER}\n${lines.join("\n")}\n${DELIMITER}\n`, { line: 0, ch: 0 });
-      placeCursorAtEndOf(editor, lines.length);
-      return;
-    }
-
-    if (findPropertyLine(editor, range, config.name) !== null) return;
-
-    const lines = formatValueLines(config);
-    editor.replaceRange(`${lines.join("\n")}\n`, { line: range.endLine, ch: 0 });
-    placeCursorAtEndOf(editor, range.endLine + lines.length - 1);
+    insertPropertyLines(editor, config.name, formatValueLines(config));
   };
 }

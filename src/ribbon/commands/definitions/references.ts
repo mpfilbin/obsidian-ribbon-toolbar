@@ -1,6 +1,6 @@
 import type { CommandEntry } from "../types";
 import * as insertActions from "../actions/insert";
-import { openCallout, openInternalLink, openFootnote, openHeadingLink } from "../modalLoaders";
+import { openAddProperty, openCallout, openInternalLink, openFootnote, openHeadingLink } from "../modalLoaders";
 
 export const REFERENCES_COMMANDS: CommandEntry[] = [
   {
@@ -42,5 +42,13 @@ export const REFERENCES_COMMANDS: CommandEntry[] = [
     icon: "message-square",
     label: "Callout",
     modal: openCallout,
+  },
+  {
+    id: "property-add",
+    tab: "references",
+    group: "Properties",
+    icon: "file-plus",
+    label: "Add Property",
+    modal: openAddProperty,
   },
 ];
