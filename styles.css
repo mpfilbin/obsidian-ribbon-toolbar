@@ -379,3 +379,13 @@
   margin: 4px 0 0;
   padding-left: 20px;
 }
+
+/* Add property dialog: room around the divider under the value field. */
+.modal-content.ribbon-bar-property-modal .setting-item {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.modal-content.ribbon-bar-property-modal > .setting-item:last-child {
+  margin-top: 16px;
+}
