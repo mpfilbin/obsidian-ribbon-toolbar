@@ -406,4 +406,6 @@ export class PluginSettingTab {
   }
 }
 
-export class MarkdownView {}
+export class MarkdownView {
+  async save(): Promise<void> {}
+}

@@ -202,6 +202,51 @@ describe("add property dialog", () => {
     });
   });
 
+  describe("saving the note", () => {
+    function openWithView(view: unknown) {
+      const editor = createMockEditor("body");
+      const app = appWith();
+      app.workspace = { getActiveViewOfType: () => view };
+      openAddPropertyModal(editor, app);
+      return { editor, modal: modals.at(-1) as any };
+    }
+    const fill = () => {
+      typeInto(settingNamed("Name").texts[0], "status");
+      typeInto(valueField().texts[0], "open");
+      add();
+    };
+
+    it("saves the note right after adding, so the Properties panel (driven by the metadata cache) refreshes", () => {
+      const save = vi.fn(async () => {});
+      const { editor } = openWithView({ save });
+      fill();
+      expect(editor.getValue()).toContain("status: open");
+      expect(save).toHaveBeenCalledTimes(1);
+    });
+
+    it("does not save when nothing was added", () => {
+      const save = vi.fn(async () => {});
+      openWithView({ save });
+      add(); // no name: validation error
+      expect(save).not.toHaveBeenCalled();
+    });
+
+    it("still adds the property when there is no markdown view", () => {
+      const { editor } = openWithView(null);
+      fill();
+      expect(editor.getValue()).toContain("status: open");
+    });
+
+    it("still adds the property, and only warns, when saving fails", async () => {
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const { editor, modal } = openWithView({ save: async () => Promise.reject(new Error("disk full")) });
+      fill();
+      expect(editor.getValue()).toContain("status: open");
+      expect(modal.opened).toBe(false);
+      await vi.waitFor(() => expect(warn).toHaveBeenCalled());
+    });
+  });
+
   describe("suggesting names from the vault", () => {
     const vault = [{ status: "open", rating: 4, done: true, tags: ["a"], due: "2025-01-31", position: {} }, { status: "closed" }];
 

@@ -1,4 +1,4 @@
-import { App, Setting } from "obsidian";
+import { App, MarkdownView, Setting } from "obsidian";
 import type { EditorLike } from "./types";
 import { FormModal } from "./formModal";
 import { hasProperty, insertPropertyLines } from "./frontmatter";
@@ -144,7 +144,22 @@ class AddPropertyModal extends FormModal {
       return;
     }
     insertPropertyLines(this.editor, entry.name, entry.lines);
+    void this.saveNote();
     this.close();
+  }
+
+  /**
+   * Writes the note to disk right away. The Properties panel shown at the top of a
+   * note is rebuilt from Obsidian's metadata cache, which only learns of an edit
+   * once the note is saved; without this the panel can stay stale until the note
+   * is reopened.
+   */
+  private async saveNote(): Promise<void> {
+    try {
+      await this.app.workspace.getActiveViewOfType?.(MarkdownView)?.save();
+    } catch (error) {
+      console.warn("Ribbon Bar: couldn't save the note after adding a property", error);
+    }
   }
 }
 
