@@ -411,3 +411,68 @@ describe("keeping the ribbon visible", () => {
     expect(scroll.get()).toBe(0);
   });
 });
+
+describe("restoring through attach() before the page watcher runs", () => {
+  const content = (view: FakeView) => view.containerEl.querySelector<HTMLElement>(".view-content")!;
+  function scrollable(el: HTMLElement) {
+    let top = 0;
+    Object.defineProperty(el, "scrollTop", { get: () => top, set: (value: number) => (top = value), configurable: true });
+    return { scrollTo: (value: number) => { top = value; el.dispatchEvent(new Event("scroll")); }, get: () => top };
+  }
+
+  it("re-binds the scroll guard to the new container, not the discarded one", () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const view = makeView();
+    const manager = makeManager();
+    manager.attach(view as never);
+    const old = content(view);
+    const oldScroll = scrollable(old);
+
+    const replacement = document.createElement("div");
+    replacement.className = "view-content";
+    old.replaceWith(replacement);
+    // A workspace event syncs before the page watcher's microtask has run.
+    manager.attach(view as never);
+
+    const scroll = scrollable(replacement);
+    scroll.scrollTo(90);
+    expect(scroll.get()).toBe(0);
+    oldScroll.scrollTo(40);
+    expect(oldScroll.get()).toBe(40); // the discarded container is no longer guarded
+  });
+
+  it("keeps watching the new container for later removals", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const view = makeView();
+    const manager = makeManager();
+    manager.attach(view as never);
+    const replacement = document.createElement("div");
+    replacement.className = "view-content";
+    content(view).replaceWith(replacement);
+    manager.attach(view as never);
+
+    replacement.replaceChildren();
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    expect(view.containerEl.querySelectorAll(".ribbon-bar-host")).toHaveLength(1);
+    expect(replacement.firstElementChild!.classList.contains("ribbon-bar-host")).toBe(true);
+  });
+
+  it("does not stack watchers when it re-arms", () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const view = makeView();
+    const manager = makeManager();
+    manager.attach(view as never);
+    for (let i = 0; i < 3; i++) {
+      const next = document.createElement("div");
+      next.className = "view-content";
+      content(view).replaceWith(next);
+      manager.attach(view as never);
+    }
+    const target = content(view);
+    const add = vi.spyOn(target, "addEventListener");
+    const remove = vi.spyOn(target, "removeEventListener");
+    manager.detach(view as never);
+    expect(add).not.toHaveBeenCalled();
+    expect(remove).toHaveBeenCalledWith("scroll", expect.any(Function));
+  });
+});

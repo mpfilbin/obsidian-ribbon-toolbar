@@ -142,6 +142,8 @@ export class RibbonManager {
 
     console.warn("Ribbon Bar: restored a ribbon that was removed from the page", view);
     this.place(instance.host, target);
+    // The observer and scroll guard were bound to the old container; follow the ribbon.
+    this.watch(view, instance);
     return true;
   }
 
@@ -166,35 +168,29 @@ export class RibbonManager {
   private watch(view: MarkdownView, instance: RibbonInstance): void {
     if (typeof MutationObserver === "undefined") return;
 
-    const start = (): void => {
-      instance.stopWatching?.();
-      const target = findInjectionPoint(view.containerEl);
+    instance.stopWatching?.();
+    const target = findInjectionPoint(view.containerEl);
 
-      const observer = new MutationObserver(() => {
-        if (this.instances.get(view) !== instance) return;
-        const current = findInjectionPoint(view.containerEl);
-        if (current && instance.host.parentElement !== current) {
-          this.ensureMounted(view, instance);
-          start();
-        }
-      });
-      observer.observe(view.containerEl, { childList: true });
+    const observer = new MutationObserver(() => {
+      if (this.instances.get(view) !== instance) return;
+      const current = findInjectionPoint(view.containerEl);
+      if (current && instance.host.parentElement !== current) this.ensureMounted(view, instance);
+    });
+    observer.observe(view.containerEl, { childList: true });
 
-      const keepAtTop = (): void => {
-        if (target && target.scrollTop !== 0) target.scrollTop = 0;
-      };
-      if (target) {
-        observer.observe(target, { childList: true });
-        target.addEventListener("scroll", keepAtTop);
-      }
-
-      instance.stopWatching = () => {
-        observer.disconnect();
-        target?.removeEventListener("scroll", keepAtTop);
-        instance.stopWatching = null;
-      };
+    const keepAtTop = (): void => {
+      if (target && target.scrollTop !== 0) target.scrollTop = 0;
     };
-    start();
+    if (target) {
+      observer.observe(target, { childList: true });
+      target.addEventListener("scroll", keepAtTop);
+    }
+
+    instance.stopWatching = () => {
+      observer.disconnect();
+      target?.removeEventListener("scroll", keepAtTop);
+      instance.stopWatching = null;
+    };
   }
 
   detach(view: MarkdownView): void {
