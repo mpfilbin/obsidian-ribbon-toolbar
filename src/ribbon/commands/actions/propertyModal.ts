@@ -143,9 +143,15 @@ class AddPropertyModal extends FormModal {
       this.errorEl.setText(`This note already has a property named "${entry.name}".`);
       return;
     }
-    insertPropertyLines(this.editor, entry.name, entry.lines);
-    void this.saveNote();
+    // Close first and write once Obsidian has given the editor back, the same state in
+    // which choosing from the Properties menu writes, rather than while this dialog still
+    // has the editor covered (the note's Properties panel stayed stale after that).
     this.close();
+    window.setTimeout(() => {
+      insertPropertyLines(this.editor, entry.name, entry.lines);
+      this.editor.focus();
+      void this.saveNote();
+    }, 0);
   }
 
   /**

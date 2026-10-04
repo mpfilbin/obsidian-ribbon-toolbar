@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { App, createdSettings, modals, obsidianLog } from "obsidian";
 import { openAddPropertyModal } from "../../../../src/ribbon/commands/actions/propertyModal";
 import { localDate, localDateTime } from "../../../../src/ribbon/commands/actions/propertyEntry";
@@ -7,7 +7,14 @@ import { createMockEditor } from "../../../support/mockEditor";
 import { makeFile } from "../../../support/vault";
 import { buttonLabeled, choose, click, settingNamed, typeInto } from "../../../support/sections";
 
-beforeEach(() => obsidianLog.reset());
+beforeEach(() => {
+  obsidianLog.reset();
+  vi.useFakeTimers();
+});
+afterEach(() => vi.useRealTimers());
+
+/** The dialog closes first and writes to the note on the next tick. */
+const flush = () => vi.advanceTimersByTime(0);
 
 /** An app whose vault has these notes' frontmatter, so property names can be suggested. */
 function appWith(frontmatters: Record<string, unknown>[] = []) {
@@ -27,7 +34,10 @@ function open(text = "body", frontmatters: Record<string, unknown>[] = []) {
 }
 
 const error = (modal: any) => modal.contentEl.querySelector(".mod-warning").textContent;
-const add = () => click(buttonLabeled("Add"));
+const add = () => {
+  click(buttonLabeled("Add"));
+  flush();
+};
 const valueField = () => settingNamed("Value");
 
 describe("add property dialog", () => {
@@ -224,6 +234,25 @@ describe("add property dialog", () => {
       expect(save).toHaveBeenCalledTimes(1);
     });
 
+    it("closes the dialog before writing to the note, so the editor is free when the property lands", () => {
+      const { editor, modal } = open();
+      typeInto(settingNamed("Name").texts[0], "status");
+      typeInto(valueField().texts[0], "open");
+      click(buttonLabeled("Add"));
+      expect(modal.opened).toBe(false);
+      expect(editor.getValue()).toBe("body"); // not written yet
+      flush();
+      expect(editor.getValue()).toContain("status: open");
+    });
+
+    it("refocuses the editor after writing", () => {
+      const { editor } = open();
+      const focus = vi.spyOn(editor, "focus");
+      typeInto(settingNamed("Name").texts[0], "status");
+      add();
+      expect(focus.mock.calls.length).toBeGreaterThanOrEqual(2); // once as the dialog closes, once after the write
+    });
+
     it("does not save when nothing was added", () => {
       const save = vi.fn(async () => {});
       openWithView({ save });
@@ -302,6 +331,7 @@ describe("add property dialog", () => {
       const { editor } = open();
       typeInto(settingNamed("Name").texts[0], "a");
       key(valueField().texts[0].inputEl, { key: "Enter" });
+      flush();
       expect(editor.getValue()).toContain("a:");
     });
 
@@ -313,6 +343,7 @@ describe("add property dialog", () => {
       key(valueField().textAreas[0].inputEl, { key: "Enter" });
       expect(modal.opened).toBe(true);
       key(valueField().textAreas[0].inputEl, { key: "Enter", ctrlKey: true });
+      flush();
       expect(editor.getValue()).toContain("l:\n  - x");
     });
   });

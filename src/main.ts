@@ -71,8 +71,13 @@ export default class RibbonBarPlugin extends Plugin implements RibbonBarPluginLi
     }
   }
 
+  // Background tabs that haven't loaded yet are "markdown" leaves too, but their view is a
+  // placeholder with no editor or .view-content to attach to; they attach once they load.
   private markdownViews(): MarkdownView[] {
-    return this.app.workspace.getLeavesOfType("markdown").map((leaf) => leaf.view as MarkdownView);
+    return this.app.workspace
+      .getLeavesOfType("markdown")
+      .map((leaf) => leaf.view)
+      .filter((view): view is MarkdownView => view instanceof MarkdownView);
   }
 
   async loadSettings(): Promise<void> {
