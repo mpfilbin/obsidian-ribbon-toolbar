@@ -236,3 +236,243 @@ describe("RibbonManager", () => {
     });
   });
 });
+
+describe("ribbons that Obsidian removes from the page", () => {
+  // Obsidian can rebuild a view's DOM (for example while loading a large paste),
+  // taking our host element with it while the manager still thinks it is mounted.
+  const settle = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
+  const content = (view: FakeView) => view.containerEl.querySelector(".view-content")!;
+  const hostCount = (view: FakeView) => view.containerEl.querySelectorAll(".ribbon-bar-host").length;
+
+  it("puts the ribbon back on the next sync when its host was removed", () => {
+    const view = makeView();
+    const manager = makeManager();
+    manager.attach(view as never);
+    view.containerEl.querySelector(".ribbon-bar-host")!.remove();
+    expect(hostCount(view)).toBe(0);
+
+    manager.syncAllLeaves(asViews(view));
+    expect(hostCount(view)).toBe(1);
+    expect(content(view).firstElementChild!.classList.contains("ribbon-bar-host")).toBe(true);
+  });
+
+  it("restores a removed ribbon by itself, without waiting for a workspace event", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const view = makeView();
+    makeManager().attach(view as never);
+    view.containerEl.querySelector(".ribbon-bar-host")!.remove();
+    await settle();
+    expect(hostCount(view)).toBe(1);
+  });
+
+  it("keeps the same mounted ribbon, including its selected tab, when restoring it", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const view = makeView();
+    makeManager().attach(view as never);
+    const tab = [...view.containerEl.querySelectorAll<HTMLButtonElement>(".ribbon-tab")].find((t) => t.textContent!.trim() === "Insert")!;
+    tab.click();
+    flushSync();
+    view.containerEl.querySelector(".ribbon-bar-host")!.remove();
+    await settle();
+    expect(view.containerEl.querySelector(".ribbon-tab.active")!.textContent!.trim()).toBe("Insert");
+  });
+
+  it("moves the ribbon into a replacement .view-content when Obsidian swaps it out", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const view = makeView();
+    makeManager().attach(view as never);
+    const replacement = document.createElement("div");
+    replacement.className = "view-content";
+    content(view).replaceWith(replacement);
+    await settle();
+    expect(replacement.firstElementChild!.classList.contains("ribbon-bar-host")).toBe(true);
+    expect(hostCount(view)).toBe(1);
+  });
+
+  it("restores a ribbon when the whole .view-content is emptied", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const view = makeView();
+    makeManager().attach(view as never);
+    content(view).replaceChildren();
+    await settle();
+    expect(hostCount(view)).toBe(1);
+  });
+
+  it("says in the console when it had to restore a ribbon", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const view = makeView();
+    makeManager().attach(view as never);
+    view.containerEl.querySelector(".ribbon-bar-host")!.remove();
+    await settle();
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(String(warn.mock.calls[0][0])).toContain("Ribbon Bar: restored a ribbon");
+  });
+
+  it("leaves a healthy ribbon alone, however much else changes in the view", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const view = makeView();
+    makeManager().attach(view as never);
+    for (let i = 0; i < 50; i++) content(view).querySelector("p")!.append(document.createElement("span"));
+    content(view).append(document.createElement("div"));
+    await settle();
+    expect(hostCount(view)).toBe(1);
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it("does not bring a ribbon back after it was detached on purpose", async () => {
+    const view = makeView();
+    const manager = makeManager();
+    manager.attach(view as never);
+    manager.detach(view as never);
+    content(view).append(document.createElement("div"));
+    await settle();
+    expect(hostCount(view)).toBe(0);
+  });
+
+  it("gives up quietly when the view has no .view-content to restore into", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const view = makeView();
+    const manager = makeManager();
+    manager.attach(view as never);
+    content(view).remove();
+    await settle();
+    expect(hostCount(view)).toBe(0);
+    expect(() => manager.syncAllLeaves(asViews(view))).not.toThrow();
+  });
+});
+
+describe("keeping the ribbon visible", () => {
+  // .view-content only holds the editor and the ribbon, so it should never scroll.
+  // If it does (the browser scrolling to the caret after a huge paste), the ribbon
+  // is carried off the top, so the manager scrolls it back.
+  const content = (view: FakeView) => view.containerEl.querySelector<HTMLElement>(".view-content")!;
+
+  /** jsdom doesn't scroll, so give the element a scrollTop that behaves like a browser's. */
+  function scrollable(el: HTMLElement) {
+    let top = 0;
+    Object.defineProperty(el, "scrollTop", { get: () => top, set: (value: number) => (top = value), configurable: true });
+    return { scrollTo: (value: number) => { top = value; el.dispatchEvent(new Event("scroll")); }, get: () => top };
+  }
+
+  it("marks the container it lives in so styles.css can lay it out around the ribbon", () => {
+    const view = makeView();
+    makeManager().attach(view as never);
+    expect(content(view).classList.contains("ribbon-bar-active")).toBe(true);
+  });
+
+  it("removes the mark when the ribbon is detached", () => {
+    const view = makeView();
+    const manager = makeManager();
+    manager.attach(view as never);
+    manager.detach(view as never);
+    expect(content(view).classList.contains("ribbon-bar-active")).toBe(false);
+  });
+
+  it("scrolls the container back to the top if something scrolls it", () => {
+    const view = makeView();
+    makeManager().attach(view as never);
+    const scroll = scrollable(content(view));
+    scroll.scrollTo(123);
+    expect(scroll.get()).toBe(0);
+  });
+
+  it("leaves a container that is already at the top alone", () => {
+    const view = makeView();
+    makeManager().attach(view as never);
+    const scroll = scrollable(content(view));
+    scroll.scrollTo(0);
+    expect(scroll.get()).toBe(0);
+  });
+
+  it("stops guarding the scroll position once the ribbon is detached", () => {
+    const view = makeView();
+    const manager = makeManager();
+    manager.attach(view as never);
+    const scroll = scrollable(content(view));
+    manager.detach(view as never);
+    scroll.scrollTo(80);
+    expect(scroll.get()).toBe(80);
+  });
+
+  it("moves the mark and the scroll guard to a replacement container", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const view = makeView();
+    makeManager().attach(view as never);
+    const old = content(view);
+    const replacement = document.createElement("div");
+    replacement.className = "view-content";
+    old.replaceWith(replacement);
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+
+    expect(replacement.classList.contains("ribbon-bar-active")).toBe(true);
+    expect(old.classList.contains("ribbon-bar-active")).toBe(false);
+    const scroll = scrollable(replacement);
+    scroll.scrollTo(50);
+    expect(scroll.get()).toBe(0);
+  });
+});
+
+describe("restoring through attach() before the page watcher runs", () => {
+  const content = (view: FakeView) => view.containerEl.querySelector<HTMLElement>(".view-content")!;
+  function scrollable(el: HTMLElement) {
+    let top = 0;
+    Object.defineProperty(el, "scrollTop", { get: () => top, set: (value: number) => (top = value), configurable: true });
+    return { scrollTo: (value: number) => { top = value; el.dispatchEvent(new Event("scroll")); }, get: () => top };
+  }
+
+  it("re-binds the scroll guard to the new container, not the discarded one", () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const view = makeView();
+    const manager = makeManager();
+    manager.attach(view as never);
+    const old = content(view);
+    const oldScroll = scrollable(old);
+
+    const replacement = document.createElement("div");
+    replacement.className = "view-content";
+    old.replaceWith(replacement);
+    // A workspace event syncs before the page watcher's microtask has run.
+    manager.attach(view as never);
+
+    const scroll = scrollable(replacement);
+    scroll.scrollTo(90);
+    expect(scroll.get()).toBe(0);
+    oldScroll.scrollTo(40);
+    expect(oldScroll.get()).toBe(40); // the discarded container is no longer guarded
+  });
+
+  it("keeps watching the new container for later removals", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const view = makeView();
+    const manager = makeManager();
+    manager.attach(view as never);
+    const replacement = document.createElement("div");
+    replacement.className = "view-content";
+    content(view).replaceWith(replacement);
+    manager.attach(view as never);
+
+    replacement.replaceChildren();
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    expect(view.containerEl.querySelectorAll(".ribbon-bar-host")).toHaveLength(1);
+    expect(replacement.firstElementChild!.classList.contains("ribbon-bar-host")).toBe(true);
+  });
+
+  it("does not stack watchers when it re-arms", () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const view = makeView();
+    const manager = makeManager();
+    manager.attach(view as never);
+    for (let i = 0; i < 3; i++) {
+      const next = document.createElement("div");
+      next.className = "view-content";
+      content(view).replaceWith(next);
+      manager.attach(view as never);
+    }
+    const target = content(view);
+    const add = vi.spyOn(target, "addEventListener");
+    const remove = vi.spyOn(target, "removeEventListener");
+    manager.detach(view as never);
+    expect(add).not.toHaveBeenCalled();
+    expect(remove).toHaveBeenCalledWith("scroll", expect.any(Function));
+  });
+});

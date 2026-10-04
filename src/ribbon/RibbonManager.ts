@@ -7,10 +7,16 @@ import type { FrontmatterPropertyConfig } from "./commands/actions/frontmatter";
 import type { TabId } from "./commands/types";
 import { findInjectionPoint } from "./injectionPoint";
 
+// Set on the container a ribbon lives in; styles.css lays that container out as
+// a column so the ribbon and the editor share its height instead of overflowing it.
+const ACTIVE_CLASS = "ribbon-bar-active";
+
 interface RibbonInstance {
   host: HTMLElement;
   component: object;
   editorStore: Writable<EditorLike | null>;
+  // Stops watching the view (see watch()); null when not watching.
+  stopWatching: (() => void) | null;
 }
 
 export class RibbonManager {
@@ -88,6 +94,7 @@ export class RibbonManager {
 
     const existing = this.instances.get(view);
     if (existing) {
+      this.ensureMounted(view, existing);
       existing.editorStore.set(this.editorFor(view));
       return;
     }
@@ -100,7 +107,7 @@ export class RibbonManager {
 
     const host = document.createElement("div");
     host.addClass("ribbon-bar-host");
-    target.prepend(host);
+    this.place(host, target);
 
     const editorStore = writable<EditorLike | null>(this.editorFor(view));
 
@@ -116,13 +123,82 @@ export class RibbonManager {
       },
     });
 
-    this.instances.set(view, { host, component, editorStore });
+    const instance: RibbonInstance = { host, component, editorStore, stopWatching: null };
+    this.instances.set(view, instance);
+    this.watch(view, instance);
+  }
+
+  /**
+   * Obsidian can rebuild a view's DOM (the ribbon has been seen to vanish while
+   * pasting a lot of text), which removes our host element while the component
+   * stays mounted and the manager still believes the ribbon is showing. Put the
+   * existing host back, keeping its component (and so its selected tab).
+   * Returns whether the ribbon is in place afterwards.
+   */
+  private ensureMounted(view: MarkdownView, instance: RibbonInstance): boolean {
+    const target = findInjectionPoint(view.containerEl);
+    if (!target) return false;
+    if (instance.host.parentElement === target) return true;
+
+    console.warn("Ribbon Bar: restored a ribbon that was removed from the page", view);
+    this.place(instance.host, target);
+    // The observer and scroll guard were bound to the old container; follow the ribbon.
+    this.watch(view, instance);
+    return true;
+  }
+
+  /** Puts a ribbon host at the top of its container and marks the container for layout. */
+  private place(host: HTMLElement, target: HTMLElement): void {
+    host.parentElement?.classList.remove(ACTIVE_CLASS);
+    target.prepend(host);
+    target.classList.add(ACTIVE_CLASS);
+  }
+
+  /**
+   * Watches only the direct children of the view and of its .view-content (not
+   * the whole subtree, which churns constantly while editing), which is where our
+   * host lives and where it can be removed from or its parent replaced.
+   *
+   * It also keeps .view-content scrolled to the top. That container holds just the
+   * editor and the ribbon and should never scroll (the editor scrolls itself), but
+   * a container that ends up taller than it is can be scrolled by the browser, for
+   * example to reveal the caret after a very large paste, which carries the ribbon
+   * off the top of the screen.
+   */
+  private watch(view: MarkdownView, instance: RibbonInstance): void {
+    if (typeof MutationObserver === "undefined") return;
+
+    instance.stopWatching?.();
+    const target = findInjectionPoint(view.containerEl);
+
+    const observer = new MutationObserver(() => {
+      if (this.instances.get(view) !== instance) return;
+      const current = findInjectionPoint(view.containerEl);
+      if (current && instance.host.parentElement !== current) this.ensureMounted(view, instance);
+    });
+    observer.observe(view.containerEl, { childList: true });
+
+    const keepAtTop = (): void => {
+      if (target && target.scrollTop !== 0) target.scrollTop = 0;
+    };
+    if (target) {
+      observer.observe(target, { childList: true });
+      target.addEventListener("scroll", keepAtTop);
+    }
+
+    instance.stopWatching = () => {
+      observer.disconnect();
+      target?.removeEventListener("scroll", keepAtTop);
+      instance.stopWatching = null;
+    };
   }
 
   detach(view: MarkdownView): void {
     const instance = this.instances.get(view);
     if (!instance) return;
+    instance.stopWatching?.();
     unmount(instance.component);
+    instance.host.parentElement?.classList.remove(ACTIVE_CLASS);
     instance.host.remove();
     this.instances.delete(view);
   }
