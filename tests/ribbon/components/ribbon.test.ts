@@ -75,7 +75,11 @@ describe("RibbonPanel", () => {
     expect(target.querySelectorAll("button.ribbon-button")).toHaveLength(homeCommands.length);
   });
 
-  it("adds a Properties group to References from the configured frontmatter properties", () => {
+  const propertyGroup = (target: HTMLElement) =>
+    [...target.querySelectorAll(".ribbon-group")].find((g) => g.querySelector(".ribbon-group-label")!.textContent === "Properties")!;
+  const buttonNames = (el: Element) => [...el.querySelectorAll("button.ribbon-button")].map((b) => b.getAttribute("aria-label"));
+
+  it("offers a single Properties menu plus Add Property, instead of a button per property", () => {
     const target = render(
       RibbonPanel,
       props("references", [
@@ -83,29 +87,39 @@ describe("RibbonPanel", () => {
         { name: "tags", type: "list" },
       ])
     );
-    const labels = groupLabels(target);
-    expect(labels.at(-1)).toBe("Properties");
-    const propertyGroup = target.querySelectorAll(".ribbon-group")[labels.length - 1];
-    expect([...propertyGroup.querySelectorAll("button")].map((b) => b.getAttribute("aria-label"))).toEqual([
-      "status",
-      "tags",
-    ]);
+    expect(groupLabels(target).at(-1)).toBe("Properties");
+    expect(buttonNames(propertyGroup(target))).toEqual(["Properties", "Add Property"]);
   });
 
-  it("omits the Properties group when none are configured, and only on References", () => {
-    expect(groupLabels(render(RibbonPanel, props("references")))).not.toContain("Properties");
-    expect(groupLabels(render(RibbonPanel, props("insert", [{ name: "x", type: "text" }])))).not.toContain(
-      "Properties"
+  it("lists the predefined properties as the menu's options", () => {
+    const target = render(
+      RibbonPanel,
+      props("references", [
+        { name: "status", type: "text" },
+        { name: "tags", type: "list" },
+      ])
     );
+    click(propertyGroup(target).querySelector("button.ribbon-button")!);
+    const options = [...document.body.querySelectorAll(".ribbon-dropdown-menu li button")].map((b) => b.textContent!.trim());
+    expect(options).toEqual(["status", "tags"]);
+  });
+
+  it("still offers Add Property when no predefined properties are configured, but no menu", () => {
+    const target = render(RibbonPanel, props("references"));
+    expect(buttonNames(propertyGroup(target))).toEqual(["Add Property"]);
+  });
+
+  it("has no Properties group on other tabs", () => {
+    expect(groupLabels(render(RibbonPanel, props("insert", [{ name: "x", type: "text" }])))).not.toContain("Properties");
   });
 
   it("updates when the properties store changes", () => {
     const store = writable<unknown[]>([]);
     const target = render(RibbonPanel, { ...props("references"), propertiesStore: store });
-    expect(groupLabels(target)).not.toContain("Properties");
+    expect(buttonNames(propertyGroup(target))).toEqual(["Add Property"]);
     store.set([{ name: "late", type: "text" }]);
     flushSync();
-    expect(groupLabels(target)).toContain("Properties");
+    expect(buttonNames(propertyGroup(target))).toEqual(["Properties", "Add Property"]);
   });
 });
 

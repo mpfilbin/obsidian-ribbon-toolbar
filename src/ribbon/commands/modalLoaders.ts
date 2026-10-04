@@ -39,6 +39,12 @@ export function openHeadingLink(editor: EditorLike, app: App): void {
     .catch((error) => console.error("Ribbon Bar: failed to open heading link modal", error));
 }
 
+export function openAddProperty(editor: EditorLike, app: App): void {
+  void import("./actions/propertyModal")
+    .then((module) => module.openAddPropertyModal(editor, app))
+    .catch((error) => console.error("Ribbon Bar: failed to open add property modal", error));
+}
+
 // ---- Bases tab. The base editors pull in the Obsidian runtime, so they load on demand too.
 
 export function openNewBase(editor: EditorLike, app: App): void {

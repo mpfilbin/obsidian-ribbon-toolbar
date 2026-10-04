@@ -47,7 +47,7 @@ export class RibbonBarSettingTab extends PluginSettingTab {
 
     containerEl.createEl("h3", { text: "Frontmatter properties" });
     containerEl.createEl("p", {
-      text: "Each property below becomes a button in the References tab's Properties group.",
+      text: "Each property below becomes an entry in the References tab's Properties menu.",
       cls: "setting-item-description",
     });
 

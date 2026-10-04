@@ -1,0 +1,439 @@
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Code coverage report for src/ribbon/bases/functions.ts</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../../prettify.css" />
+    <link rel="stylesheet" href="../../../base.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="../../../favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+    
+<body>
+<div class='wrapper'>
+    <div class='pad1'>
+        <h1><a href="../../../index.html">All files</a> / <a href="index.html">src/ribbon/bases</a> functions.ts</h1>
+        <div class='clearfix'>
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Statements</span>
+                <span class='fraction'>85/85</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Branches</span>
+                <span class='fraction'>6/6</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Functions</span>
+                <span class='fraction'>3/3</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Lines</span>
+                <span class='fraction'>85/85</span>
+            </div>
+        
+            
+        </div>
+        <p class="quiet">
+            Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
+        </p>
+        <template id="filterTemplate">
+            <div class="quiet">
+                Filter:
+                <input type="search" id="fileSearch">
+            </div>
+        </template>
+    </div>
+    <div class='status-line high'></div>
+    <pre><table class="coverage">
+<tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
+<a name='L2'></a><a href='#L2'>2</a>
+<a name='L3'></a><a href='#L3'>3</a>
+<a name='L4'></a><a href='#L4'>4</a>
+<a name='L5'></a><a href='#L5'>5</a>
+<a name='L6'></a><a href='#L6'>6</a>
+<a name='L7'></a><a href='#L7'>7</a>
+<a name='L8'></a><a href='#L8'>8</a>
+<a name='L9'></a><a href='#L9'>9</a>
+<a name='L10'></a><a href='#L10'>10</a>
+<a name='L11'></a><a href='#L11'>11</a>
+<a name='L12'></a><a href='#L12'>12</a>
+<a name='L13'></a><a href='#L13'>13</a>
+<a name='L14'></a><a href='#L14'>14</a>
+<a name='L15'></a><a href='#L15'>15</a>
+<a name='L16'></a><a href='#L16'>16</a>
+<a name='L17'></a><a href='#L17'>17</a>
+<a name='L18'></a><a href='#L18'>18</a>
+<a name='L19'></a><a href='#L19'>19</a>
+<a name='L20'></a><a href='#L20'>20</a>
+<a name='L21'></a><a href='#L21'>21</a>
+<a name='L22'></a><a href='#L22'>22</a>
+<a name='L23'></a><a href='#L23'>23</a>
+<a name='L24'></a><a href='#L24'>24</a>
+<a name='L25'></a><a href='#L25'>25</a>
+<a name='L26'></a><a href='#L26'>26</a>
+<a name='L27'></a><a href='#L27'>27</a>
+<a name='L28'></a><a href='#L28'>28</a>
+<a name='L29'></a><a href='#L29'>29</a>
+<a name='L30'></a><a href='#L30'>30</a>
+<a name='L31'></a><a href='#L31'>31</a>
+<a name='L32'></a><a href='#L32'>32</a>
+<a name='L33'></a><a href='#L33'>33</a>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a>
+<a name='L36'></a><a href='#L36'>36</a>
+<a name='L37'></a><a href='#L37'>37</a>
+<a name='L38'></a><a href='#L38'>38</a>
+<a name='L39'></a><a href='#L39'>39</a>
+<a name='L40'></a><a href='#L40'>40</a>
+<a name='L41'></a><a href='#L41'>41</a>
+<a name='L42'></a><a href='#L42'>42</a>
+<a name='L43'></a><a href='#L43'>43</a>
+<a name='L44'></a><a href='#L44'>44</a>
+<a name='L45'></a><a href='#L45'>45</a>
+<a name='L46'></a><a href='#L46'>46</a>
+<a name='L47'></a><a href='#L47'>47</a>
+<a name='L48'></a><a href='#L48'>48</a>
+<a name='L49'></a><a href='#L49'>49</a>
+<a name='L50'></a><a href='#L50'>50</a>
+<a name='L51'></a><a href='#L51'>51</a>
+<a name='L52'></a><a href='#L52'>52</a>
+<a name='L53'></a><a href='#L53'>53</a>
+<a name='L54'></a><a href='#L54'>54</a>
+<a name='L55'></a><a href='#L55'>55</a>
+<a name='L56'></a><a href='#L56'>56</a>
+<a name='L57'></a><a href='#L57'>57</a>
+<a name='L58'></a><a href='#L58'>58</a>
+<a name='L59'></a><a href='#L59'>59</a>
+<a name='L60'></a><a href='#L60'>60</a>
+<a name='L61'></a><a href='#L61'>61</a>
+<a name='L62'></a><a href='#L62'>62</a>
+<a name='L63'></a><a href='#L63'>63</a>
+<a name='L64'></a><a href='#L64'>64</a>
+<a name='L65'></a><a href='#L65'>65</a>
+<a name='L66'></a><a href='#L66'>66</a>
+<a name='L67'></a><a href='#L67'>67</a>
+<a name='L68'></a><a href='#L68'>68</a>
+<a name='L69'></a><a href='#L69'>69</a>
+<a name='L70'></a><a href='#L70'>70</a>
+<a name='L71'></a><a href='#L71'>71</a>
+<a name='L72'></a><a href='#L72'>72</a>
+<a name='L73'></a><a href='#L73'>73</a>
+<a name='L74'></a><a href='#L74'>74</a>
+<a name='L75'></a><a href='#L75'>75</a>
+<a name='L76'></a><a href='#L76'>76</a>
+<a name='L77'></a><a href='#L77'>77</a>
+<a name='L78'></a><a href='#L78'>78</a>
+<a name='L79'></a><a href='#L79'>79</a>
+<a name='L80'></a><a href='#L80'>80</a>
+<a name='L81'></a><a href='#L81'>81</a>
+<a name='L82'></a><a href='#L82'>82</a>
+<a name='L83'></a><a href='#L83'>83</a>
+<a name='L84'></a><a href='#L84'>84</a>
+<a name='L85'></a><a href='#L85'>85</a>
+<a name='L86'></a><a href='#L86'>86</a>
+<a name='L87'></a><a href='#L87'>87</a>
+<a name='L88'></a><a href='#L88'>88</a>
+<a name='L89'></a><a href='#L89'>89</a>
+<a name='L90'></a><a href='#L90'>90</a>
+<a name='L91'></a><a href='#L91'>91</a>
+<a name='L92'></a><a href='#L92'>92</a>
+<a name='L93'></a><a href='#L93'>93</a>
+<a name='L94'></a><a href='#L94'>94</a>
+<a name='L95'></a><a href='#L95'>95</a>
+<a name='L96'></a><a href='#L96'>96</a>
+<a name='L97'></a><a href='#L97'>97</a>
+<a name='L98'></a><a href='#L98'>98</a>
+<a name='L99'></a><a href='#L99'>99</a>
+<a name='L100'></a><a href='#L100'>100</a>
+<a name='L101'></a><a href='#L101'>101</a>
+<a name='L102'></a><a href='#L102'>102</a>
+<a name='L103'></a><a href='#L103'>103</a>
+<a name='L104'></a><a href='#L104'>104</a>
+<a name='L105'></a><a href='#L105'>105</a>
+<a name='L106'></a><a href='#L106'>106</a>
+<a name='L107'></a><a href='#L107'>107</a>
+<a name='L108'></a><a href='#L108'>108</a>
+<a name='L109'></a><a href='#L109'>109</a>
+<a name='L110'></a><a href='#L110'>110</a>
+<a name='L111'></a><a href='#L111'>111</a>
+<a name='L112'></a><a href='#L112'>112</a>
+<a name='L113'></a><a href='#L113'>113</a>
+<a name='L114'></a><a href='#L114'>114</a>
+<a name='L115'></a><a href='#L115'>115</a>
+<a name='L116'></a><a href='#L116'>116</a>
+<a name='L117'></a><a href='#L117'>117</a>
+<a name='L118'></a><a href='#L118'>118</a>
+<a name='L119'></a><a href='#L119'>119</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">1943x</span>
+<span class="cline-any cline-yes">1943x</span>
+<span class="cline-any cline-yes">1943x</span>
+<span class="cline-any cline-yes">1943x</span>
+<span class="cline-any cline-yes">1943x</span>
+<span class="cline-any cline-yes">1943x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">165x</span>
+<span class="cline-any cline-yes">165x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">150x</span>
+<span class="cline-any cline-yes">150x</span>
+<span class="cline-any cline-yes">149x</span>
+<span class="cline-any cline-yes">149x</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/**
+ * Functions available in Bases expressions (formulas, filters and summaries),
+ * grouped for the "insert function" menus. `template` is the text inserted;
+ * `$0` marks where the cursor lands (it is removed on insert).
+ */
+&nbsp;
+export type FunctionGroup = "Global" | "Text" | "Number" | "List" | "Date" | "File";
+&nbsp;
+export interface BaseFunction {
+  group: FunctionGroup;
+  /** Display name, e.g. "contains" or "if". */
+  name: string;
+  signature: string;
+  description: string;
+  template: string;
+}
+&nbsp;
+const fn = (group: FunctionGroup, name: string, signature: string, description: string, template: string): BaseFunction =&gt; ({
+  group,
+  name,
+  signature,
+  description,
+  template,
+});
+&nbsp;
+export const FUNCTIONS: BaseFunction[] = [
+  // Global
+  fn("Global", "if", "if(condition, trueResult, falseResult?)", "Returns one value or the other depending on a condition.", "if($0, , )"),
+  fn("Global", "now", "now()", "The current date and time.", "now()$0"),
+  fn("Global", "today", "today()", "The current date, without a time.", "today()$0"),
+  fn("Global", "date", "date(text)", "Parses text such as \"2025-01-31\" into a date.", 'date("$0")'),
+  fn("Global", "duration", "duration(text)", "Parses text such as \"3 days\" into a duration.", 'duration("$0")'),
+  fn("Global", "number", "number(value)", "Converts a value to a number.", "number($0)"),
+  fn("Global", "link", "link(path, display?)", "Creates a link to a file path.", 'link("$0")'),
+  fn("Global", "file", "file(path)", "Gets a file by path or link.", 'file("$0")'),
+  fn("Global", "list", "list(value)", "Wraps a value in a list if it isn't one already.", "list($0)"),
+  fn("Global", "min", "min(a, b, …)", "The smallest of the given numbers.", "min($0)"),
+  fn("Global", "max", "max(a, b, …)", "The largest of the given numbers.", "max($0)"),
+  fn("Global", "image", "image(path)", "Shows an image.", 'image($0)'),
+  fn("Global", "icon", "icon(name)", "Shows a Lucide icon.", 'icon("$0")'),
+  fn("Global", "html", "html(text)", "Renders text as HTML.", "html($0)"),
+  fn("Global", "escapeHTML", "escapeHTML(text)", "Escapes text so it is safe inside HTML.", "escapeHTML($0)"),
+&nbsp;
+  // Text
+  fn("Text", "contains", "text.contains(value)", "Whether the text contains a value.", '.contains("$0")'),
+  fn("Text", "startsWith", "text.startsWith(value)", "Whether the text starts with a value.", '.startsWith("$0")'),
+  fn("Text", "endsWith", "text.endsWith(value)", "Whether the text ends with a value.", '.endsWith("$0")'),
+  fn("Text", "lower", "text.lower()", "Converts to lowercase.", ".lower()$0"),
+  fn("Text", "title", "text.title()", "Converts to Title Case.", ".title()$0"),
+  fn("Text", "trim", "text.trim()", "Removes whitespace from both ends.", ".trim()$0"),
+  fn("Text", "replace", "text.replace(pattern, replacement)", "Replaces matches of a pattern.", '.replace("$0", "")'),
+  fn("Text", "split", "text.split(separator)", "Splits into a list.", '.split("$0")'),
+  fn("Text", "slice", "text.slice(start, end?)", "Takes part of the text.", ".slice($0)"),
+  fn("Text", "repeat", "text.repeat(count)", "Repeats the text.", ".repeat($0)"),
+  fn("Text", "reverse", "text.reverse()", "Reverses the characters.", ".reverse()$0"),
+  fn("Text", "isEmpty", "text.isEmpty()", "Whether the text is empty.", ".isEmpty()$0"),
+  fn("Text", "toString", "value.toString()", "Converts any value to text.", ".toString()$0"),
+  fn("Text", "length", "text.length", "The number of characters.", ".length$0"),
+&nbsp;
+  // Number
+  fn("Number", "abs", "number.abs()", "Absolute value.", ".abs()$0"),
+  fn("Number", "ceil", "number.ceil()", "Rounds up.", ".ceil()$0"),
+  fn("Number", "floor", "number.floor()", "Rounds down.", ".floor()$0"),
+  fn("Number", "round", "number.round(digits?)", "Rounds to the nearest value.", ".round($0)"),
+  fn("Number", "toFixed", "number.toFixed(digits)", "Formats with a fixed number of decimals.", ".toFixed($0)"),
+  fn("Number", "isEmpty", "number.isEmpty()", "Whether the number is empty.", ".isEmpty()$0"),
+&nbsp;
+  // List
+  fn("List", "contains", "list.contains(value)", "Whether the list contains a value.", ".contains($0)"),
+  fn("List", "containsAll", "list.containsAll(a, b, …)", "Whether the list contains every value.", ".containsAll($0)"),
+  fn("List", "containsAny", "list.containsAny(a, b, …)", "Whether the list contains any value.", ".containsAny($0)"),
+  fn("List", "filter", "list.filter(condition)", "Keeps items where the condition (using `value`) is true.", ".filter($0)"),
+  fn("List", "map", "list.map(expression)", "Transforms each item (using `value`).", ".map($0)"),
+  fn("List", "reduce", "list.reduce(expression, initial)", "Combines items into one value (using `acc` and `value`).", ".reduce($0, )"),
+  fn("List", "join", "list.join(separator)", "Joins items into text.", '.join(", ")$0'),
+  fn("List", "sort", "list.sort()", "Sorts the items.", ".sort()$0"),
+  fn("List", "unique", "list.unique()", "Removes duplicates.", ".unique()$0"),
+  fn("List", "flat", "list.flat()", "Flattens nested lists.", ".flat()$0"),
+  fn("List", "slice", "list.slice(start, end?)", "Takes part of the list.", ".slice($0)"),
+  fn("List", "reverse", "list.reverse()", "Reverses the order.", ".reverse()$0"),
+  fn("List", "isEmpty", "list.isEmpty()", "Whether the list is empty.", ".isEmpty()$0"),
+  fn("List", "length", "list.length", "The number of items.", ".length$0"),
+&nbsp;
+  // Date
+  fn("Date", "format", "date.format(pattern)", "Formats a date, e.g. \"YYYY-MM-DD\".", '.format("$0")'),
+  fn("Date", "date", "date.date()", "Removes the time, keeping the day.", ".date()$0"),
+  fn("Date", "time", "date.time()", "The time of day as text.", ".time()$0"),
+  fn("Date", "relative", "date.relative()", "Describes the date relative to now, e.g. \"3 days ago\".", ".relative()$0"),
+  fn("Date", "year", "date.year", "The year.", ".year$0"),
+  fn("Date", "month", "date.month", "The month (1–12).", ".month$0"),
+  fn("Date", "day", "date.day", "The day of the month.", ".day$0"),
+  fn("Date", "hour", "date.hour", "The hour.", ".hour$0"),
+  fn("Date", "minute", "date.minute", "The minute.", ".minute$0"),
+  fn("Date", "second", "date.second", "The second.", ".second$0"),
+  fn("Date", "isEmpty", "date.isEmpty()", "Whether the date is empty.", ".isEmpty()$0"),
+&nbsp;
+  // File
+  fn("File", "hasTag", "file.hasTag(tag, …)", "Whether the file has any of the tags.", 'file.hasTag("$0")'),
+  fn("File", "inFolder", "file.inFolder(folder)", "Whether the file is in the folder or a subfolder.", 'file.inFolder("$0")'),
+  fn("File", "hasLink", "file.hasLink(file)", "Whether the file links to another file.", "file.hasLink($0)"),
+  fn("File", "hasProperty", "file.hasProperty(name)", "Whether the file has a property.", 'file.hasProperty("$0")'),
+  fn("File", "asLink", "file.asLink(display?)", "Turns the file into a link.", "file.asLink()$0"),
+  fn("File", "linksTo", "link.linksTo(file)", "Whether a link points to a file.", ".linksTo($0)"),
+  fn("File", "asFile", "link.asFile()", "Resolves a link to its file.", ".asFile()$0"),
+];
+&nbsp;
+export const FUNCTION_GROUPS: FunctionGroup[] = ["Global", "Text", "Number", "List", "Date", "File"];
+&nbsp;
+export function functionsInGroup(group: FunctionGroup): BaseFunction[] {
+  return FUNCTIONS.filter((f) =&gt; f.group === group);
+}
+&nbsp;
+/** Splits a template at its `$0` marker; the cursor belongs between the halves. */
+export function splitTemplate(template: string): { before: string; after: string } {
+  const at = template.indexOf("$0");
+  if (at === -1) return { before: template, after: "" };
+  return { before: template.slice(0, at), after: template.slice(at + 2) };
+}
+&nbsp;</pre></td></tr></table></pre>
+
+                <div class='push'></div><!-- for sticky footer -->
+            </div><!-- /wrapper -->
+            <div class='footer quiet pad2 space-top1 center small'>
+                Code coverage generated by
+                <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
+                at 2026-10-04T11:18:40.383Z
+            </div>
+        <script src="../../../prettify.js"></script>
+        <script>
+            window.onload = function () {
+                prettyPrint();
+            };
+        </script>
+        <script src="../../../sorter.js"></script>
+        <script src="../../../block-navigation.js"></script>
+    </body>
+</html>
+    

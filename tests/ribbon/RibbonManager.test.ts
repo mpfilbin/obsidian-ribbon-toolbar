@@ -217,8 +217,14 @@ describe("RibbonManager", () => {
       tab.click();
       flushSync();
       const groups = [...view.containerEl.querySelectorAll(".ribbon-group")];
-      const group = groups.find((g) => g.querySelector(".ribbon-group-label")!.textContent === "Properties");
-      return group ? [...group.querySelectorAll("button")].map((b) => b.getAttribute("aria-label")) : [];
+      const group = groups.find((g) => g.querySelector(".ribbon-group-label")!.textContent === "Properties")!;
+      // The predefined properties are the options of the group's Properties menu.
+      group.querySelector<HTMLButtonElement>("button.ribbon-button")!.click();
+      flushSync();
+      const options = [...document.body.querySelectorAll(".ribbon-dropdown-menu li button")].map((b) => b.textContent!.trim());
+      group.querySelector<HTMLButtonElement>("button.ribbon-button")!.click(); // close it again
+      flushSync();
+      return options;
     };
 
     it("starts from the configured properties and live-updates every ribbon, even for in-place mutation", () => {

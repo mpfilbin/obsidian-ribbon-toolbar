@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { App, obsidianLog } from "obsidian";
 import { FormModal } from "../../../../src/ribbon/commands/actions/formModal";
 import { EditorSuggestModal } from "../../../../src/ribbon/commands/actions/editorSuggestModal";
@@ -108,6 +108,32 @@ describe("EditorSuggestModal", () => {
     expect(focus).toHaveBeenCalledTimes(1);
     modal.open();
     modal.close();
+    expect(focus).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("returning focus to the editor", () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  it("focuses the editor again after Obsidian restores focus to the ribbon button", () => {
+    const editor = createMockEditor("");
+    const focus = vi.spyOn(editor, "focus");
+    const modal = new TestForm(new App() as never, editor);
+    modal.open();
+    modal.close();
+    expect(focus).toHaveBeenCalledTimes(1); // immediately, as the dialog closes
+    vi.advanceTimersByTime(0);
+    expect(focus).toHaveBeenCalledTimes(2); // and again once the focus restore has happened
+  });
+
+  it("does the same for suggestion dialogs", () => {
+    const editor = createMockEditor("");
+    const focus = vi.spyOn(editor, "focus");
+    const modal = new TestSuggest(new App() as never, editor, "");
+    modal.open();
+    modal.close();
+    vi.advanceTimersByTime(0);
     expect(focus).toHaveBeenCalledTimes(2);
   });
 });

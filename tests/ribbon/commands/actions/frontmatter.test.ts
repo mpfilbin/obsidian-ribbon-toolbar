@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createMockEditor } from "../../../support/mockEditor";
-import { insertProperty } from "../../../../src/ribbon/commands/actions/frontmatter";
+import { hasProperty, insertProperty, insertPropertyLines } from "../../../../src/ribbon/commands/actions/frontmatter";
 
 describe("insertProperty", () => {
   it("creates a frontmatter block when none exists (text, no default)", () => {
@@ -75,5 +75,95 @@ describe("insertProperty with an unterminated frontmatter block", () => {
     const editor = createMockEditor("---\ntitle: x\nbody", { line: 0, ch: 0 });
     insertProperty({ name: "tags", type: "text" })(editor);
     expect(editor.getValue().startsWith("---\ntags: \n---\n")).toBe(true);
+  });
+});
+
+describe("hasProperty and insertPropertyLines", () => {
+  it("reports whether the frontmatter has a property", () => {
+    const editor = createMockEditor("---\nstatus: open\n---\nbody");
+    expect(hasProperty(editor, "status")).toBe(true);
+    expect(hasProperty(editor, "owner")).toBe(false);
+    expect(hasProperty(createMockEditor("no frontmatter"), "status")).toBe(false);
+  });
+
+  it("does not mistake a property name for a longer one", () => {
+    expect(hasProperty(createMockEditor("---\nstatus-code: 1\n---\n"), "status")).toBe(false);
+  });
+
+  it("creates a frontmatter block when there is none, leaving the cursor on the new property", () => {
+    const editor = createMockEditor("body");
+    expect(insertPropertyLines(editor, "owner", ["owner: me"])).toBe("inserted");
+    expect(editor.getValue()).toBe("---\nowner: me\n---\nbody");
+    expect(editor.getCursor()).toEqual({ line: 1, ch: 9 });
+  });
+
+  it("adds to an existing block above its closing delimiter", () => {
+    const editor = createMockEditor("---\na: 1\n---\nbody");
+    expect(insertPropertyLines(editor, "tags", ["tags:", "  - x"])).toBe("inserted");
+    expect(editor.getValue()).toBe("---\na: 1\ntags:\n  - x\n---\nbody");
+    expect(editor.getCursor()).toEqual({ line: 3, ch: 5 });
+  });
+
+  it("refuses to duplicate an existing property", () => {
+    const editor = createMockEditor("---\nstatus: open\n---\nbody");
+    expect(insertPropertyLines(editor, "status", ["status: done"])).toBe("exists");
+    expect(editor.getValue()).toBe("---\nstatus: open\n---\nbody");
+  });
+});
+
+describe("duplicate detection for quoted keys", () => {
+  const note = (line: string) => `---\n${line}\n---\nbody`;
+
+  it.each([
+    ["a: b", '"a: b": 1'],
+    ["a: b", "'a: b': 1"],
+    ["status", '"status": open'],
+    ["status", "'status': open"],
+    ["it's", "'it''s': 1"],
+    ["say \"hi\"", '"say \\"hi\\"": 1'],
+    ["status", "status : open"],
+  ])("finds %j written as %s", (name, line) => {
+    expect(hasProperty(createMockEditor(note(line)), name)).toBe(true);
+  });
+
+  it("refuses to insert a property whose quoted key already exists", () => {
+    const editor = createMockEditor(note('"a: b": 1'));
+    expect(insertPropertyLines(editor, "a: b", ['"a: b": 2'])).toBe("exists");
+    expect(editor.getValue()).toBe(note('"a: b": 1'));
+  });
+
+  it("applies to predefined properties too", () => {
+    const editor = createMockEditor(note('"status": open'));
+    insertProperty({ name: "status", type: "text", defaultValue: "x" })(editor);
+    expect(editor.getValue()).toBe(note('"status": open'));
+  });
+
+  it.each(['"status-code": 1', "status-code: 1", '"status code": 1', "mystatus: 1"])("does not confuse %s with status", (line) => {
+    expect(hasProperty(createMockEditor(note(line)), "status")).toBe(false);
+  });
+
+  it("matches names that contain regex characters literally", () => {
+    expect(hasProperty(createMockEditor(note("a.b: 1")), "a.b")).toBe(true);
+    expect(hasProperty(createMockEditor(note("axb: 1")), "a.b")).toBe(false);
+  });
+});
+
+describe("insertProperty with configured defaults", () => {
+  it("uses a checkbox default of true, a configured date and a configured date-time", () => {
+    const editor = createMockEditor("");
+    insertProperty({ name: "done", type: "checkbox", defaultValue: "true" })(editor);
+    insertProperty({ name: "due", type: "date", defaultValue: "2025-01-31" })(editor);
+    insertProperty({ name: "at", type: "datetime", defaultValue: "2025-01-31T09:30" })(editor);
+    expect(editor.getValue()).toContain("done: true");
+    expect(editor.getValue()).toContain("due: 2025-01-31");
+    expect(editor.getValue()).toContain("at: 2025-01-31T09:30");
+  });
+
+  it("falls back to today and now when a date default is empty", () => {
+    const editor = createMockEditor("");
+    insertProperty({ name: "due", type: "date", defaultValue: "" })(editor);
+    insertProperty({ name: "at", type: "datetime" })(editor);
+    expect(editor.getValue()).toMatch(/due: \d{4}-\d{2}-\d{2}\n/);
+    expect(editor.getValue()).toMatch(/at: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}\n/);
   });
 });

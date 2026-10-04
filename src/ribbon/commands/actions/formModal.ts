@@ -1,5 +1,6 @@
 import { App, Modal, Setting } from "obsidian";
 import type { EditorLike } from "./types";
+import { returnFocusToEditor } from "./editorFocus";
 
 /**
  * Base for the ribbon's "fill in a form, then Insert" dialogs. It owns the
@@ -44,6 +45,6 @@ export abstract class FormModal extends Modal {
   }
 
   onClose(): void {
-    this.editor.focus();
+    returnFocusToEditor(this.editor);
   }
 }

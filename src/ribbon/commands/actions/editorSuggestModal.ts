@@ -1,5 +1,6 @@
 import { App, SuggestModal } from "obsidian";
 import type { EditorLike } from "./types";
+import { returnFocusToEditor } from "./editorFocus";
 
 /**
  * Base for the ribbon's "pick something to insert" dialogs. Any selected text
@@ -25,6 +26,6 @@ export abstract class EditorSuggestModal<T> extends SuggestModal<T> {
   }
 
   onClose(): void {
-    this.editor.focus();
+    returnFocusToEditor(this.editor);
   }
 }

@@ -2,6 +2,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   buildPropertyCommands,
   COMMAND_REGISTRY,
+  commandsForTabWithProperties,
+  groupsOf,
   TABS,
   commandsForTab,
   groupsForTab,
@@ -292,19 +294,64 @@ describe("LaTeX tab commands", () => {
 });
 
 describe("buildPropertyCommands", () => {
-  it("builds one Properties-group command per configured property", () => {
-    const commands = buildPropertyCommands([
-      { name: "tags", type: "list" },
-      { name: "description", type: "text" },
+  const properties = [
+    { name: "tags", type: "list" as const },
+    { name: "description", type: "text" as const },
+  ];
+
+  it("merges the predefined properties into a single Properties menu", () => {
+    const commands = buildPropertyCommands(properties);
+    expect(commands).toHaveLength(1);
+    expect(commands[0]).toMatchObject({ id: "property-menu", tab: "references", group: "Properties", label: "Properties" });
+    expect(commands[0].action).toBeUndefined();
+    expect(commands[0].options!.map((o) => [o.id, o.label])).toEqual([
+      ["property-tags", "tags"],
+      ["property-description", "description"],
     ]);
-    expect(commands).toHaveLength(2);
-    expect(commands[0]).toMatchObject({ tab: "references", group: "Properties", label: "tags" });
-    expect(commands[1]).toMatchObject({ tab: "references", group: "Properties", label: "description" });
-    expect(typeof commands[0].action).toBe("function");
   });
 
-  it("returns an empty array for an empty property list", () => {
+  it("inserts the chosen property into the note's frontmatter", () => {
+    const [menu] = buildPropertyCommands(properties);
+    const editor = createMockEditor("body");
+    menu.options![0].action(editor, {} as never);
+    expect(editor.getValue()).toBe("---\ntags:\n  - \n---\nbody");
+  });
+
+  it("returns no menu for an empty property list", () => {
     expect(buildPropertyCommands([])).toEqual([]);
+  });
+});
+
+describe("Properties group on the References tab", () => {
+  const props = [{ name: "status", type: "text" as const }];
+
+  it("always offers Add Property, as a modal command", () => {
+    const add = COMMAND_REGISTRY.find((c) => c.id === "property-add");
+    expect(add).toMatchObject({ tab: "references", group: "Properties", label: "Add Property" });
+    expect(add!.modal).toBeTypeOf("function");
+    expect(groupsForTab("references")).toContain("Properties");
+  });
+
+  it("puts the predefined-properties menu ahead of Add Property", () => {
+    const commands = commandsForTabWithProperties("references", props);
+    const group = commands.filter((c) => c.group === "Properties").map((c) => c.label);
+    expect(group).toEqual(["Properties", "Add Property"]);
+  });
+
+  it("leaves other groups and tabs alone", () => {
+    expect(commandsForTabWithProperties("references", props).filter((c) => c.group !== "Properties")).toEqual(
+      commandsForTab("references").filter((c) => c.group !== "Properties")
+    );
+    expect(commandsForTabWithProperties("insert", props)).toEqual(commandsForTab("insert"));
+  });
+
+  it("is just the static commands when no properties are configured", () => {
+    expect(commandsForTabWithProperties("references", [])).toEqual(commandsForTab("references"));
+  });
+
+  it("groupsOf lists groups in first-seen order", () => {
+    expect(groupsOf(commandsForTabWithProperties("references", props))).toEqual(groupsForTab("references"));
+    expect(groupsOf([])).toEqual([]);
   });
 });
 
@@ -315,6 +362,7 @@ describe("lazy-loaded modal commands", () => {
     ["internal-link", "linkModal", "openLinkModal"],
     ["embed", "embedModal", "openEmbedModal"],
     ["footnote", "footnoteModal", "openFootnoteModal"],
+    ["property-add", "propertyModal", "openAddPropertyModal"],
     ["ref-heading-link", "headingLinkModal", "openHeadingLinkModal"],
   ];
 

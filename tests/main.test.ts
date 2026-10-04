@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { App, obsidianLog } from "obsidian";
+import { App, MarkdownView, obsidianLog } from "obsidian";
 import RibbonBarPlugin from "../src/main";
 import { DEFAULT_SETTINGS } from "../src/settings";
 import { RibbonBarSettingTab } from "../src/settings-tab";
@@ -29,6 +29,9 @@ function makeApp(views: object[] = []) {
     handlers,
   };
 }
+
+/** A stand-in for a loaded MarkdownView (the plugin ignores anything that isn't one). */
+const markdownView = (id: string) => Object.assign(Object.create(MarkdownView.prototype), { id });
 
 async function loadPlugin(stored?: unknown, views: object[] = []) {
   const env = makeApp(views);
@@ -97,15 +100,23 @@ describe("RibbonBarPlugin", () => {
     });
 
     it("hands the manager the markdown views from the workspace", async () => {
-      const view = { id: "v1" };
+      const view = markdownView("v1");
       const { plugin, spies } = await loadPlugin(undefined, [view]);
       plugin.syncRibbons();
       expect(spies.sync).toHaveBeenCalledWith([view]);
     });
   });
 
+  it("skips background tabs that haven't loaded yet, whose view is only a placeholder", async () => {
+    const loaded = markdownView("loaded");
+    const placeholder = { id: "deferred" };
+    const { plugin, spies } = await loadPlugin(undefined, [placeholder, loaded]);
+    plugin.syncRibbons();
+    expect(spies.sync).toHaveBeenCalledWith([loaded]);
+  });
+
   it("detaches every ribbon on unload", async () => {
-    const view = { id: "v1" };
+    const view = markdownView("v1");
     const { plugin, spies } = await loadPlugin(undefined, [view]);
     plugin.onunload();
     expect(spies.detachAll).toHaveBeenCalledWith([view]);
