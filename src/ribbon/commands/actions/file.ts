@@ -16,7 +16,7 @@ function activeNote(app: App): TFile | null {
 }
 
 async function openInNewTab(app: App, file: TFile): Promise<void> {
-  await app.workspace.getLeaf(false).openFile(file);
+  await app.workspace.getLeaf("tab").openFile(file);
 }
 
 export async function newNote(_editor: EditorLike, app: App): Promise<void> {
