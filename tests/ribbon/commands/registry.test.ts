@@ -483,3 +483,19 @@ describe("code block command", () => {
     for (const id of ids) expect(id).toMatch(/^[a-z+]+$/);
   });
 });
+
+describe("File tab", () => {
+  it("comes first in the tab row and offers the note and export commands", () => {
+    expect(TABS[0]).toEqual({ id: "file", label: "File" });
+    expect(commandsForTab("file").map((entry) => entry.label)).toEqual([
+      "New",
+      "Open",
+      "Open File",
+      "Save As",
+      "Move",
+      "Export PDF",
+      "Export HTML",
+    ]);
+    expect(groupsForTab("file")).toEqual(["Note", "Export"]);
+  });
+});

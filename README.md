@@ -25,6 +25,10 @@ An Obsidian plugin that adds a Microsoft Office-style, multi-tab editing ribbon 
 
 The ribbon appears above every open Markdown pane, in Source, Live Preview, and Reading view (buttons are disabled in Reading view, since there's no live editor to act on there). Most buttons wrap your current selection in the relevant Markdown syntax, or — if nothing is selected — insert a placeholder with the new text pre-selected so you can start typing immediately.
 
+### File tab
+
+New (an untitled note in the default new-note folder), Open (Obsidian's quick switcher), Open File (pick a Markdown or text file from disk with the system dialog; it is copied into the vault and opened), Save As (save a copy of the current note under a new vault path), Move (Obsidian's move-file dialog), Export PDF (Obsidian's built-in PDF export), Export HTML (renders the note to a standalone page and asks where to save it; local images and embeds are not inlined)
+
 ### Home tab
 
 Bold, Italic, Strikethrough, Highlight (dropdown: Default plus Obsidian's native red/orange/green/blue/purple), Code, Clear Formatting, Heading (dropdown: H1–H3), Bulleted List, Numbered List, Checklist, Quote

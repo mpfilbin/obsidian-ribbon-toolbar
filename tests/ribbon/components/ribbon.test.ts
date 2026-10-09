@@ -138,14 +138,14 @@ describe("RibbonBar", () => {
   const tabs = (t: HTMLElement) => [...t.querySelectorAll<HTMLButtonElement>(".ribbon-tab")];
   const activeLabel = (t: HTMLElement) => tabs(t).find((b) => b.classList.contains("active"))?.textContent?.trim();
 
-  it("shows every tab, starting on the first, with its panel", () => {
+  it("shows every tab, starting on Home, with its panel", () => {
     const { target } = mountBar();
     expect(tabs(target).map((b) => b.textContent!.trim())).toEqual(TABS.map((t) => t.label));
     expect(activeLabel(target)).toBe("Home");
     expect(target.querySelector(".ribbon-panel")).not.toBeNull();
   });
 
-  it("opens on the given initial tab, falling back to the first for an unknown one", () => {
+  it("opens on the given initial tab, falling back to Home for an unknown one", () => {
     expect(activeLabel(mountBar({ initialTab: "latex" }).target)).toBe("LaTeX");
     expect(activeLabel(mountBar({ initialTab: "nonsense" }).target)).toBe("Home");
   });
@@ -153,14 +153,14 @@ describe("RibbonBar", () => {
   it("reports each tab selection", () => {
     const ontabchange = vi.fn();
     const { target } = mountBar({ ontabchange });
-    click(tabs(target)[2]);
-    click(tabs(target)[4]);
+    click(tabs(target)[3]);
+    click(tabs(target)[5]);
     expect(ontabchange.mock.calls).toEqual([["layout"], ["latex"]]);
   });
 
   it("switches panels when a tab is clicked", () => {
     const { target } = mountBar();
-    click(tabs(target)[1]);
+    click(tabs(target)[2]);
     expect(activeLabel(target)).toBe("Insert");
     expect([...target.querySelectorAll(".ribbon-group-label")].map((e) => e.textContent)).toContain("Tables");
   });
