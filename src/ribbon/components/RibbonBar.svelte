@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { untrack } from "svelte";
   import type { Writable } from "svelte/store";
   import type { App } from "obsidian";
   import { DEFAULT_TAB, TABS } from "../commands/registry";
@@ -26,8 +27,10 @@
 
   let editor = $derived($editorStore);
 
-  let activeTab = $state<TabId>(TABS.some((tab) => tab.id === initialTab) ? initialTab : DEFAULT_TAB);
-  let collapsed = $state(defaultCollapsed);
+  // initialTab and defaultCollapsed only seed the starting state: a ribbon keeps the tab
+  // and collapsed state the user left it in, so later changes to them are ignored on purpose.
+  let activeTab = $state<TabId>(untrack(() => (TABS.some((tab) => tab.id === initialTab) ? initialTab : DEFAULT_TAB)));
+  let collapsed = $state(untrack(() => defaultCollapsed));
 
   function selectTab(tab: TabId) {
     activeTab = tab;
