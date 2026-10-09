@@ -1,6 +1,7 @@
 import type { FrontmatterPropertyConfig } from "./actions/frontmatter";
 import { insertProperty } from "./actions/frontmatter";
 import type { CommandEntry, TabId } from "./types";
+import { FILE_COMMANDS } from "./definitions/file";
 import { HOME_COMMANDS } from "./definitions/home";
 import { INSERT_COMMANDS } from "./definitions/insert";
 import { LAYOUT_COMMANDS } from "./definitions/layout";
@@ -11,6 +12,7 @@ import { BASES_COMMANDS } from "./definitions/bases";
 export type { CommandEntry, CommandOption, TabId } from "./types";
 
 export const TABS: { id: TabId; label: string }[] = [
+  { id: "file", label: "File" },
   { id: "home", label: "Home" },
   { id: "insert", label: "Insert" },
   { id: "layout", label: "Layout" },
@@ -19,8 +21,13 @@ export const TABS: { id: TabId; label: string }[] = [
   { id: "bases", label: "Bases" },
 ];
 
+// The tab a ribbon opens on when none has been chosen yet. File comes first in the
+// row, as in Office, but Home is where editing starts.
+export const DEFAULT_TAB: TabId = "home";
+
 // Within a tab, groups and commands appear in the order they are listed here.
 export const COMMAND_REGISTRY: CommandEntry[] = [
+  ...FILE_COMMANDS,
   ...HOME_COMMANDS,
   ...INSERT_COMMANDS,
   ...LAYOUT_COMMANDS,

@@ -86,3 +86,21 @@ export function addBaseQuickFilter(id: string) {
       .catch((error) => console.error("Ribbon Bar: failed to add a base filter", error));
   };
 }
+
+// ---- File tab. These act on notes and files through the Obsidian runtime, so they load on demand too.
+
+function fileAction(name: "newNote" | "openNote" | "moveNote" | "exportPdf" | "openFileFromDisk" | "openSaveAsModal" | "exportHtml") {
+  return (editor: EditorLike, app: App): void => {
+    void import("./actions/file")
+      .then((module) => module[name](editor, app))
+      .catch((error) => console.error(`Ribbon Bar: file command ${name} failed`, error));
+  };
+}
+
+export const newNoteFile = fileAction("newNote");
+export const openNoteFile = fileAction("openNote");
+export const openFileFromDiskDialog = fileAction("openFileFromDisk");
+export const openSaveAs = fileAction("openSaveAsModal");
+export const moveNoteFile = fileAction("moveNote");
+export const exportPdfNote = fileAction("exportPdf");
+export const exportHtmlNote = fileAction("exportHtml");

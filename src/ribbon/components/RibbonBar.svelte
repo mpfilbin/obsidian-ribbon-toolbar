@@ -1,7 +1,8 @@
 <script lang="ts">
+  import { untrack } from "svelte";
   import type { Writable } from "svelte/store";
   import type { App } from "obsidian";
-  import { TABS } from "../commands/registry";
+  import { DEFAULT_TAB, TABS } from "../commands/registry";
   import type { TabId } from "../commands/registry";
   import type { EditorLike } from "../commands/actions/types";
   import type { FrontmatterPropertyConfig } from "../commands/actions/frontmatter";
@@ -13,7 +14,7 @@
     defaultCollapsed,
     propertiesStore,
     app,
-    initialTab = TABS[0].id,
+    initialTab = DEFAULT_TAB,
     ontabchange,
   }: {
     editorStore: Writable<EditorLike | null>;
@@ -26,8 +27,10 @@
 
   let editor = $derived($editorStore);
 
-  let activeTab = $state<TabId>(TABS.some((tab) => tab.id === initialTab) ? initialTab : TABS[0].id);
-  let collapsed = $state(defaultCollapsed);
+  // initialTab and defaultCollapsed only seed the starting state: a ribbon keeps the tab
+  // and collapsed state the user left it in, so later changes to them are ignored on purpose.
+  let activeTab = $state<TabId>(untrack(() => (TABS.some((tab) => tab.id === initialTab) ? initialTab : DEFAULT_TAB)));
+  let collapsed = $state(untrack(() => defaultCollapsed));
 
   function selectTab(tab: TabId) {
     activeTab = tab;

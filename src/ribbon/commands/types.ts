@@ -1,7 +1,7 @@
 import type { App } from "obsidian";
 import type { EditorLike } from "./actions/types";
 
-export type TabId = "home" | "insert" | "layout" | "references" | "latex" | "bases";
+export type TabId = "file" | "home" | "insert" | "layout" | "references" | "latex" | "bases";
 
 export interface CommandOption {
   id: string;
