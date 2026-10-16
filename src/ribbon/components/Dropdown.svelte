@@ -84,6 +84,7 @@
             type="button"
             title={option.display ? option.label : undefined}
             aria-label={option.display ? option.label : undefined}
+            style={option.previewStyle}
             onclick={() => choose(option.action)}
           >
             {option.display ?? option.label}

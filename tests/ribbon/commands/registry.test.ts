@@ -225,6 +225,64 @@ describe("highlight command", () => {
   });
 });
 
+describe("heading command", () => {
+  it("offers all six Markdown heading levels in the Home tab's Paragraph group", () => {
+    const heading = COMMAND_REGISTRY.find((entry) => entry.id === "heading");
+    expect(heading?.tab).toBe("home");
+    expect(heading?.group).toBe("Paragraph");
+    expect(heading?.action).toBeUndefined();
+    expect(heading?.options?.map((option) => option.id)).toEqual([
+      "heading-1",
+      "heading-2",
+      "heading-3",
+      "heading-4",
+      "heading-5",
+      "heading-6",
+    ]);
+    expect(heading?.options?.map((option) => option.label)).toEqual([
+      "Heading 1",
+      "Heading 2",
+      "Heading 3",
+      "Heading 4",
+      "Heading 5",
+      "Heading 6",
+    ]);
+  });
+
+  it("the Heading 6 option sets the current line to an H6", () => {
+    const heading = COMMAND_REGISTRY.find((entry) => entry.id === "heading");
+    const h6 = heading?.options?.find((option) => option.id === "heading-6");
+    const editor = createMockEditor("Title");
+    h6?.action(editor);
+    expect(editor.getValue()).toBe("###### Title");
+  });
+});
+
+describe("font command", () => {
+  const font = COMMAND_REGISTRY.find((entry) => entry.id === "font");
+
+  it("is a static Home tab Font-group dropdown of system-safe fonts", () => {
+    expect(font?.tab).toBe("home");
+    expect(font?.group).toBe("Font");
+    expect(font?.action).toBeUndefined();
+    expect(font?.options?.length).toBeGreaterThan(0);
+  });
+
+  it("previews each option in its own font family", () => {
+    const georgia = font?.options?.find((option) => option.id === "font-georgia");
+    expect(georgia?.label).toBe("Georgia");
+    expect(georgia?.previewStyle).toBe("font-family: Georgia, 'Times New Roman', serif;");
+  });
+
+  it("wraps the selection in a span styled with the chosen font", () => {
+    const georgia = font?.options?.find((option) => option.id === "font-georgia");
+    const editor = createMockEditor("hi");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: 2 });
+    georgia?.action(editor);
+    expect(editor.getValue()).toBe('<span style="font-family: Georgia, \'Times New Roman\', serif;">hi</span>');
+  });
+});
+
 describe("LaTeX tab commands", () => {
   it("groups commands within the LaTeX tab in first-seen order", () => {
     expect(groupsForTab("latex")).toEqual([
@@ -459,7 +517,7 @@ describe("code block command", () => {
   it("starts with Plain text, then offers the common languages", () => {
     const labels = codeBlock?.options?.map((option) => option.label) ?? [];
     expect(labels[0]).toBe("Plain text");
-    for (const language of ["JavaScript", "TypeScript", "HTML", "HTTP", "C#", "Java", "C", "C++", "CSS", "Bash / Shell", "PHP", "Ruby"]) {
+    for (const language of ["JavaScript", "TypeScript", "HTML", "HTTP", "C#", "Java", "C", "C++", "CSS", "Shell", "PHP", "Ruby"]) {
       expect(labels, language).toContain(language);
     }
   });
@@ -468,7 +526,7 @@ describe("code block command", () => {
     ["code-block-plain", "```\ncode\n```"],
     ["code-block-csharp", "```csharp\ncode\n```"],
     ["code-block-cpp", "```cpp\ncode\n```"],
-    ["code-block-bash", "```bash\ncode\n```"],
+    ["code-block-shell", "```shell\ncode\n```"],
     ["code-block-http", "```http\ncode\n```"],
   ])("%s inserts the right fenced block", (id, expected) => {
     const option = codeBlock?.options?.find((o) => o.id === id);

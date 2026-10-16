@@ -73,9 +73,9 @@ describe("Insert tab actions", () => {
 
   it("insertCodeBlock selects the placeholder correctly mid-document", () => {
     const editor = createMockEditor("intro\n", { line: 1, ch: 0 });
-    insertCodeBlock(editor, "bash");
+    insertCodeBlock(editor, "shell");
     expect(editor.getSelection()).toBe("code");
-    expect(editor.getValue()).toBe("intro\n```bash\ncode\n```");
+    expect(editor.getValue()).toBe("intro\n```shell\ncode\n```");
   });
 
   it("insertCodeBlockWithLanguage returns an action bound to that language", () => {

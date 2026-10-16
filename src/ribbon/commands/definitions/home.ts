@@ -1,8 +1,22 @@
 import type { CommandEntry } from "../types";
 import * as home from "../actions/home";
 import { HIGHLIGHT_COLORS, highlightWithColor } from "../actions/highlight";
+import { FONT_OPTIONS, applyFont } from "../actions/fonts";
 
 export const HOME_COMMANDS: CommandEntry[] = [
+  {
+    id: "font",
+    tab: "home",
+    group: "Font",
+    icon: "type",
+    label: "Font",
+    options: FONT_OPTIONS.map((font) => ({
+      id: `font-${font.id}`,
+      label: font.name,
+      previewStyle: `font-family: ${font.family};`,
+      action: applyFont(font.family),
+    })),
+  },
   { id: "bold", tab: "home", group: "Font", icon: "bold", label: "Bold", action: home.toggleBold },
   { id: "italic", tab: "home", group: "Font", icon: "italic", label: "Italic", action: home.toggleItalic },
   {
@@ -89,6 +103,9 @@ export const HOME_COMMANDS: CommandEntry[] = [
       { id: "heading-1", label: "Heading 1", action: home.setHeading(1) },
       { id: "heading-2", label: "Heading 2", action: home.setHeading(2) },
       { id: "heading-3", label: "Heading 3", action: home.setHeading(3) },
+      { id: "heading-4", label: "Heading 4", action: home.setHeading(4) },
+      { id: "heading-5", label: "Heading 5", action: home.setHeading(5) },
+      { id: "heading-6", label: "Heading 6", action: home.setHeading(6) },
     ],
   },
   {

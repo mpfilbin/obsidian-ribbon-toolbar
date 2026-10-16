@@ -9,6 +9,7 @@ An Obsidian plugin that adds a Microsoft Office-style, multi-tab editing ribbon 
 - **Collapsible** — double-click any tab to collapse the ribbon down to just the tab strip
 - **Theme aware** — uses Obsidian's CSS variables, so it matches your active light/dark/community theme
 - **Per-pane** — split panes each get their own independent ribbon, bound to that pane's own editor
+- **Auto-hides when too narrow** — the ribbon disappears if its pane is squeezed below ~400px, e.g. after dragging the note into the sidebar
 - **Desktop only** — not available on Obsidian Mobile
 
 ## Prerequisites
@@ -31,11 +32,11 @@ New (an untitled note in the default new-note folder), Open (Obsidian's quick sw
 
 ### Home tab
 
-Bold, Italic, Strikethrough, Highlight (dropdown: Default plus Obsidian's native red/orange/green/blue/purple), Code, Clear Formatting, Heading (dropdown: H1–H3), Bulleted List, Numbered List, Checklist, Quote
+Font (dropdown: a curated set of system-safe fonts, each previewed in its own face), Bold, Italic, Strikethrough, Highlight (dropdown: Default plus Obsidian's native red/orange/green/blue/purple), Code, Clear Formatting, Heading (dropdown: H1–H6), Bulleted List, Numbered List, Checklist, Quote
 
 ### Insert tab
 
-Link, Internal Link, Tag, Image, Table, Code Block (dropdown: Plain text plus common languages such as JavaScript, TypeScript, HTML, HTTP, C#, Java, C, C++, CSS, Bash / Shell, PHP, Ruby), Horizontal Rule, Callout
+Link, Internal Link, Tag, Image, Table, Code Block (dropdown: Plain text plus common languages such as JavaScript, TypeScript, HTML, HTTP, C#, Java, C, C++, CSS, Shell, PHP, Ruby), Horizontal Rule, Callout
 
 ### Layout tab
 
