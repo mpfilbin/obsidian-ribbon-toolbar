@@ -65,12 +65,17 @@ export function toggleListPrefix(editor: EditorLike, kind: ListMarkerKind, prefi
   const from = editor.getCursor("from");
   const to = editor.getCursor("to");
 
-  if (from.line === to.line) {
+  // A selection ending at column 0 (e.g. from shift-selecting whole lines,
+  // which lands the head at the start of the line after the last one picked)
+  // doesn't visually include that trailing line, so exclude it from the range.
+  const endLine = to.ch === 0 && to.line > from.line ? to.line - 1 : to.line;
+
+  if (from.line === endLine) {
     toggleListPrefixOnLine(editor, from.line, kind, prefix);
     return;
   }
 
-  toggleListPrefixOnLines(editor, from.line, to.line, kind, prefix);
+  toggleListPrefixOnLines(editor, from.line, endLine, kind, prefix);
 }
 
 function toggleListPrefixOnLine(editor: EditorLike, lineNumber: number, kind: ListMarkerKind, prefix: string): void {

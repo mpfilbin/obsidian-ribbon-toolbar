@@ -65,6 +65,20 @@ describe("toggleListPrefix with a multi-line selection", () => {
     toggleListPrefix(editor, "bullet", "- ");
     expect(editor.getValue()).toBe("- one\n\n- two");
   });
+
+  it("excludes the trailing line when the selection ends at its column 0 (shift-selecting whole lines)", () => {
+    const editor = createMockEditor("one\ntwo\nthree");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 2, ch: 0 });
+    toggleListPrefix(editor, "bullet", "- ");
+    expect(editor.getValue()).toBe("- one\n- two\nthree");
+  });
+
+  it("falls back to single-line handling when excluding the trailing line leaves just one", () => {
+    const editor = createMockEditor("one\ntwo");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 1, ch: 0 });
+    toggleListPrefix(editor, "bullet", "- ");
+    expect(editor.getValue()).toBe("- one\ntwo");
+  });
 });
 
 describe("insertAtCursor", () => {
