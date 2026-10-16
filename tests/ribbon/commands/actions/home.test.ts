@@ -125,6 +125,12 @@ describe("Home tab actions", () => {
     expect(editor.getValue()).toBe("## Title");
   });
 
+  it("setHeading(6) sets the current line to an H6, replacing a lower-level heading", () => {
+    const editor = createMockEditor("# Title");
+    setHeading(6)(editor);
+    expect(editor.getValue()).toBe("###### Title");
+  });
+
   it("toggleBulletList prefixes the current line", () => {
     const editor = createMockEditor("item");
     toggleBulletList(editor);
@@ -177,6 +183,34 @@ describe("Home tab actions", () => {
     const editor = createMockEditor("- [ ] item");
     toggleChecklist(editor);
     expect(editor.getValue()).toBe("item");
+  });
+
+  it("toggleBulletList applies to every line of a multi-line selection", () => {
+    const editor = createMockEditor("one\ntwo\nthree");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 2, ch: 5 });
+    toggleBulletList(editor);
+    expect(editor.getValue()).toBe("- one\n- two\n- three");
+  });
+
+  it("toggleBulletList on a multi-line selection toggles off when all lines already have it", () => {
+    const editor = createMockEditor("- one\n- two\n- three");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 2, ch: 7 });
+    toggleBulletList(editor);
+    expect(editor.getValue()).toBe("one\ntwo\nthree");
+  });
+
+  it("toggleNumberedList applies to every line of a multi-line selection", () => {
+    const editor = createMockEditor("one\ntwo\nthree");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 2, ch: 5 });
+    toggleNumberedList(editor);
+    expect(editor.getValue()).toBe("1. one\n1. two\n1. three");
+  });
+
+  it("toggleNumberedList on a multi-line selection toggles off when all lines already have it", () => {
+    const editor = createMockEditor("1. one\n1. two\n1. three");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 2, ch: 8 });
+    toggleNumberedList(editor);
+    expect(editor.getValue()).toBe("one\ntwo\nthree");
   });
 
   it("lands the cursor after the new marker, not inside it, when the old cursor was within the replaced marker", () => {

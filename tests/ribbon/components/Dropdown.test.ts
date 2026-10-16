@@ -100,6 +100,15 @@ describe("Dropdown", () => {
     expect(menu()).toBeNull();
   });
 
+  it("applies an option's previewStyle to its button, so it can preview e.g. a font in its own face", () => {
+    const cmd = command({
+      label: "Font",
+      options: [{ id: "georgia", label: "Georgia", previewStyle: "font-family: Georgia, serif;", action: vi.fn() }],
+    });
+    open(cmd);
+    expect(items()[0].style.fontFamily).toBe("Georgia, serif");
+  });
+
   describe("grid layout", () => {
     const gridCommand = () =>
       command({

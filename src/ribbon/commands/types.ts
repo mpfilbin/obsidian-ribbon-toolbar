@@ -9,6 +9,9 @@ export interface CommandOption {
   // Compact text shown in place of the label when the menu is a grid; the
   // label is then only the tooltip.
   display?: string;
+  // Inline CSS applied to the option's button, e.g. so a font option can
+  // render its own name as a preview in that font's face.
+  previewStyle?: string;
   // Receives the Obsidian app so options can open dialogs or edit files.
   action: (editor: EditorLike, app: App) => void;
 }

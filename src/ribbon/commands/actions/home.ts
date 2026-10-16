@@ -30,7 +30,7 @@ export const toSentenceCase = transformCase((text) =>
   text.toLowerCase().replace(/(^\s*\w|[.!?]\s+\w)/g, (match) => match.toUpperCase())
 );
 
-export function setHeading(level: 1 | 2 | 3): (editor: EditorLike) => void {
+export function setHeading(level: 1 | 2 | 3 | 4 | 5 | 6): (editor: EditorLike) => void {
   return (editor: EditorLike): void => {
     const cursor = editor.getCursor();
     const line = editor.getLine(cursor.line);

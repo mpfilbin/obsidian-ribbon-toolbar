@@ -8,6 +8,19 @@
 }
 
 /*
+ * Hides the ribbon once its pane is too narrow to show it usefully - e.g.
+ * after dragging the note into the sidebar. Keyed to the pane's own width
+ * (via container-type on .view-content.ribbon-bar-active below) rather than
+ * the viewport, since a narrow sidebar pane can exist in an otherwise wide
+ * window.
+ */
+@container (max-width: 400px) {
+  .ribbon-bar-host {
+    display: none;
+  }
+}
+
+/*
  * Obsidian sizes the editor to 100% of .view-content. Adding the ribbon above
  * it makes the content taller than the container by the ribbon's height, so the
  * container becomes scrollable and the browser can scroll the ribbon out of view
@@ -17,6 +30,7 @@
 .view-content.ribbon-bar-active {
   display: flex;
   flex-direction: column;
+  container-type: inline-size;
 }
 
 .view-content.ribbon-bar-active > .markdown-source-view,

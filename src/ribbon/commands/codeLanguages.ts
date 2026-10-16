@@ -10,7 +10,7 @@ export const CODE_LANGUAGES: [string, string][] = [
   ["css", "CSS"],
   ["json", "JSON"],
   ["http", "HTTP"],
-  ["bash", "Bash / Shell"],
+  ["shell", "Shell"],
   ["powershell", "PowerShell"],
   ["sql", "SQL"],
   ["python", "Python"],
