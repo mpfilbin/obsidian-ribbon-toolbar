@@ -4,6 +4,9 @@
   "private": true,
   "description": "An Office-style multi-tab editing ribbon for Obsidian Markdown notes.",
   "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
   "type": "module",
   "scripts": {
     "dev": "node esbuild.config.mjs",
