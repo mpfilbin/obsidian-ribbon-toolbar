@@ -1,6 +1,6 @@
 {
   "name": "ribbon-bar",
-  "version": "0.18.6",
+  "version": "0.18.7",
   "private": true,
   "description": "An Office-style multi-tab editing ribbon for Obsidian Markdown notes.",
   "license": "MIT",
@@ -22,7 +22,7 @@
     "@types/node": "^26.6.5",
     "@vitest/coverage-v8": "^5.0.5",
     "esbuild": "^0.28.2",
-    "esbuild-svelte": "^0.8.2",
+    "esbuild-svelte": "^0.9.5",
     "jsdom": "^30.1.3",
     "obsidian": "^1.14.4",
     "svelte": "^5.57.2",
