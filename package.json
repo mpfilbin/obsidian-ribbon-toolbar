@@ -24,7 +24,7 @@
     "esbuild": "^0.28.2",
     "esbuild-svelte": "^0.8.2",
     "jsdom": "^24.1.0",
-    "obsidian": "^1.5.7",
+    "obsidian": "^1.14.4",
     "svelte": "^5.57.2",
     "tslib": "^2.6.3",
     "typescript": "^7.0.2",
