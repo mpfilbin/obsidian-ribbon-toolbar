@@ -27,7 +27,7 @@
     "obsidian": "^1.5.7",
     "svelte": "^5.57.2",
     "tslib": "^2.6.3",
-    "typescript": "^5.5.2",
+    "typescript": "^7.0.2",
     "vitest": "^2.0.0",
     "yaml": "^2.9.1"
   },
