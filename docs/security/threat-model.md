@@ -382,8 +382,6 @@ Anything that gains code execution in `main.js` — a tampered release (T-9), a 
 
 ---
 
----
-
 ## 5. Full register
 
 ### 5.1 Register by STRIDE letter
