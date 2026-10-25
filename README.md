@@ -154,6 +154,10 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 C:\path\to\your\v
 `npm run release` runs a bash script, so run it from Git Bash or WSL rather
 than PowerShell.
 
+### Security notes for contributors
+
+Before changing file writes, HTML or YAML generation, regular expressions over note content, settings, dependencies or the GitHub workflows, read the [threat model](docs/security/threat-model.md). Its section 1.2 lists the changes that require an update, and every pull request description should end with `Threat model: no impact` or `Threat model: updated (IDs)`.
+
 ### Bump version and prepare a release
 
 ```bash
@@ -162,6 +166,10 @@ git push
 ```
 
 The release GitHub Action automatically builds and publishes a GitHub release, with `main.js`, `manifest.json`, and `styles.css` attached, whenever it detects a `manifest.json` change on `master`.
+
+## Security
+
+Ribbon Bar runs inside Obsidian with the same privileges as Obsidian itself and makes no network requests. The [threat model](docs/security/threat-model.md) lists what was tested, the confirmed findings (for example the Format Document slowdown on crafted notes and the unsanitised Export HTML output), the existing controls, and the recommended fixes. Please report anything new to the maintainer privately (GitHub's private vulnerability reporting, if enabled on the repository) rather than in a public issue.
 
 ## License
 
