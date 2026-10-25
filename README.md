@@ -169,7 +169,7 @@ The release GitHub Action automatically builds and publishes a GitHub release, w
 
 ## Security
 
-Ribbon Bar runs inside Obsidian with the same privileges as Obsidian itself and makes no network requests. The [threat model](docs/security/threat-model.md) lists what was tested, the confirmed findings (for example the Format Document slowdown on crafted notes and the unsanitised Export HTML output), the existing controls, and the recommended fixes. Please report anything new to the maintainer privately (GitHub's private vulnerability reporting, if enabled on the repository) rather than in a public issue.
+Ribbon Bar runs inside Obsidian with the same privileges as Obsidian itself and makes no network requests. The [threat model](docs/security/threat-model.md) lists what was tested, the confirmed findings (for example the Format Document slowdown on crafted notes and the unsanitised Export HTML output), the existing controls, and the recommended fixes. See [SECURITY.md](SECURITY.md) for supported versions and how to report a vulnerability privately.
 
 ## License
 
