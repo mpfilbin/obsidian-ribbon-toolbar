@@ -181,10 +181,11 @@ describe("Document parity commands", () => {
     expect(editor.getValue()).toBe("—");
   });
 
-  it("ref-block-id is a References > Links action that adds a block ID", () => {
+  it("ref-block-id is a References > Links button that opens the block ID modal", () => {
     const blockId = COMMAND_REGISTRY.find((entry) => entry.id === "ref-block-id");
     expect(blockId).toMatchObject({ tab: "references", group: "Links", label: "Block ID" });
-    expect(typeof blockId?.action).toBe("function");
+    expect(typeof blockId?.modal).toBe("function");
+    expect(blockId?.action).toBeUndefined();
   });
 
   it("ref-heading-link opens the heading link modal instead of a direct action", () => {
@@ -428,6 +429,7 @@ describe("lazy-loaded modal commands", () => {
     ["footnote", "footnoteModal", "openFootnoteModal"],
     ["property-add", "propertyModal", "openAddPropertyModal"],
     ["ref-heading-link", "headingLinkModal", "openHeadingLinkModal"],
+    ["ref-block-id", "blockIdModal", "openBlockIdModal"],
   ];
 
   afterEach(() => {

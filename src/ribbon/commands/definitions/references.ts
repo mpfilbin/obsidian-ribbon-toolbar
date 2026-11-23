@@ -1,7 +1,6 @@
 import type { CommandEntry } from "../types";
 import * as insertActions from "../actions/insert";
-import { insertBlockId } from "../actions/blockId";
-import { openAddProperty, openCallout, openInternalLink, openFootnote, openHeadingLink } from "../modalLoaders";
+import { openAddProperty, openBlockId, openCallout, openInternalLink, openFootnote, openHeadingLink } from "../modalLoaders";
 
 export const REFERENCES_COMMANDS: CommandEntry[] = [
   {
@@ -42,7 +41,7 @@ export const REFERENCES_COMMANDS: CommandEntry[] = [
     group: "Links",
     icon: "hash",
     label: "Block ID",
-    action: insertBlockId,
+    modal: openBlockId,
   },
   {
     id: "ref-callout",

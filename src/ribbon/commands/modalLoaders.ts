@@ -39,6 +39,12 @@ export function openHeadingLink(editor: EditorLike, app: App): void {
     .catch((error) => console.error("Ribbon Bar: failed to open heading link modal", error));
 }
 
+export function openBlockId(editor: EditorLike, app: App): void {
+  void import("./actions/blockIdModal")
+    .then((module) => module.openBlockIdModal(editor, app))
+    .catch((error) => console.error("Ribbon Bar: failed to open block ID modal", error));
+}
+
 export function openAddProperty(editor: EditorLike, app: App): void {
   void import("./actions/propertyModal")
     .then((module) => module.openAddPropertyModal(editor, app))
