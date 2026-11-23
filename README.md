@@ -44,8 +44,9 @@ Promote/Demote Heading, Indent/Outdent, Move Line Up/Down, Table of Contents
 
 ### References tab
 
-Footnote, Internal Link, Tag, Heading Link, Callout, and the **Properties** group for the note's frontmatter:
+Footnote, Internal Link, Tag, Heading Link, Block ID, Callout, and the **Properties** group for the note's frontmatter:
 
+- **Block ID** adds a short random `^id` to the paragraph or list item under the cursor so you can link to it with `[[Note#^id]]` (the Internal Link dialog then suggests it). For quotes and tables the ID goes on its own line below, as Obsidian requires. It does nothing on blank lines, headings, fenced code, or blocks that already have an ID.
 - **Properties** is a single dropdown of your predefined properties (managed in the plugin's settings, by default `tags`, `description`, `cssclasses` and `source`). Choosing one adds it to the note's frontmatter, creating the frontmatter block if needed, and never duplicates a property the note already has.
 - **Add Property** opens a dialog for any property: choose its type (Text, List, Number, Checkbox, Date, Date & time), give it a name (existing property names from your vault are suggested, and choosing one selects its usual type) and a value. Values YAML would misread, such as the text `007` or `key: value`, are quoted automatically, and the dialog won't overwrite a property the note already has.
 

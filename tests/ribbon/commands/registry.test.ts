@@ -181,6 +181,12 @@ describe("Document parity commands", () => {
     expect(editor.getValue()).toBe("—");
   });
 
+  it("ref-block-id is a References > Links action that adds a block ID", () => {
+    const blockId = COMMAND_REGISTRY.find((entry) => entry.id === "ref-block-id");
+    expect(blockId).toMatchObject({ tab: "references", group: "Links", label: "Block ID" });
+    expect(typeof blockId?.action).toBe("function");
+  });
+
   it("ref-heading-link opens the heading link modal instead of a direct action", () => {
     const headingLink = COMMAND_REGISTRY.find((entry) => entry.id === "ref-heading-link");
     expect(headingLink?.tab).toBe("references");
