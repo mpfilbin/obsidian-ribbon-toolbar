@@ -167,6 +167,72 @@ describe("link modal", () => {
   });
 });
 
+describe("tab completion in the link modal", () => {
+  const note = makeFile("notes/Beta.md");
+  const image = makeFile("pic.png");
+
+  function open() {
+    const editor = createMockEditor("");
+    // Like Obsidian, link text keeps the extension of non-markdown files.
+    const fileToLinktext = (file: TFile) => (file.extension === "md" ? file.basename : file.name);
+    openLinkModal(editor, fakeApp([note, image], { fileToLinktext }));
+    const modal = latest() as any;
+    modal.opened = true;
+    const input = modal.inputEl as HTMLInputElement;
+    const refreshed = vi.fn();
+    input.addEventListener("input", refreshed);
+    const press = (highlighted: unknown, query: string) => {
+      input.value = query;
+      modal.activeSuggestion = highlighted;
+      const evt = new KeyboardEvent("keydown", { key: "Tab" });
+      const handler = modal.scope.handlers.find(([key]: [string]) => key === "Tab")[1];
+      return { result: handler(evt), evt };
+    };
+    return { editor, modal, input, refreshed, press };
+  }
+
+  it("completes a highlighted note to Note# so headings can be searched next, without closing", () => {
+    const { editor, modal, input, refreshed, press } = open();
+    const { result } = press({ type: "file", file: note }, "bet");
+    expect(result).toBe(false);
+    expect(input.value).toBe("Beta#");
+    expect(refreshed).toHaveBeenCalledTimes(1);
+    expect(modal.opened).toBe(true);
+    expect(editor.getValue()).toBe("");
+  });
+
+  it("completes non-markdown files without a fragment delimiter", () => {
+    const { input, press } = open();
+    press({ type: "file", file: image }, "pi");
+    expect(input.value).toBe("pic.png");
+  });
+
+  it("completes a heading or block into the full target, keeping the note part as typed", () => {
+    const { input, press } = open();
+    press({ type: "heading", file: note, heading: "Beta Section" }, "Beta#be");
+    expect(input.value).toBe("Beta#Beta Section");
+    press({ type: "block", file: note, blockId: "abc123", preview: "" }, "Beta#^ab");
+    expect(input.value).toBe("Beta#^abc123");
+    press({ type: "heading", file: note, heading: "Intro" }, "#in");
+    expect(input.value).toBe("#Intro");
+  });
+
+  it("leaves the input alone for create and raw rows", () => {
+    const { input, refreshed, press } = open();
+    press({ type: "create", name: "bet" }, "bet");
+    press({ type: "raw", target: "bet#x" }, "bet#x");
+    expect(input.value).toBe("bet#x");
+    expect(refreshed).not.toHaveBeenCalled();
+  });
+
+  it("still inserts and closes when a suggestion is chosen with Enter", () => {
+    const { editor, modal } = open();
+    modal.selectSuggestion({ type: "file", file: note }, new KeyboardEvent("keydown", { key: "Enter" }));
+    expect(modal.opened).toBe(false);
+    expect(editor.getValue()).toBe("[[Beta]]");
+  });
+});
+
 describe("heading link modal", () => {
   const doc = "# Intro\ntext\n## Setup Steps\n### Deep Dive\n```\n# not a heading\n```";
 

@@ -27,6 +27,10 @@ export abstract class NoteTargetSuggestModal extends EditorSuggestModal<NoteTarg
     private readonly rawLabel: string
   ) {
     super(app, editor, placeholder);
+    this.scope.register([], "Tab", (evt) => {
+      this.selectActiveSuggestion(evt);
+      return false;
+    });
   }
 
   /** Files offered when the query names a file. */
@@ -138,6 +142,45 @@ export abstract class NoteTargetSuggestModal extends EditorSuggestModal<NoteTarg
     }
     el.createEl("div", { text: `^${item.blockId}` });
     el.createEl("small", { text: item.preview, cls: "ribbon-bar-link-modal-path" });
+  }
+
+  /**
+   * Tab completes the highlighted suggestion into the search box instead of
+   * choosing it, so the search can continue from that anchor (a note becomes
+   * `Note#` to search its headings, a heading or block fills in the full target).
+   */
+  selectSuggestion(item: NoteTargetSuggestion, evt: MouseEvent | KeyboardEvent): void {
+    if (evt instanceof KeyboardEvent && evt.key === "Tab") {
+      this.completeInput(item);
+      return;
+    }
+    super.selectSuggestion(item, evt);
+  }
+
+  private completeInput(item: NoteTargetSuggestion): void {
+    const completion = this.getCompletion(item, this.inputEl.value);
+    if (completion === null) return;
+    this.inputEl.value = completion;
+    this.inputEl.setSelectionRange(completion.length, completion.length);
+    this.inputEl.dispatchEvent(new Event("input"));
+  }
+
+  private getCompletion(item: NoteTargetSuggestion, query: string): string | null {
+    const sourcePath = this.app.workspace.getActiveFile()?.path ?? "";
+    // Headings and blocks keep the note part exactly as typed (empty means the active note).
+    const filePart = query.slice(0, Math.max(query.indexOf("#"), 0));
+    switch (item.type) {
+      case "file": {
+        const linktext = this.app.metadataCache.fileToLinktext(item.file, sourcePath);
+        return item.file.extension === "md" ? `${linktext}#` : linktext;
+      }
+      case "heading":
+        return `${filePart}#${item.heading}`;
+      case "block":
+        return `${filePart}#^${item.blockId}`;
+      default:
+        return null;
+    }
   }
 
   onChooseSuggestion(item: NoteTargetSuggestion): void {
