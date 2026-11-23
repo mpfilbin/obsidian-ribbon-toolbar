@@ -36,7 +36,7 @@ Font (dropdown: a curated set of system-safe fonts, each previewed in its own fa
 
 ### Insert tab
 
-Link, Internal Link, Tag, Image, Table, Code Block (dropdown: Plain text plus common languages such as JavaScript, TypeScript, HTML, HTTP, C#, Java, C, C++, CSS, Shell, PHP, Ruby), Horizontal Rule, Callout
+Link, Internal Link (autocompletes headings via `Note#` and blocks via `Note#^`), Tag, Image, Table, Code Block (dropdown: Plain text plus common languages such as JavaScript, TypeScript, HTML, HTTP, C#, Java, C, C++, CSS, Shell, PHP, Ruby), Horizontal Rule, Callout
 
 ### Layout tab
 

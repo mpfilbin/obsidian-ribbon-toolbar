@@ -46,47 +46,82 @@ beforeEach(() => obsidianLog.reset());
 
 describe("link modal", () => {
   const files = [makeFile("Alpha.md"), makeFile("notes/Beta.md"), makeFile("notes/Gamma.md")];
+  const cache = {
+    headings: [
+      { heading: "Alpha Section", level: 1 },
+      { heading: "Beta Section", level: 2 },
+    ],
+    blocks: { abc123: { position: { start: { line: 1 } } } },
+  };
 
-  function open(selection?: string) {
+  function open(selection?: string, extra: Record<string, unknown> = {}) {
     const editor = createMockEditor(selection ?? "");
     if (selection) editor.setSelection({ line: 0, ch: 0 }, { line: 0, ch: selection.length });
     const focus = vi.spyOn(editor, "focus");
-    openLinkModal(editor, fakeApp(files));
+    const app = fakeApp(files, extra);
+    app.vault.cachedRead = vi.fn(async () => "first\nA block ^abc123");
+    openLinkModal(editor, app);
     return { editor, focus, modal: latest() };
   }
 
-  it("lists every markdown file when the query is empty, with no create option", () => {
+  it("lists every markdown file when the query is empty, with no create option", async () => {
     const { modal } = open();
-    expect(modal.placeholder).toBe("Find or create a note...");
-    expect(modal.getSuggestions("")).toHaveLength(3);
+    expect(modal.placeholder).toContain("Find or create a note");
+    expect(await modal.getSuggestions("")).toHaveLength(3);
   });
 
-  it("fuzzy filters files and offers to create a note when there is no exact match", () => {
+  it("fuzzy filters files and offers to create a note when there is no exact match", async () => {
     const { modal } = open();
-    const results = modal.getSuggestions("bet") as any[];
+    const results = (await modal.getSuggestions("bet")) as any[];
     expect(results.map((r) => r.type)).toEqual(["file", "create"]);
     expect(results[0].file.basename).toBe("Beta");
     expect(results[1].name).toBe("bet");
   });
 
-  it("does not offer to create a note that already exists (case-insensitive)", () => {
+  it("does not offer to create a note that already exists (case-insensitive)", async () => {
     const { modal } = open();
-    const results = modal.getSuggestions("alpha") as any[];
+    const results = (await modal.getSuggestions("alpha")) as any[];
     expect(results.some((r) => r.type === "create")).toBe(false);
   });
 
-  it("caps file suggestions at 20", () => {
+  it("caps file suggestions at 20", async () => {
     const many = Array.from({ length: 30 }, (_, i) => makeFile(`Note${i}.md`));
     const editor = createMockEditor("");
     openLinkModal(editor, fakeApp(many));
-    expect(latest().getSuggestions("")).toHaveLength(20);
+    expect(await latest().getSuggestions("")).toHaveLength(20);
   });
 
-  it("renders file rows with their folder, root files without, and the create row", () => {
+  it("suggests headings after Note# and for the active note after a bare #", async () => {
+    const { modal } = open(undefined, { getFileCache: () => cache });
+    const all = (await modal.getSuggestions("Beta#")) as any[];
+    expect(all.map((r) => [r.type, r.heading])).toEqual([
+      ["heading", "Alpha Section"],
+      ["heading", "Beta Section"],
+    ]);
+    expect(((await modal.getSuggestions("Beta#beta")) as any[]).map((r) => r.heading)).toEqual(["Beta Section"]);
+    expect(((await modal.getSuggestions("#")) as any[]).length).toBe(2);
+  });
+
+  it("suggests blocks after Note#^", async () => {
+    const { modal } = open(undefined, { getFileCache: () => cache });
+    const results = (await modal.getSuggestions("Beta#^")) as any[];
+    expect(results.map((r) => [r.type, r.blockId, r.preview])).toEqual([["block", "abc123", "A block ^abc123"]]);
+  });
+
+  it("falls back to linking the typed text when nothing matches a fragment", async () => {
+    const { modal } = open();
+    expect(await modal.getSuggestions("Missing#Head")).toEqual([{ type: "raw", target: "Missing#Head" }]);
+    expect(await modal.getSuggestions("Missing#")).toEqual([]);
+  });
+
+  it("renders file rows with their folder, root files without, and the other rows", () => {
     const { modal } = open();
     expect(rendered(modal, { type: "file", file: files[1] }).textContent).toContain("notes");
     expect(rendered(modal, { type: "file", file: files[0] }).querySelector("small")).toBeNull();
     expect(rendered(modal, { type: "create", name: "New" }).textContent).toBe('Create new note: "New"');
+    expect(rendered(modal, { type: "raw", target: "x" }).textContent).toContain('Link to "x"');
+    expect(rendered(modal, { type: "heading", file: files[1], heading: "H" }).textContent).toBe("HBeta");
+    expect(rendered(modal, { type: "block", file: files[1], blockId: "b1", preview: "t" }).textContent).toBe("^b1t");
   });
 
   it("inserts a wikilink to the chosen file and refocuses the editor", () => {
@@ -94,6 +129,16 @@ describe("link modal", () => {
     modal.onChooseSuggestion({ type: "file", file: files[1] }, null);
     expect(editor.getValue()).toBe("[[Beta]]");
     expect(focus).toHaveBeenCalled();
+  });
+
+  it.each([
+    [{ type: "heading", file: files[1], heading: "Head" }, "[[Beta#Head]]"],
+    [{ type: "block", file: files[1], blockId: "b1", preview: "" }, "[[Beta#^b1]]"],
+    [{ type: "raw", target: "typed#thing" }, "[[typed#thing]]"],
+  ])("inserts the right link for a chosen %j", (suggestion, expected) => {
+    const { modal, editor } = open();
+    modal.onChooseSuggestion(suggestion, null);
+    expect(editor.getValue()).toBe(expected);
   });
 
   it("uses the selected text as the alias and the typed name for new notes", () => {
