@@ -33,6 +33,6 @@
     "yaml": "^2.9.1"
   },
   "dependencies": {
-    "markdown-table": "^3.0.4"
+    "markdown-table": "^3.1.0"
   }
 }
