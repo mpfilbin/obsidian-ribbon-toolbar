@@ -133,6 +133,23 @@ export class Modal {
 
 export abstract class SuggestModal<T> extends Modal {
   placeholder = "";
+  inputEl = document.createElement("input");
+  /** Key handlers registered on the modal's scope, as [key, handler]. */
+  scope = {
+    handlers: [] as [string, (evt: KeyboardEvent) => unknown][],
+    register(_modifiers: string[], key: string, handler: (evt: KeyboardEvent) => unknown) {
+      this.handlers.push([key, handler]);
+    },
+  };
+  /** The suggestion Obsidian would have highlighted; tests set it. */
+  activeSuggestion: T | undefined;
+  selectSuggestion(value: T, evt: MouseEvent | KeyboardEvent): void {
+    this.close();
+    this.onChooseSuggestion(value, evt);
+  }
+  selectActiveSuggestion(evt: MouseEvent | KeyboardEvent): void {
+    if (this.activeSuggestion !== undefined) this.selectSuggestion(this.activeSuggestion, evt);
+  }
   setPlaceholder(placeholder: string): void {
     this.placeholder = placeholder;
   }

@@ -1,34 +1,19 @@
 import { App, TFile } from "obsidian";
 import type { EditorLike } from "./types";
 import { buildLinkText } from "./linkText";
-import { EditorSuggestModal } from "./editorSuggestModal";
-import { suggestNotes, type NoteSuggestion } from "./fuzzySuggest";
+import { NoteTargetSuggestModal } from "./noteTargetSuggestModal";
 
-class LinkSuggestModal extends EditorSuggestModal<NoteSuggestion> {
+class LinkSuggestModal extends NoteTargetSuggestModal {
   constructor(app: App, editor: EditorLike) {
-    super(app, editor, "Find or create a note...");
+    super(app, editor, "Find or create a note, or type Note# for headings, Note#^ for blocks...", "Link to");
   }
 
-  getSuggestions(query: string): NoteSuggestion[] {
-    return suggestNotes(this.app.vault.getMarkdownFiles(), query);
+  protected getCandidateFiles(): TFile[] {
+    return this.app.vault.getMarkdownFiles();
   }
 
-  renderSuggestion(item: NoteSuggestion, el: HTMLElement): void {
-    if (item.type === "create") {
-      el.createEl("div", { text: `Create new note: "${item.name}"` });
-      return;
-    }
-    el.createEl("div", { text: item.file.basename });
-    if (item.file.parent && !item.file.parent.isRoot()) {
-      el.createEl("small", { text: item.file.parent.path, cls: "ribbon-bar-link-modal-path" });
-    }
-  }
-
-  onChooseSuggestion(item: NoteSuggestion): void {
-    const sourcePath = this.app.workspace.getActiveFile()?.path ?? "";
-    const target =
-      item.type === "file" ? this.app.metadataCache.fileToLinktext(item.file, sourcePath) : item.name;
-    this.insert(buildLinkText(target, this.alias));
+  protected buildText(target: string, alias: string | null): string {
+    return buildLinkText(target, alias);
   }
 }
 

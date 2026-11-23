@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { App, modals, obsidianLog } from "obsidian";
+import { App, modals, notices, obsidianLog } from "obsidian";
 import { openExternalLinkModal } from "../../../../src/ribbon/commands/actions/externalLinkModal";
+import { openBlockIdModal } from "../../../../src/ribbon/commands/actions/blockIdModal";
 import { openFootnoteModal } from "../../../../src/ribbon/commands/actions/footnoteModal";
 import { createMockEditor } from "../../../support/mockEditor";
 
@@ -129,5 +130,85 @@ describe("footnote modal", () => {
     const combo = press(ui.textarea, "Enter", { metaKey: true });
     expect(combo.defaultPrevented).toBe(true);
     expect(ui.modal.opened).toBe(false);
+  });
+});
+
+describe("block ID modal", () => {
+  function open(text: string, line = 0) {
+    notices.length = 0;
+    const editor = createMockEditor(text, { line, ch: 0 });
+    const focus = vi.spyOn(editor, "focus");
+    openBlockIdModal(editor, new App() as never);
+    const modal = modals.at(-1)!;
+    return {
+      editor,
+      focus,
+      modal,
+      input: modal.contentEl.querySelector<HTMLInputElement>("input")!,
+      insert: modal.contentEl.querySelector("button")!,
+    };
+  }
+
+  beforeEach(() => {
+    modals.length = 0;
+  });
+
+  it("prefills a suggested ID, focuses and selects it", () => {
+    const focused = spyOnFocus();
+    const select = vi.spyOn(HTMLInputElement.prototype, "select").mockImplementation(() => {});
+    const ui = open("Some text");
+    expect(ui.modal.titleEl.textContent).toBe("Insert block ID");
+    expect(ui.input.value).toMatch(/^[a-z0-9]{6}$/);
+    expect(focused).toEqual([ui.input]);
+    expect(select).toHaveBeenCalled();
+  });
+
+  it("inserts the suggested ID when accepted as-is", () => {
+    const ui = open("Some text");
+    const suggestion = ui.input.value;
+    ui.insert.click();
+    expect(ui.editor.getValue()).toBe(`Some text ^${suggestion}`);
+    expect(ui.modal.opened).toBe(false);
+    expect(ui.focus).toHaveBeenCalled();
+  });
+
+  it("inserts a custom ID, submitting with Enter", () => {
+    const ui = open("Some text");
+    setValue(ui.input, "  ^my-id ");
+    const event = press(ui.input, "Enter");
+    expect(event.defaultPrevented).toBe(true);
+    expect(ui.editor.getValue()).toBe("Some text ^my-id");
+    expect(ui.modal.opened).toBe(false);
+  });
+
+  it("falls back to the suggestion when the field is cleared", () => {
+    const ui = open("Some text");
+    const suggestion = ui.input.value;
+    setValue(ui.input, "   ");
+    ui.insert.click();
+    expect(ui.editor.getValue()).toBe(`Some text ^${suggestion}`);
+  });
+
+  it("keeps the dialog open with a message for an invalid or already used ID", () => {
+    const ui = open("Para\n\nOther ^taken", 0);
+    setValue(ui.input, "bad id");
+    ui.insert.click();
+    expect(ui.modal.opened).toBe(true);
+    expect(notices.at(-1)).toContain("letters, numbers and hyphens");
+
+    setValue(ui.input, "taken");
+    ui.insert.click();
+    expect(ui.modal.opened).toBe(true);
+    expect(notices.at(-1)).toContain("^taken is already used");
+    expect(ui.editor.getValue()).toBe("Para\n\nOther ^taken");
+  });
+
+  it("does not open, and explains why, when the cursor is not in a block that can take an ID", () => {
+    const editor = createMockEditor("# Heading");
+    notices.length = 0;
+    openBlockIdModal(editor, new App() as never);
+    expect(modals).toHaveLength(0);
+    expect(notices.at(-1)).toContain("Heading Link");
+    expect(editor.getValue()).toBe("# Heading");
   });
 });
