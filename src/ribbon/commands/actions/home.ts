@@ -1,4 +1,4 @@
-import type { EditorLike } from "./types";
+import type { EditorLike, EditorPosition } from "./types";
 import { toggleListPrefix, togglePrefix, wrapSelection } from "./helpers";
 
 export const toggleBold = (editor: EditorLike): void => wrapSelection(editor, "**", "**", "bold text");
@@ -91,15 +91,29 @@ function deleteLine(editor: EditorLike, line: number): void {
   editor.replaceRange("", { line: fromLine, ch: fromLength }, { line, ch: editor.getLine(line).length });
 }
 
-function removeFootnoteDefinitions(editor: EditorLike, indices: string[]): void {
-  if (indices.length === 0) return;
+/**
+ * Deletes the definition lines for the given footnote indices. Returns how many
+ * lines were removed above `aboveLine`, so the caller can shift any position
+ * that sat below them back into place.
+ */
+function removeFootnoteDefinitions(editor: EditorLike, indices: string[], aboveLine: number): number {
+  if (indices.length === 0) return 0;
   const pending = new Set(indices);
+  let removedAbove = 0;
   for (let line = editor.lastLine(); line >= 0; line--) {
     const match = editor.getLine(line).match(/^\[\^(\d+)\]:/);
     if (match && pending.has(match[1])) {
+      const linesBefore = editor.lastLine();
       deleteLine(editor, line);
+      if (line < aboveLine && editor.lastLine() < linesBefore) removedAbove++;
     }
   }
+  return removedAbove;
+}
+
+function clampPosition(editor: EditorLike, pos: EditorPosition): EditorPosition {
+  const line = Math.max(0, Math.min(pos.line, editor.lastLine()));
+  return { line, ch: Math.min(pos.ch, editor.getLine(line).length) };
 }
 
 export function clearFormatting(editor: EditorLike): void {
@@ -116,6 +130,17 @@ export function clearFormatting(editor: EditorLike): void {
   }
   text = text.split("\n").map(stripLineLeadingMarkers).join("\n");
 
+  // Remember where the selection starts so the cleaned text can be re-selected
+  // (e.g. to go on and highlight it) once the replacement collapses the cursor.
+  const start = editor.getCursor("from");
   editor.replaceSelection(text);
-  removeFootnoteDefinitions(editor, footnoteIndices);
+  const removedAbove = removeFootnoteDefinitions(editor, footnoteIndices, start.line);
+
+  const lines = text.split("\n");
+  const from = { line: start.line - removedAbove, ch: start.ch };
+  const to =
+    lines.length === 1
+      ? { line: from.line, ch: from.ch + text.length }
+      : { line: from.line + lines.length - 1, ch: lines[lines.length - 1].length };
+  editor.setSelection(clampPosition(editor, from), clampPosition(editor, to));
 }
