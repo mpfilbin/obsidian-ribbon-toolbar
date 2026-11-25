@@ -262,6 +262,30 @@ describe("Home tab actions", () => {
     expect(editor.getValue()).toBe("see this is hidden text");
   });
 
+  it("clearFormatting leaves the cleaned text selected on a single line", () => {
+    const editor = createMockEditor("keep **bold** and *italic* here");
+    editor.setSelection({ line: 0, ch: 5 }, { line: 0, ch: 26 });
+    clearFormatting(editor);
+    expect(editor.getValue()).toBe("keep bold and italic here");
+    expect(editor.getSelection()).toBe("bold and italic");
+  });
+
+  it("clearFormatting leaves the cleaned text selected across multiple lines", () => {
+    const editor = createMockEditor("# Title\n**bold** line\ntail");
+    editor.setSelection({ line: 0, ch: 0 }, { line: 1, ch: 13 });
+    clearFormatting(editor);
+    expect(editor.getValue()).toBe("Title\nbold line\ntail");
+    expect(editor.getSelection()).toBe("Title\nbold line");
+  });
+
+  it("clearFormatting keeps the selection in place when a footnote definition above it is deleted", () => {
+    const editor = createMockEditor("[^1]: note\nbody **text**[^1] end");
+    editor.setSelection({ line: 1, ch: 0 }, { line: 1, ch: 17 });
+    clearFormatting(editor);
+    expect(editor.getValue()).toBe("body text end");
+    expect(editor.getSelection()).toBe("body text");
+  });
+
   it("clearFormatting does nothing when there is no selection", () => {
     const editor = createMockEditor("**bold**");
     clearFormatting(editor);
